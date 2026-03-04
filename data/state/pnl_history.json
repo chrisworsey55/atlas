@@ -1,0 +1,35 @@
+{
+  "portfolio_start_value": 1000000,
+  "portfolio_current_value": 999820,
+  "last_updated": "2026-03-04",
+  "trades": [
+    {
+      "date": "2026-03-04",
+      "ticker": "BE",
+      "action": "BUY",
+      "shares": 329,
+      "price": 151.95,
+      "value": 49991.55,
+      "allocation_pct": 5.0,
+      "notes": "New position - AI data centre power thesis via Aschenbrenner fund"
+    },
+    {
+      "date": "2026-03-04",
+      "ticker": "BIL",
+      "action": "SELL",
+      "shares": 547,
+      "price": 91.39,
+      "value": 49990.33,
+      "allocation_pct": -5.0,
+      "notes": "Reduced cash allocation from 85% to 80% to fund BE position"
+    }
+  ],
+  "daily_pnl": [
+    {
+      "date": "2026-03-04",
+      "portfolio_value": 999820,
+      "daily_return_pct": 0.0,
+      "cumulative_return_pct": -0.02
+    }
+  ]
+}

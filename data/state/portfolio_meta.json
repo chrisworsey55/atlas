@@ -1,0 +1,22 @@
+{
+  "portfolio_name": "AI Infrastructure Portfolio",
+  "inception_date": "2025-01-02",
+  "last_updated": "2026-03-04",
+  "starting_capital": 1000000,
+  "current_value": 999820,
+  "cash_ticker": "BIL",
+  "benchmark": "SPY",
+  "total_positions": 4,
+  "allocation_summary": {
+    "cash_equivalent": 80.0,
+    "shorts": 10.0,
+    "longs": 10.0
+  },
+  "position_tickers": ["BIL", "TLT", "AVGO", "BE"],
+  "risk_metrics": {
+    "max_single_position_pct": 10.0,
+    "short_exposure_pct": 10.0,
+    "long_exposure_pct": 90.0,
+    "net_exposure_pct": 80.0
+  }
+}

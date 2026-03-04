@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-03-03T06:00:00Z",
+  "sp500_median_pe": 22.5,
+  "sp500_median_forward_pe": 19.8,
+  "undervalued_screen": [
+    {"ticker": "APO", "pe": 14.2, "fwd_pe": 12.8, "peg": 0.85, "sector": "Financials"},
+    {"ticker": "CVS", "pe": 9.8, "fwd_pe": 8.5, "peg": 0.75, "sector": "Healthcare"},
+    {"ticker": "VZ", "pe": 9.2, "fwd_pe": 8.8, "peg": 1.2, "sector": "Communications"},
+    {"ticker": "BMY", "pe": 7.5, "fwd_pe": 7.2, "peg": 0.9, "sector": "Healthcare"},
+    {"ticker": "INTC", "pe": 28.0, "fwd_pe": 15.0, "peg": 0.8, "sector": "Technology"}
+  ],
+  "overvalued_screen": [
+    {"ticker": "TSLA", "pe": 85.0, "fwd_pe": 65.0, "peg": 3.2, "sector": "Consumer"},
+    {"ticker": "NVDA", "pe": 65.0, "fwd_pe": 35.0, "peg": 1.5, "sector": "Technology"}
+  ],
+  "sector_median_pe": {
+    "Technology": 28.5,
+    "Healthcare": 18.2,
+    "Financials": 12.5,
+    "Energy": 10.8,
+    "Consumer": 22.0,
+    "Industrials": 20.5,
+    "Communications": 15.8,
+    "Utilities": 16.2,
+    "Materials": 14.5,
+    "Real Estate": 35.0
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-03-03T06:00:00Z",
+  "valuations": {
+    "APO": {
+      "ticker": "APO",
+      "name": "Apollo Global Management",
+      "sector": "Financials",
+      "pe_ratio": 14.2,
+      "forward_pe": 12.8,
+      "peg_ratio": 0.85,
+      "ev_ebitda": 9.5,
+      "price_to_book": 2.1,
+      "dividend_yield": 1.8,
+      "revenue_growth_3y": 18.5,
+      "eps_growth_3y": 22.3,
+      "roe": 18.7,
+      "debt_to_equity": 0.45,
+      "fcf_yield": 8.2,
+      "valuation_score": 85,
+      "quality_score": 82,
+      "assessment": "UNDERVALUED",
+      "fair_value_estimate": 165.00,
+      "current_price": 142.50,
+      "upside_pct": 15.8
+    },
+    "NVDA": {
+      "ticker": "NVDA",
+      "name": "NVIDIA Corporation",
+      "sector": "Technology",
+      "pe_ratio": 65.0,
+      "forward_pe": 35.0,
+      "peg_ratio": 1.5,
+      "ev_ebitda": 45.0,
+      "price_to_book": 35.0,
+      "dividend_yield": 0.03,
+      "revenue_growth_3y": 85.0,
+      "eps_growth_3y": 120.0,
+      "roe": 95.0,
+      "debt_to_equity": 0.25,
+      "fcf_yield": 2.8,
+      "valuation_score": 45,
+      "quality_score": 95,
+      "assessment": "FAIRLY_VALUED",
+      "fair_value_estimate": 135.00,
+      "current_price": 138.00,
+      "upside_pct": -2.2
+    }
+  }
+}
