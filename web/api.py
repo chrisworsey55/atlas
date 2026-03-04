@@ -302,7 +302,7 @@ async def chat_cio(message: str, include_context: bool = True) -> dict:
                 pnl = pos.get('pnl_pct', 0)
                 pnl_str = f"+{pnl:.1f}%" if pnl >= 0 else f"{pnl:.1f}%"
                 prompt_parts.append(
-                    f"- {pos['ticker']} ({pos['direction']}): {pos['size_pct']:.1f}% | "
+                    f"- {pos['ticker']} ({pos['direction']}): {pos.get('allocation_pct', pos.get('size_pct', 0)):.1f}% | "
                     f"Entry ${pos['entry_price']:.2f} | Current ${pos['current_price']:.2f} | "
                     f"P&L {pnl_str} | {pos.get('thesis', '')}"
                 )
@@ -402,7 +402,7 @@ Always tie your analysis back to the macro environment. What's the Fed doing? Wh
             for pos in portfolio['positions']:
                 pnl = pos.get('pnl_pct', 0)
                 pnl_str = f"+{pnl:.1f}%" if pnl >= 0 else f"{pnl:.1f}%"
-                prompt_parts.append(f"- {pos['ticker']}: {pos['size_pct']:.1f}% | P&L {pnl_str}")
+                prompt_parts.append(f"- {pos['ticker']}: {pos.get('allocation_pct', pos.get('size_pct', 0)):.1f}% | P&L {pnl_str}")
             prompt_parts.append("")
 
     if news_context:
@@ -568,7 +568,7 @@ async def chat_sector_desk(desk_name: str, message: str) -> dict:
             "## CURRENT PORTFOLIO",
         ])
         for pos in portfolio.get('positions', []):
-            prompt_parts.append(f"- {pos['ticker']}: {pos['size_pct']:.1f}%")
+            prompt_parts.append(f"- {pos['ticker']}: {pos.get('allocation_pct', pos.get('size_pct', 0)):.1f}%")
         prompt_parts.append("")
 
     prompt_parts.extend(["## QUESTION", message])

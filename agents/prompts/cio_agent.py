@@ -207,7 +207,7 @@ def build_cio_prompt(
         for pos in current_portfolio['positions']:
             pnl_str = f"+{pos['pnl_pct']:.1%}" if pos.get('pnl_pct', 0) >= 0 else f"{pos['pnl_pct']:.1%}"
             prompt_parts.append(
-                f"- {pos['ticker']}: {pos['size_pct']:.1%} of portfolio, "
+                f"- {pos['ticker']}: {pos.get('allocation_pct', pos.get('size_pct', 0)):.1%} of portfolio, "
                 f"entry ${pos['entry_price']:.2f}, current ${pos['current_price']:.2f}, "
                 f"P&L {pnl_str}"
             )

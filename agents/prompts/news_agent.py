@@ -157,7 +157,7 @@ def build_scan_prompt(
         ])
         for pos in portfolio.get('positions', []):
             prompt_parts.append(
-                f"- {pos['ticker']} ({pos['direction']}): {pos['size_pct']:.1f}% | Thesis: {pos.get('thesis', 'N/A')}"
+                f"- {pos['ticker']} ({pos['direction']}): {pos.get('allocation_pct', pos.get('size_pct', 0)):.1f}% | Thesis: {pos.get('thesis', 'N/A')}"
             )
         prompt_parts.append("")
 
@@ -221,7 +221,7 @@ def build_chat_prompt(
         ])
         for pos in portfolio.get('positions', []):
             prompt_parts.append(
-                f"- {pos['ticker']} ({pos['direction']}): {pos['size_pct']:.1f}%"
+                f"- {pos['ticker']} ({pos['direction']}): {pos.get('allocation_pct', pos.get('size_pct', 0)):.1f}%"
             )
         prompt_parts.append("")
 

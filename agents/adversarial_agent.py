@@ -141,7 +141,7 @@ class AdversarialAgent:
                     pnl = pos.get('pnl_pct', 0)
                     pnl_str = f"+{pnl:.1f}%" if pnl >= 0 else f"{pnl:.1f}%"
                     prompt_parts.append(
-                        f"- {pos['ticker']} ({pos['direction']}): {pos['size_pct']:.1f}% | P&L: {pnl_str}"
+                        f"- {pos['ticker']} ({pos['direction']}): {pos.get('allocation_pct', pos.get('size_pct', 0)):.1f}% | P&L: {pnl_str}"
                     )
                 prompt_parts.append("")
 

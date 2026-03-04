@@ -6,8 +6,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env from parent directory (gic-underwriting)
-load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
+# Load .env from gic-underwriting directory
+load_dotenv(Path.home() / "gic-underwriting" / ".env")
 
 # Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent
