@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}Briefing{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">ATLAS Morning Briefing</h1>
+            {% if briefing %}
+            <p class="text-atlas-muted mt-1">{{ briefing.date }} &bull; Generated {{ briefing.generated_at[:16] if briefing.generated_at else 'N/A' }}</p>
+            {% else %}
+            <p class="text-atlas-muted mt-1">No briefing available</p>
+            {% endif %}
+        </div>
+        <div class="flex items-center space-x-3">
+            {% if briefing %}
+            <a href="/api/atlas/briefing/{{ briefing.date }}/pdf" class="px-4 py-2 bg-atlas-primary text-white rounded-lg hover:bg-atlas-primary/80 transition flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                <span>Download PDF</span>
+            </a>
+            {% endif %}
+            <button id="refresh-btn" class="p-2 rounded-lg bg-atlas-card border border-atlas-border hover:border-atlas-primary transition">
+                <svg class="w-5 h-5 text-atlas-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    {% if briefing %}
+    <!-- Portfolio Snapshot -->
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4 text-atlas-primary">Portfolio Snapshot</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <p class="text-xs text-atlas-muted uppercase tracking-wide">Total Value</p>
+                <p class="text-2xl font-bold">${{ "{:,.0f}".format(briefing.portfolio_snapshot.total_value|default(0)) }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted uppercase tracking-wide">Day P&L</p>
+                <p class="text-2xl font-bold {% if briefing.portfolio_snapshot.day_pnl|default(0) >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                    ${{ "{:,.0f}".format(briefing.portfolio_snapshot.day_pnl|default(0)) }}
+                    <span class="text-sm">({{ "{:.2f}".format(briefing.portfolio_snapshot.day_pnl_pct|default(0)) }}%)</span>
+                </p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted uppercase tracking-wide">Alpha vs Hurdle</p>
+                <p class="text-2xl font-bold {% if briefing.portfolio_snapshot.alpha_vs_hurdle|default(0) >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                    ${{ "{:,.0f}".format(briefing.portfolio_snapshot.alpha_vs_hurdle|default(0)) }}
+                </p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted uppercase tracking-wide">Days</p>
+                <p class="text-2xl font-bold">{{ briefing.portfolio_snapshot.days_since_inception|default(0) }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Positions -->
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4 text-atlas-primary">Positions</h2>
+        {% if briefing.positions %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-atlas-muted text-left border-b border-atlas-border">
+                        <th class="pb-3">Signal</th>
+                        <th class="pb-3">Ticker</th>
+                        <th class="pb-3">Direction</th>
+                        <th class="pb-3">Shares</th>
+                        <th class="pb-3">Entry</th>
+                        <th class="pb-3">Current</th>
+                        <th class="pb-3">P&L</th>
+                        <th class="pb-3">Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pos in briefing.positions %}
+                    <tr class="border-b border-atlas-border/50 hover:bg-atlas-border/20">
+                        <td class="py-3">
+                            {% if pos.signal == 'GREEN' %}
+                            <span class="w-3 h-3 inline-block rounded-full bg-atlas-success"></span>
+                            {% elif pos.signal == 'AMBER' %}
+                            <span class="w-3 h-3 inline-block rounded-full bg-atlas-warning"></span>
+                            {% else %}
+                            <span class="w-3 h-3 inline-block rounded-full bg-atlas-danger"></span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 font-medium">{{ pos.ticker }}</td>
+                        <td class="py-3">
+                            <span class="px-2 py-1 rounded text-xs {% if pos.direction == 'LONG' %}bg-atlas-success/20 text-atlas-success{% else %}bg-atlas-danger/20 text-atlas-danger{% endif %}">
+                                {{ pos.direction }}
+                            </span>
+                        </td>
+                        <td class="py-3">{{ "{:,}".format(pos.shares|default(0)) }}</td>
+                        <td class="py-3">${{ "{:.2f}".format(pos.entry|default(0)) }}</td>
+                        <td class="py-3">${{ "{:.2f}".format(pos.current|default(0)) }}</td>
+                        <td class="py-3 {% if pos.pnl|default(0) >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                            ${{ "{:,.0f}".format(pos.pnl|default(0)) }} ({{ "{:.1f}".format(pos.pnl_pct|default(0)) }}%)
+                        </td>
+                        <td class="py-3 text-atlas-muted text-xs max-w-xs truncate">{{ pos.note|default('') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-atlas-muted">No positions</p>
+        {% endif %}
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Overnight News -->
+        <div class="card p-6">
+            <h2 class="text-lg font-semibold mb-4 text-atlas-primary">Overnight News</h2>
+            <div class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin">
+                {% if briefing.overnight_news %}
+                {% for news in briefing.overnight_news[:10] %}
+                <div class="p-3 rounded-lg bg-atlas-bg border-l-3 {% if news.urgency == 'HIGH' %}border-atlas-danger{% elif news.urgency == 'MEDIUM' %}border-atlas-warning{% else %}border-atlas-success{% endif %}" style="border-left-width: 3px;">
+                    <p class="font-medium text-sm">{{ news.headline }}</p>
+                    <div class="flex items-center justify-between mt-2 text-xs text-atlas-muted">
+                        <span>{{ news.source }}</span>
+                        <span class="{% if news.urgency == 'HIGH' %}text-atlas-danger{% elif news.urgency == 'MEDIUM' %}text-atlas-warning{% else %}text-atlas-success{% endif %}">
+                            Impact: {{ news.impact_score|default('N/A') }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-atlas-muted">No significant overnight news</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Agent Views -->
+        <div class="card p-6">
+            <h2 class="text-lg font-semibold mb-4 text-atlas-primary">Agent Views</h2>
+            <div class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin">
+                {% if briefing.agent_views %}
+                {% for agent, view in briefing.agent_views.items() %}
+                <div class="p-3 rounded-lg bg-atlas-bg">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium capitalize">{{ agent }}</span>
+                        <span class="px-2 py-1 rounded text-xs font-bold
+                            {% if 'BULL' in view.tilt|default('')|upper or view.tilt == 'AGGRESSIVE' %}
+                            bg-atlas-success/20 text-atlas-success
+                            {% elif 'BEAR' in view.tilt|default('')|upper or view.tilt == 'ELEVATED' %}
+                            bg-atlas-danger/20 text-atlas-danger
+                            {% else %}
+                            bg-atlas-warning/20 text-atlas-warning
+                            {% endif %}">
+                            {{ view.tilt|default('N/A') }}
+                        </span>
+                    </div>
+                    <p class="text-sm text-atlas-muted">{{ view.summary|default('No summary available') }}</p>
+                    {% if view.key_action %}
+                    <p class="text-xs text-atlas-secondary mt-2">{{ view.key_action }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-atlas-muted">No agent views available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Earnings Today -->
+    {% if briefing.earnings_today %}
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4 text-atlas-warning">Earnings Today</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for earning in briefing.earnings_today %}
+            <div class="p-4 rounded-lg bg-atlas-warning/10 border border-atlas-warning/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-lg">{{ earning.ticker }}</span>
+                    <span class="text-xs text-atlas-muted">{{ earning.time|default('TBD') }}</span>
+                </div>
+                <p class="text-sm text-atlas-muted">{{ earning.company_name }}</p>
+                {% if earning.eps_estimate %}
+                <p class="text-xs mt-2">EPS Est: ${{ "{:.2f}".format(earning.eps_estimate) }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- CIO Recommendation -->
+    <div class="card p-6 border-2 {% if briefing.cio_recommendation.action == 'HOLD' %}border-atlas-warning{% elif briefing.cio_recommendation.action == 'ADD' %}border-atlas-success{% elif briefing.cio_recommendation.action == 'REDUCE' %}border-atlas-danger{% else %}border-atlas-secondary{% endif %}">
+        <h2 class="text-lg font-semibold mb-4 text-atlas-primary">CIO Recommendation</h2>
+        <div class="mb-4">
+            <span class="inline-block px-4 py-2 rounded-full text-sm font-bold
+                {% if briefing.cio_recommendation.action == 'HOLD' %}
+                bg-atlas-warning/20 text-atlas-warning
+                {% elif briefing.cio_recommendation.action == 'ADD' %}
+                bg-atlas-success/20 text-atlas-success
+                {% elif briefing.cio_recommendation.action == 'REDUCE' %}
+                bg-atlas-danger/20 text-atlas-danger
+                {% else %}
+                bg-atlas-secondary/20 text-atlas-secondary
+                {% endif %}">
+                {{ briefing.cio_recommendation.action|default('HOLD') }}
+            </span>
+        </div>
+        <p class="text-atlas-text mb-4">{{ briefing.cio_recommendation.rationale|default('No rationale provided') }}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-atlas-border">
+            <div>
+                <p class="text-xs text-atlas-muted uppercase tracking-wide mb-1">Watchlist</p>
+                <p class="font-medium">
+                    {% if briefing.cio_recommendation.watchlist %}
+                    {{ briefing.cio_recommendation.watchlist|join(', ') }}
+                    {% else %}
+                    None
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted uppercase tracking-wide mb-1">Next Catalyst</p>
+                <p class="font-medium">{{ briefing.cio_recommendation.next_catalyst|default('N/A') }}</p>
+            </div>
+        </div>
+        {% if briefing.cio_recommendation.risk_flag %}
+        <div class="mt-4 p-3 rounded-lg bg-atlas-danger/10 border border-atlas-danger/30">
+            <p class="text-xs text-atlas-danger uppercase tracking-wide mb-1">Risk Flag</p>
+            <p class="text-atlas-danger">{{ briefing.cio_recommendation.risk_flag }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Macro Snapshot -->
+    {% if briefing.macro_snapshot %}
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4 text-atlas-primary">Macro Snapshot</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div>
+                <p class="text-xs text-atlas-muted">Fed Funds</p>
+                <p class="font-medium">{{ briefing.macro_snapshot.fed_funds_rate|default('N/A') }}%</p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted">Yield Curve (10Y-2Y)</p>
+                <p class="font-medium {% if briefing.macro_snapshot.yield_curve_10y_2y|default(0) < 0 %}text-atlas-danger{% endif %}">
+                    {{ briefing.macro_snapshot.yield_curve_10y_2y|default('N/A') }}
+                </p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted">VIX</p>
+                <p class="font-medium {% if briefing.macro_snapshot.vix|default(0) > 25 %}text-atlas-danger{% endif %}">
+                    {{ "{:.1f}".format(briefing.macro_snapshot.vix|default(0)) }}
+                </p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted">S&P 500</p>
+                <p class="font-medium">{{ "{:,.0f}".format(briefing.macro_snapshot.sp500|default(0)) }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted">Liquidity Regime</p>
+                <p class="font-medium">{{ briefing.macro_snapshot.liquidity_regime|default('N/A') }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-atlas-muted">Cycle Position</p>
+                <p class="font-medium">{{ briefing.macro_snapshot.cycle_position|default('N/A') }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Archive -->
+    {% if briefing_dates %}
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4 text-atlas-primary">Archive</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for d in briefing_dates[:14] %}
+            <a href="#" onclick="loadBriefing('{{ d }}'); return false;"
+               class="px-3 py-1 rounded-lg text-sm {% if d == briefing.date %}bg-atlas-primary text-white{% else %}bg-atlas-bg border border-atlas-border hover:border-atlas-primary{% endif %} transition">
+                {{ d }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- No Briefing State -->
+    <div class="card p-12 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-atlas-border/50 flex items-center justify-center">
+            <svg class="w-8 h-8 text-atlas-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">No Briefing Available</h3>
+        <p class="text-atlas-muted mb-4">The morning briefing hasn't been generated yet.</p>
+        <p class="text-sm text-atlas-muted">Briefings are generated at 7:00 AM ET on weekdays.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function loadBriefing(dateStr) {
+    try {
+        const resp = await fetch(`/api/atlas/briefing/${dateStr}`);
+        if (resp.ok) {
+            // Reload the page with the selected date
+            window.location.href = `/atlas/briefing?date=${dateStr}`;
+        } else {
+            console.error('Failed to load briefing');
+        }
+    } catch (e) {
+        console.error('Error loading briefing:', e);
+    }
+}
+
+document.getElementById('refresh-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('refresh-btn');
+    btn.classList.add('animate-spin');
+
+    try {
+        const resp = await fetch('/api/atlas/briefing/latest');
+        if (resp.ok) {
+            window.location.reload();
+        }
+    } catch (e) {
+        console.error('Error refreshing:', e);
+    }
+
+    btn.classList.remove('animate-spin');
+});
+</script>
+{% endblock %}

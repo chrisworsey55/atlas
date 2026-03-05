@@ -4,7 +4,7 @@ Challenges every CIO trade decision before execution.
 """
 import json
 import logging
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from pathlib import Path
 
@@ -15,19 +15,64 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config.settings import ANTHROPIC_API_KEY, CLAUDE_MODEL_PREMIUM
 from agents.prompts.adversarial_agent import SYSTEM_PROMPT, build_adversarial_prompt
+from agents.chat_mixin import ChatMixin, ADVERSARIAL_CHAT_PROMPT
 
 logger = logging.getLogger(__name__)
 
+# State file for persisting reviews
+STATE_DIR = Path(__file__).resolve().parent.parent / "data" / "state"
+ADVERSARIAL_STATE_FILE = STATE_DIR / "adversarial_reviews.json"
 
-class AdversarialAgent:
+
+class AdversarialAgent(ChatMixin):
     """
     Adversarial agent that challenges trade decisions.
     Acts as the fund's internal risk committee.
     """
-    
+
+    CHAT_SYSTEM_PROMPT = ADVERSARIAL_CHAT_PROMPT
+    desk_name = "adversarial"
+
     def __init__(self):
         self.client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
         self.model = CLAUDE_MODEL_PREMIUM  # Use opus for adversarial review
+        self._ensure_state_dir()
+
+    def _ensure_state_dir(self):
+        """Ensure state directory exists."""
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+    def _load_previous_analysis(self) -> Optional[dict]:
+        """Load the most recent adversarial review."""
+        if ADVERSARIAL_STATE_FILE.exists():
+            try:
+                with open(ADVERSARIAL_STATE_FILE, "r") as f:
+                    reviews = json.load(f)
+                if reviews:
+                    return reviews[-1]
+            except (json.JSONDecodeError, IOError) as e:
+                logger.warning(f"Could not load previous adversarial review: {e}")
+        return None
+
+    def _save_review(self, review: dict):
+        """Save review to state file."""
+        reviews = []
+        if ADVERSARIAL_STATE_FILE.exists():
+            try:
+                with open(ADVERSARIAL_STATE_FILE, "r") as f:
+                    reviews = json.load(f)
+            except (json.JSONDecodeError, IOError):
+                reviews = []
+
+        reviews.append(review)
+        reviews = reviews[-30:]
+
+        with open(ADVERSARIAL_STATE_FILE, "w") as f:
+            json.dump(reviews, f, indent=2, default=str)
+
+    def load_latest_brief(self) -> Optional[dict]:
+        """Load the most recent review for chat context."""
+        return self._load_previous_analysis()
     
     def review(
         self,
@@ -105,73 +150,6 @@ class AdversarialAgent:
                 "risk_score": 1.0,
             }
     
-    def chat(self, message: str, include_context: bool = True) -> Optional[dict]:
-        """
-        Chat with the adversarial agent for risk assessment.
-        """
-        logger.info(f"[Adversarial] Processing: {message[:50]}...")
-
-        # Load portfolio context
-        portfolio = None
-        if include_context:
-            try:
-                portfolio_path = Path(__file__).parent.parent / "data" / "state" / "positions.json"
-                with open(portfolio_path) as f:
-                    portfolio = json.load(f)
-            except Exception as e:
-                logger.warning(f"Could not load portfolio: {e}")
-                portfolio = {}
-
-        # Build prompt for chat-style interaction
-        prompt_parts = [
-            f"## DATE: {datetime.utcnow().strftime('%Y-%m-%d')}",
-            "",
-        ]
-
-        if portfolio:
-            prompt_parts.extend([
-                "## CURRENT PORTFOLIO",
-                f"Total Value: ${portfolio.get('total_value', 0):,.0f}",
-                f"Cash: ${portfolio.get('cash', 0):,.0f} ({portfolio.get('cash_pct', 0):.1f}%)",
-                "",
-            ])
-            if portfolio.get('positions'):
-                prompt_parts.append("### Positions:")
-                for pos in portfolio['positions']:
-                    pnl = pos.get('pnl_pct', 0)
-                    pnl_str = f"+{pnl:.1f}%" if pnl >= 0 else f"{pnl:.1f}%"
-                    prompt_parts.append(
-                        f"- {pos['ticker']} ({pos['direction']}): {pos.get('allocation_pct', pos.get('size_pct', 0)):.1f}% | P&L: {pnl_str}"
-                    )
-                prompt_parts.append("")
-
-        prompt_parts.extend([
-            "## USER QUESTION",
-            message,
-            "",
-            "Respond with risk analysis, identifying potential flaws and blind spots.",
-        ])
-
-        # Call Claude
-        try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=4096,
-                system=SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": "\n".join(prompt_parts)}]
-            )
-            raw_response = response.content[0].text
-        except Exception as e:
-            logger.error(f"[Adversarial] Claude API error: {e}")
-            return None
-
-        return {
-            "agent": "adversarial",
-            "response": raw_response,
-            "generated_at": datetime.utcnow().isoformat(),
-            "model_used": self.model,
-        }
-
     def review_all(
         self,
         trade_decisions: list[dict],

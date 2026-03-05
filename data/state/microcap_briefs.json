@@ -1,0 +1,75 @@
+[
+  {
+    "ticker": "PRGS",
+    "company_name": "Progress Software Corporation",
+    "analysis_date": "2026-01-20",
+    "signal": "AVOID",
+    "confidence": 0.95,
+    "market_cap": 1654516096,
+    "sector": "Software",
+    "value_assessment": {
+      "pe_ratio": 23.23,
+      "pb_ratio": null,
+      "ev_ebitda": null,
+      "fcf_yield": null,
+      "valuation_grade": "EXPENSIVE",
+      "assessment": "P/E of 23.2x is expensive for a company with declining stock performance and limited growth visibility."
+    },
+    "quality_assessment": {
+      "gross_margin": null,
+      "operating_margin": 53.6,
+      "roe": null,
+      "debt_equity": null,
+      "quality_grade": "MEDIUM",
+      "assessment": "Strong operating margins at 53.6% indicate decent profitability, but missing key balance sheet data limits full quality assessment."
+    },
+    "growth_assessment": {
+      "revenue_growth_3y": null,
+      "earnings_growth": null,
+      "growth_grade": "LOW",
+      "assessment": "Recent ShareFile acquisition suggests acquisition-driven growth strategy, but organic growth trends unclear from filing data."
+    },
+    "insider_activity": {
+      "recent_buying": false,
+      "recent_selling": true,
+      "net_insider_flow": "SELLING",
+      "assessment": "Multiple executives adopted 10b5-1 selling plans in Q4 2025, including CFO and CIO positions totaling significant share counts."
+    },
+    "catalysts": {
+      "near_term": [
+        "Q1 2026 earnings announcement"
+      ],
+      "medium_term": [
+        "ShareFile integration synergies",
+        "Potential acquisition activity"
+      ],
+      "assessment": "Limited near-term catalysts visible, with integration execution as primary medium-term focus."
+    },
+    "risks": {
+      "liquidity_risk": "LOW",
+      "concentration_risk": "MEDIUM",
+      "accounting_flags": [],
+      "key_risks": [
+        "Stock down 38.4% YTD indicating fundamental issues",
+        "Heavy insider selling activity",
+        "Market cap exceeds micro-cap threshold at $1.65B"
+      ]
+    },
+    "position_sizing": {
+      "max_position_pct": 0.0,
+      "avg_daily_volume": null,
+      "days_to_liquidate": null,
+      "recommendation": "Do not initiate position - exceeds micro-cap mandate and shows concerning insider selling pattern."
+    },
+    "bull_case": "Strong operating margins demonstrate pricing power and efficiency. Recent acquisitions could drive synergies and market expansion if executed well.",
+    "bear_case": "Stock down 38.4% YTD signals fundamental problems. Heavy insider selling by key executives suggests lack of confidence in near-term prospects. Market cap exceeds micro-cap investment mandate.",
+    "target_price": null,
+    "stop_loss": null,
+    "brief_for_cio": "AVOID - PRGS market cap of $1.65B exceeds micro-cap mandate. Stock down 38% YTD with heavy insider selling by CFO/CIO. Outside investment parameters.",
+    "desk": "microcap",
+    "analyzed_at": "2026-03-03T11:57:56.440838",
+    "filing_used": "10-K",
+    "filing_date": "2026-01-20",
+    "model_used": "claude-sonnet-4-20250514"
+  }
+]

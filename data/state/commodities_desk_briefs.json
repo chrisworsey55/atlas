@@ -1,0 +1,96 @@
+[
+  {
+    "analysis_date": "2026-03-03",
+    "signal": "NEUTRAL",
+    "confidence": 0.6,
+    "crude_oil": {
+      "wti_price": 76.52,
+      "brent_price": 83.7,
+      "spread": 7.18,
+      "curve_structure": "CONTANGO",
+      "supply_demand_balance": "BALANCED",
+      "signal": "NEUTRAL",
+      "assessment": "Oil trapped in mid-cycle range with elevated Brent-WTI spread suggesting Atlantic arbitrage pressures."
+    },
+    "natural_gas": {
+      "price": 3.08,
+      "curve_structure": "CONTANGO",
+      "storage_vs_average": "AT",
+      "signal": "NEUTRAL",
+      "assessment": "Natural gas at fair value for shoulder season with limited upside until heating demand materializes."
+    },
+    "supply_outlook": {
+      "opec_stance": "MAINTAINING",
+      "us_shale_growth": "STABLE",
+      "non_opec_growth": "MODERATE",
+      "assessment": "Supply discipline maintained but growth acceleration limited by moderate capex environment."
+    },
+    "demand_outlook": {
+      "global_growth_impact": "SUPPORTIVE",
+      "china_demand": "MODERATE",
+      "seasonal_factors": "NEUTRAL",
+      "assessment": "Strong GDP growth supportive but transitioning out of heating season limits immediate upside catalysts."
+    },
+    "macro_factors": {
+      "usd_impact": "NEUTRAL",
+      "rate_impact": "HEADWIND",
+      "inflation_demand": "LOW",
+      "assessment": "Dollar near neutral zone but elevated rates creating opportunity cost headwinds for commodity allocation."
+    },
+    "geopolitical_risk": {
+      "premium_level": "MODERATE",
+      "key_risks": [
+        "Middle East tensions",
+        "Russia sanctions",
+        "Shipping lane disruptions",
+        "Ukraine conflict spillover"
+      ],
+      "assessment": "Standard geopolitical premium embedded but elevated VIX suggests market stress could spike risk premiums."
+    },
+    "positioning": {
+      "crude_stance": "NEUTRAL",
+      "gas_stance": "NEUTRAL",
+      "spread_trades": "Long Brent/Short WTI spread trade viable given 7.18 differential above historical norms",
+      "recommended_instruments": [
+        "USO",
+        "BNO",
+        "UNG",
+        "GUSH",
+        "DRIP"
+      ]
+    },
+    "key_levels": {
+      "wti_resistance": 82.0,
+      "wti_support": 72.0,
+      "brent_key_level": 85.0,
+      "natgas_key_level": 3.5
+    },
+    "catalysts": {
+      "upcoming": [
+        "OPEC+ meeting March 15",
+        "China PMI data March 7",
+        "EIA inventory reports weekly",
+        "Fed meeting March 18-19"
+      ],
+      "risks": [
+        "Demand destruction above $85 Brent",
+        "OPEC+ discipline breakdown",
+        "Recession signals",
+        "USD strength above 102"
+      ]
+    },
+    "bull_case": "Strong GDP growth at 7.45% supports demand while supply discipline holds, creating potential for breakout above $82 WTI resistance. Geopolitical risk premium could expand rapidly given elevated VIX environment.",
+    "bear_case": "Contango curve structure indicates oversupply concerns while elevated real rates create headwinds for commodity allocation. Risk-off sentiment from VIX > 25 typically pressures energy complex lower.",
+    "brief_for_cio": "Energy neutral-positioned in mid-cycle range. Consider Brent/WTI spread trade given elevated 7.18 differential. Monitor $82 WTI breakout potential but remain cautious given contango structure and elevated VIX risk-off signals.",
+    "desk": "commodities",
+    "analyzed_at": "2026-03-03T11:53:10.882196",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "wti": 76.5199966430664,
+      "brent": 83.69999694824219,
+      "natgas": 3.0810000896453857,
+      "dollar_index": 99.27899932861328,
+      "vix": 25.899999618530273
+    }
+  }
+]

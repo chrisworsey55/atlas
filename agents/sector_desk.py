@@ -5,7 +5,7 @@ Supports multiple desk types: Semiconductor, Biotech, etc.
 """
 import json
 import logging
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from datetime import datetime, date
 from pathlib import Path
 
@@ -17,6 +17,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config.settings import ANTHROPIC_API_KEY, CLAUDE_MODEL
 from data.edgar_client import EdgarClient
 from data.price_client import PriceClient
+from agents.chat_mixin import ChatMixin, SECTOR_DESK_CHAT_PROMPT
+
+# State directory for briefs
+STATE_DIR = Path(__file__).resolve().parent.parent / "data" / "state"
 
 # Import desk prompts
 from agents.prompts.semiconductor_desk import (
@@ -47,11 +51,13 @@ from agents.prompts.industrials_desk import (
 logger = logging.getLogger(__name__)
 
 
-class SectorDeskAgent:
+class SectorDeskAgent(ChatMixin):
     """
     Generic sector desk agent that can be specialized with different prompts.
     """
-    
+
+    CHAT_SYSTEM_PROMPT = SECTOR_DESK_CHAT_PROMPT
+
     def __init__(self, desk_name: str, system_prompt: str, prompt_builder: callable):
         self.desk_name = desk_name
         self.system_prompt = system_prompt
@@ -59,6 +65,44 @@ class SectorDeskAgent:
         self.edgar = EdgarClient()
         self.prices = PriceClient()
         self.client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        self._ensure_state_dir()
+
+    def _ensure_state_dir(self):
+        """Ensure state directory exists."""
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+    def _get_state_file(self) -> Path:
+        """Get state file path for this desk."""
+        return STATE_DIR / f"{self.desk_name.lower()}_desk_briefs.json"
+
+    def _load_briefs(self) -> List[dict]:
+        """Load all briefs from state file."""
+        state_file = self._get_state_file()
+        if state_file.exists():
+            try:
+                with open(state_file, "r") as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, IOError) as e:
+                logger.warning(f"Could not load {self.desk_name} briefs: {e}")
+        return []
+
+    def _save_brief(self, brief: dict):
+        """Save brief to state file."""
+        briefs = self._load_briefs()
+        briefs.append(brief)
+        briefs = briefs[-50:]  # Keep last 50
+
+        with open(self._get_state_file(), "w") as f:
+            json.dump(briefs, f, indent=2, default=str)
+
+        logger.info(f"[{self.desk_name}] Saved brief to {self._get_state_file()}")
+
+    def load_latest_brief(self) -> Optional[dict]:
+        """Load the most recent analysis for chat context."""
+        briefs = self._load_briefs()
+        if briefs:
+            return briefs[-1]
+        return None
     
     def analyze(self, ticker: str, days_back: int = 180, filing_types: list = None,
                 persist: bool = False) -> Optional[dict]:

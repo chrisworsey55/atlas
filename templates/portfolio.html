@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% block title %}Portfolio{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Portfolio Overview</h1>
+            <p class="text-atlas-muted mt-1">Real-time positions and performance</p>
+        </div>
+        <div class="text-right text-sm text-atlas-muted">
+            <div>Last updated: <span id="last-update">--</span></div>
+            <div>Inception: {{ meta.inception_date or '--' }}</div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Total Value -->
+        <div class="card p-5">
+            <div class="text-atlas-muted text-sm mb-1">Total Value</div>
+            <div class="text-2xl font-bold text-white" id="total-value">
+                {{ "${:,.0f}".format(summary.total_value) if summary else '--' }}
+            </div>
+            <div class="text-xs text-atlas-muted mt-1">
+                Starting: ${{ "{:,.0f}".format(meta.starting_value or 1000000) }}
+            </div>
+        </div>
+
+        <!-- Total P&L -->
+        <div class="card p-5">
+            <div class="text-atlas-muted text-sm mb-1">Total P&L</div>
+            <div class="text-2xl font-bold {% if summary and summary.total_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}" id="total-pnl">
+                {% if summary %}
+                    {% if summary.total_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(summary.total_pnl) }}
+                {% else %}--{% endif %}
+            </div>
+            <div class="text-xs {% if summary and summary.total_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %} mt-1" id="total-pnl-pct">
+                {% if summary %}
+                    {% set pnl_pct = (summary.total_pnl / (meta.starting_value or 1000000)) * 100 %}
+                    {% if pnl_pct >= 0 %}+{% endif %}{{ "{:.2f}".format(pnl_pct) }}%
+                {% else %}--{% endif %}
+            </div>
+        </div>
+
+        <!-- Positions -->
+        <div class="card p-5">
+            <div class="text-atlas-muted text-sm mb-1">Open Positions</div>
+            <div class="text-2xl font-bold text-white" id="position-count">
+                {{ summary.position_count if summary else '--' }}
+            </div>
+            <div class="text-xs text-atlas-muted mt-1">
+                <span class="text-atlas-primary">{{ summary.active_count if summary else 0 }} active</span> |
+                <span class="text-atlas-secondary">{{ summary.autonomous_count if summary else 0 }} auto</span>
+            </div>
+        </div>
+
+        <!-- Alpha -->
+        <div class="card p-5">
+            <div class="text-atlas-muted text-sm mb-1">Alpha vs Hurdle</div>
+            <div class="text-2xl font-bold {% if hurdle and hurdle.alpha >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}" id="alpha">
+                {% if hurdle %}
+                    {% if hurdle.alpha >= 0 %}+{% endif %}${{ "{:,.0f}".format(hurdle.alpha) }}
+                {% else %}--{% endif %}
+            </div>
+            <div class="text-xs text-atlas-muted mt-1">
+                Hurdle: {{ "{:.1f}%".format((meta.hurdle_rate_annual or 0.045) * 100) }} annual
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Equity Curve -->
+        <div class="lg:col-span-2 card p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-white">Equity Curve</h2>
+                <div class="flex items-center space-x-4 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-atlas-primary"></div>
+                        <span class="text-atlas-muted">Portfolio</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full bg-atlas-secondary"></div>
+                        <span class="text-atlas-muted">SPY</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="equity-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Allocation Pie -->
+        <div class="card p-5">
+            <h2 class="text-lg font-semibold text-white mb-4">Position Allocation</h2>
+            <div class="chart-container" style="height: 250px;">
+                <canvas id="allocation-chart"></canvas>
+            </div>
+            <div class="mt-4 space-y-2" id="allocation-legend">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Positions Table -->
+    <div class="card overflow-hidden">
+        <div class="p-5 border-b border-atlas-border">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-white">Open Positions</h2>
+                <div class="flex items-center space-x-2">
+                    <button class="px-3 py-1 text-sm rounded-lg border border-atlas-border hover:border-atlas-primary text-atlas-muted hover:text-atlas-primary transition-colors filter-btn active" data-filter="all">All</button>
+                    <button class="px-3 py-1 text-sm rounded-lg border border-atlas-border hover:border-atlas-primary text-atlas-muted hover:text-atlas-primary transition-colors filter-btn" data-filter="ACTIVE_TRADE">Active</button>
+                    <button class="px-3 py-1 text-sm rounded-lg border border-atlas-border hover:border-atlas-secondary text-atlas-muted hover:text-atlas-secondary transition-colors filter-btn" data-filter="AUTONOMOUS">Auto</button>
+                    <button class="px-3 py-1 text-sm rounded-lg border border-atlas-border hover:border-atlas-muted text-atlas-muted transition-colors filter-btn" data-filter="CASH_MANAGEMENT">Cash</button>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-atlas-bg/50">
+                    <tr class="text-left text-sm text-atlas-muted border-b border-atlas-border">
+                        <th class="px-5 py-3 font-medium">Ticker</th>
+                        <th class="px-5 py-3 font-medium">Type</th>
+                        <th class="px-5 py-3 font-medium">Direction</th>
+                        <th class="px-5 py-3 font-medium text-right">Shares</th>
+                        <th class="px-5 py-3 font-medium text-right">Entry</th>
+                        <th class="px-5 py-3 font-medium text-right">Current</th>
+                        <th class="px-5 py-3 font-medium text-right">Value</th>
+                        <th class="px-5 py-3 font-medium text-right">P&L</th>
+                        <th class="px-5 py-3 font-medium text-right">P&L %</th>
+                        <th class="px-5 py-3 font-medium">Agent</th>
+                    </tr>
+                </thead>
+                <tbody id="positions-table">
+                    {% for pos in positions %}
+                    <tr class="border-b border-atlas-border/50 hover:bg-atlas-card/50 position-row" data-type="{{ pos.type }}">
+                        <td class="px-5 py-4">
+                            <a href="/atlas/company/{{ pos.ticker }}" class="font-semibold text-white hover:text-atlas-primary">
+                                {{ pos.ticker }}
+                            </a>
+                        </td>
+                        <td class="px-5 py-4">
+                            {% if pos.type == 'ACTIVE_TRADE' %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-atlas-primary/20 text-atlas-primary">Active</span>
+                            {% elif pos.type == 'AUTONOMOUS' %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-atlas-secondary/20 text-atlas-secondary">Auto</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-atlas-muted/20 text-atlas-muted">Cash</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-5 py-4">
+                            {% if pos.direction == 'LONG' %}
+                                <span class="text-atlas-success">LONG</span>
+                            {% else %}
+                                <span class="text-atlas-danger">SHORT</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-5 py-4 text-right font-mono">{{ "{:,}".format(pos.shares) }}</td>
+                        <td class="px-5 py-4 text-right font-mono">${{ "{:.2f}".format(pos.entry_price) }}</td>
+                        <td class="px-5 py-4 text-right font-mono">${{ "{:.2f}".format(pos.current_price) }}</td>
+                        <td class="px-5 py-4 text-right font-mono">${{ "{:,.0f}".format(pos.value) }}</td>
+                        <td class="px-5 py-4 text-right font-mono {% if pos.unrealized_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                            {% if pos.unrealized_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(pos.unrealized_pnl) }}
+                        </td>
+                        <td class="px-5 py-4 text-right font-mono {% if pos.unrealized_pnl_pct >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                            {% if pos.unrealized_pnl_pct >= 0 %}+{% endif %}{{ "{:.2f}".format(pos.unrealized_pnl_pct) }}%
+                        </td>
+                        <td class="px-5 py-4 text-atlas-muted">{{ pos.agent or '--' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Position Details / Thesis Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for pos in positions if pos.type != 'CASH_MANAGEMENT' %}
+        <div class="card p-5 card-hover">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-lg font-bold text-white">{{ pos.ticker }}</span>
+                        {% if pos.direction == 'LONG' %}
+                            <span class="px-2 py-0.5 text-xs rounded bg-atlas-success/20 text-atlas-success">LONG</span>
+                        {% else %}
+                            <span class="px-2 py-0.5 text-xs rounded bg-atlas-danger/20 text-atlas-danger">SHORT</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-atlas-muted">{{ pos.agent }} | {{ pos.confidence * 100 if pos.confidence else '--' }}% confidence</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-bold {% if pos.unrealized_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                        {% if pos.unrealized_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(pos.unrealized_pnl) }}
+                    </div>
+                    <div class="text-sm {% if pos.unrealized_pnl_pct >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                        {% if pos.unrealized_pnl_pct >= 0 %}+{% endif %}{{ "{:.2f}".format(pos.unrealized_pnl_pct) }}%
+                    </div>
+                </div>
+            </div>
+
+            {% if pos.thesis %}
+            <div class="text-sm text-atlas-text mb-3">
+                <span class="text-atlas-muted">Thesis:</span> {{ pos.thesis }}
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                    <div class="text-atlas-muted">Entry</div>
+                    <div class="font-mono">${{ "{:.2f}".format(pos.entry_price) }}</div>
+                </div>
+                {% if pos.stop_loss %}
+                <div>
+                    <div class="text-atlas-muted">Stop Loss</div>
+                    <div class="font-mono text-atlas-danger">${{ "{:.2f}".format(pos.stop_loss) }}</div>
+                </div>
+                {% endif %}
+                {% if pos.target %}
+                <div>
+                    <div class="text-atlas-muted">Target</div>
+                    <div class="font-mono text-atlas-success">${{ "{:.2f}".format(pos.target) }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if pos.invalidation %}
+            <div class="mt-3 p-3 bg-atlas-bg rounded-lg text-sm">
+                <span class="text-atlas-warning">Invalidation:</span>
+                <span class="text-atlas-muted">{{ pos.invalidation }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Position filter
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'border-atlas-primary'));
+            this.classList.add('active', 'border-atlas-primary');
+
+            document.querySelectorAll('.position-row').forEach(row => {
+                if (filter === 'all' || row.dataset.type === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Equity curve chart
+    const pnlHistory = {{ pnl_history | tojson | safe }};
+
+    if (pnlHistory && pnlHistory.length > 0) {
+        const ctx = document.getElementById('equity-chart').getContext('2d');
+
+        // Check if all data is from the same day
+        const dates = pnlHistory.map(p => new Date(p.date).toDateString());
+        const isSingleDay = dates.every(d => d === dates[0]);
+
+        // Format labels based on whether it's single day or multi-day
+        const labels = pnlHistory.map(p => {
+            const d = new Date(p.date);
+            if (isSingleDay) {
+                // Show time for single day
+                return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            } else {
+                // Show date for multi-day
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+        });
+
+        const portfolioValues = pnlHistory.map(p => p.portfolio_value);
+
+        // Generate SPY benchmark (rebased to starting value)
+        const startingValue = {{ meta.starting_value or 1000000 }};
+        const spyValues = pnlHistory.map((p, i) => {
+            // Simple approximation - in production would fetch actual SPY data
+            return startingValue * (1 + (i * 0.0005));  // ~0.05% per snapshot
+        });
+
+        // Calculate Y-axis range - set min to $900K to avoid exaggerated scale
+        const minValue = Math.min(...portfolioValues, ...spyValues);
+        const maxValue = Math.max(...portfolioValues, ...spyValues);
+        const yMin = 900000;  // Fixed minimum at $900K for proper scale
+        const yMax = Math.max(maxValue * 1.02, 1050000);  // Add 2% headroom, min $1.05M
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Portfolio',
+                        data: portfolioValues,
+                        borderColor: '#3db27f',
+                        backgroundColor: 'rgba(61, 178, 127, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: pnlHistory.length <= 5 ? 4 : 0,  // Show points if few data points
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'SPY (benchmark)',
+                        data: spyValues,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: pnlHistory.length <= 5 ? 4 : 0,
+                        pointHoverRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(30, 36, 51, 0.5)' },
+                        ticks: {
+                            color: '#6b7280',
+                            maxRotation: 0
+                        }
+                    },
+                    y: {
+                        min: yMin,
+                        max: yMax,
+                        grid: { color: 'rgba(30, 36, 51, 0.5)' },
+                        ticks: {
+                            color: '#6b7280',
+                            callback: function(value) {
+                                return '$' + (value / 1000).toFixed(0) + 'K';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    // Allocation pie chart
+    const positions = {{ positions | tojson | safe }};
+
+    if (positions && positions.length > 0) {
+        const pieCtx = document.getElementById('allocation-chart').getContext('2d');
+
+        const colors = {
+            'TLT': '#ef4444',
+            'GLD': '#f59e0b',
+            'BIL': '#6b7280',
+            'AVGO': '#3db27f',
+            'NVDA': '#2563eb',
+            'default': '#8b5cf6'
+        };
+
+        const pieData = positions.map(p => ({
+            ticker: p.ticker,
+            value: p.value,
+            color: colors[p.ticker] || colors.default
+        }));
+
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: pieData.map(p => p.ticker),
+                datasets: [{
+                    data: pieData.map(p => p.value),
+                    backgroundColor: pieData.map(p => p.color),
+                    borderColor: '#111217',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${formatCurrency(context.parsed)} (${pct}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Legend
+        const legend = document.getElementById('allocation-legend');
+        const total = pieData.reduce((sum, p) => sum + p.value, 0);
+        legend.innerHTML = pieData.map(p => {
+            const pct = ((p.value / total) * 100).toFixed(1);
+            return `
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 rounded-full" style="background: ${p.color}"></div>
+                        <span class="text-atlas-text">${p.ticker}</span>
+                    </div>
+                    <span class="text-atlas-muted">${pct}%</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Update timestamp
+    document.getElementById('last-update').textContent = new Date().toLocaleString();
+
+    // Auto-refresh every 60 seconds
+    setInterval(() => {
+        location.reload();
+    }, 60000);
+</script>
+{% endblock %}

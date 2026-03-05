@@ -1,0 +1,87 @@
+[
+  {
+    "analysis_date": "2026-03-03",
+    "signal": "BEARISH",
+    "confidence": 0.8,
+    "gold": {
+      "price": 5138.0,
+      "real_yield_impact": "HEADWIND",
+      "usd_impact": "NEUTRAL",
+      "safe_haven_demand": "MODERATE",
+      "signal": "BEARISH",
+      "assessment": "Gold at extreme highs with real yields near 2% threshold creating significant opportunity cost despite elevated VIX."
+    },
+    "silver": {
+      "price": 80.86,
+      "gold_silver_ratio": 63.5,
+      "industrial_demand": "STRONG",
+      "signal": "BEARISH",
+      "assessment": "Silver at historically extreme levels despite fair gold/silver ratio, vulnerable to momentum reversal."
+    },
+    "copper": {
+      "price": 5.79,
+      "china_demand": "MODERATE",
+      "green_transition_demand": "ACCELERATING",
+      "signal": "BEARISH",
+      "assessment": "Copper significantly elevated above $5.00 threshold despite strong GDP growth, pricing in too much optimism."
+    },
+    "real_rates": {
+      "10y_real_yield": 1.84,
+      "direction": "STABLE",
+      "gold_implication": "BEARISH",
+      "assessment": "Real yields near critical 2% threshold where gold faces significant headwinds from opportunity cost."
+    },
+    "macro_drivers": {
+      "inflation_trend": "STABLE",
+      "fed_policy_impact": "RESTRICTIVE",
+      "dollar_trend": "STABLE",
+      "assessment": "Macro environment shows growth momentum but restrictive Fed policy keeping real rates elevated."
+    },
+    "positioning": {
+      "gold_stance": "UNDERWEIGHT",
+      "silver_stance": "UNDERWEIGHT",
+      "copper_stance": "UNDERWEIGHT",
+      "gold_silver_trade": "neutral - ratio at fair value",
+      "recommended_instruments": [
+        "DUST",
+        "JDST",
+        "SH",
+        "PST"
+      ]
+    },
+    "key_levels": {
+      "gold_resistance": 5200,
+      "gold_support": 4800,
+      "silver_key_level": 75.0,
+      "copper_key_level": 5.5
+    },
+    "catalysts": {
+      "upcoming": [
+        "Fed meeting",
+        "CPI release",
+        "China PMI data",
+        "ECB policy decision"
+      ],
+      "risks": [
+        "Geopolitical escalation",
+        "Banking sector stress",
+        "Inflation re-acceleration",
+        "Dollar spike"
+      ]
+    },
+    "bull_case": "Continued strong GDP growth supports industrial metals demand while elevated VIX maintains safe-haven bid. Green transition accelerating copper demand fundamentals despite high prices.",
+    "bear_case": "All metals at extreme valuations with gold facing 2% real yield threshold headwind. Risk-off environment insufficient to justify current precious metal premiums with restrictive Fed policy.",
+    "brief_for_cio": "SELL metals complex. Gold at $5138 faces critical real yield headwind near 2%. Silver/copper both extremely elevated. Recommend tactical shorts via DUST/JDST. Risk-reward heavily favors bears.",
+    "desk": "metals",
+    "analyzed_at": "2026-03-03T11:55:32.513351",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "gold": 5138.0,
+      "silver": 80.86499786376953,
+      "copper": 5.7895002365112305,
+      "gold_silver_ratio": 63.53799710297169,
+      "dollar_index": 99.2760009765625,
+      "vix": 26.09000015258789
+    }
+  }
+]

@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}Agent Swarm{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Agent Swarm</h1>
+            <p class="text-atlas-muted mt-1">{{ counts.total }} AI agents analyzing markets</p>
+        </div>
+        <div class="flex items-center space-x-4 text-sm">
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-atlas-success"></div>
+                <span class="text-atlas-muted">{{ counts.active }} Active</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-atlas-secondary"></div>
+                <span class="text-atlas-muted">{{ counts.database }} Database</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-atlas-warning"></div>
+                <span class="text-atlas-muted">{{ counts.pending }} Pending</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Categories -->
+    <div class="space-y-8">
+        <!-- Active Traders -->
+        <section>
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                <svg class="w-5 h-5 text-atlas-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span>Active Traders</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for agent_id, agent in agents.items() if agent.type in ['ACTIVE_TRADER', 'AUTONOMOUS'] %}
+                <div class="card p-5 card-hover">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-atlas-primary to-atlas-success flex items-center justify-center">
+                                <span class="text-white font-bold">{{ agent.name[0] }}</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">{{ agent.name }}</h3>
+                                <p class="text-xs text-atlas-muted">{{ agent.type | replace('_', ' ') | title }}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 text-xs rounded-full status-{{ agent.status | lower }}">
+                            {{ agent.status }}
+                        </span>
+                    </div>
+
+                    <p class="text-sm text-atlas-muted mb-4">{{ agent.description }}</p>
+
+                    <div class="flex items-center justify-between text-sm">
+                        <div>
+                            <span class="text-atlas-muted">Positions:</span>
+                            <span class="text-white font-medium">{{ agent.positions or 0 }}</span>
+                        </div>
+                        {% if agent.last_activity %}
+                        <div class="text-atlas-muted text-xs">
+                            Last: {{ agent.last_activity[:10] if agent.last_activity else 'Never' }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Sector Desks -->
+        <section>
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                <svg class="w-5 h-5 text-atlas-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>Sector Analysis Desks</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for agent_id, agent in agents.items() if agent.type == 'SECTOR_DESK' %}
+                <div class="card p-5 card-hover">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-atlas-secondary to-blue-700 flex items-center justify-center">
+                                <span class="text-white font-bold">{{ agent.name[0] }}</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">{{ agent.name }}</h3>
+                                <p class="text-xs text-atlas-muted">Sector Desk</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 text-xs rounded-full status-{{ agent.status | lower }}">
+                            {{ agent.status }}
+                        </span>
+                    </div>
+
+                    <p class="text-sm text-atlas-muted mb-4">{{ agent.description }}</p>
+
+                    {% if agent.latest_signal %}
+                    <div class="p-3 bg-atlas-bg rounded-lg mb-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-atlas-muted">Latest Signal:</span>
+                            <span class="font-semibold signal-{{ agent.latest_signal | lower }}">
+                                {{ agent.latest_signal }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex items-center justify-between text-sm">
+                        {% if agent.briefs_count %}
+                        <div>
+                            <span class="text-atlas-muted">Briefs:</span>
+                            <span class="text-white font-medium">{{ agent.briefs_count }}</span>
+                        </div>
+                        {% elif agent.valuations_count %}
+                        <div>
+                            <span class="text-atlas-muted">Valuations:</span>
+                            <span class="text-white font-medium">{{ agent.valuations_count }}</span>
+                        </div>
+                        {% else %}
+                        <div></div>
+                        {% endif %}
+                        {% if agent.last_activity %}
+                        <div class="text-atlas-muted text-xs">
+                            {{ agent.last_activity[:10] if agent.last_activity else 'Never' }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Risk & Decision Agents -->
+        <section>
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                <svg class="w-5 h-5 text-atlas-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span>Risk & Decision Layer</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for agent_id, agent in agents.items() if agent.type in ['RISK', 'DECISION', 'DATA_AGENT'] %}
+                <div class="card p-5 card-hover">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-lg {% if agent.type == 'DECISION' %}bg-gradient-to-br from-atlas-gold to-yellow-600{% elif agent.type == 'RISK' %}bg-gradient-to-br from-atlas-danger to-red-700{% else %}bg-gradient-to-br from-purple-500 to-purple-700{% endif %} flex items-center justify-center">
+                                <span class="text-white font-bold">{{ agent.name[0] }}</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">{{ agent.name }}</h3>
+                                <p class="text-xs text-atlas-muted">{{ agent.type | replace('_', ' ') | title }}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 text-xs rounded-full status-{{ agent.status | lower }}">
+                            {{ agent.status }}
+                        </span>
+                    </div>
+
+                    <p class="text-sm text-atlas-muted">{{ agent.description }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- Latest Desk Briefs -->
+    <section class="mt-8">
+        <h2 class="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+            <svg class="w-5 h-5 text-atlas-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span>Latest Desk Briefs</span>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for desk_name, desk in desks.items() if desk %}
+            <div class="card p-5">
+                <div class="flex items-start justify-between mb-3">
+                    <h3 class="font-semibold text-white capitalize">{{ desk_name }} Desk</h3>
+                    {% if desk.signal %}
+                    <span class="px-3 py-1 text-sm font-semibold rounded-full
+                        {% if desk.signal == 'BULLISH' %}bg-atlas-success/20 text-atlas-success
+                        {% elif desk.signal == 'BEARISH' %}bg-atlas-danger/20 text-atlas-danger
+                        {% else %}bg-atlas-warning/20 text-atlas-warning{% endif %}">
+                        {{ desk.signal }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if desk.confidence %}
+                <div class="mb-3">
+                    <div class="flex items-center justify-between text-sm mb-1">
+                        <span class="text-atlas-muted">Confidence</span>
+                        <span class="text-white">{{ (desk.confidence * 100) | int }}%</span>
+                    </div>
+                    <div class="h-2 bg-atlas-bg rounded-full overflow-hidden">
+                        <div class="h-full bg-atlas-primary rounded-full" style="width: {{ (desk.confidence * 100) | int }}%"></div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if desk.brief %}
+                <p class="text-sm text-atlas-text mb-3">{{ desk.brief[:200] }}{% if desk.brief | length > 200 %}...{% endif %}</p>
+                {% endif %}
+
+                <div class="text-xs text-atlas-muted">
+                    {% if desk.analyzed_at %}
+                    Analyzed: {{ desk.analyzed_at[:16] | replace('T', ' ') }}
+                    {% elif desk.analysis_date %}
+                    Date: {{ desk.analysis_date }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Chat with Agent CTA -->
+    <div class="card p-6 bg-gradient-to-r from-atlas-primary/10 to-atlas-secondary/10 border-atlas-primary/30">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-1">Chat with Agents</h3>
+                <p class="text-atlas-muted">Ask questions, get analysis, or drill into any agent's thesis</p>
+            </div>
+            <a href="/atlas/chat" class="px-6 py-3 bg-atlas-primary hover:bg-atlas-primary/80 text-white font-semibold rounded-lg transition-colors">
+                Open Chat
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ATLAS{% endblock %} | AI Trading System</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        atlas: {
+                            bg: '#0a0b0d',
+                            card: '#111217',
+                            border: '#1e2433',
+                            primary: '#3db27f',
+                            secondary: '#2563eb',
+                            gold: '#c9a962',
+                            text: '#e5e7eb',
+                            muted: '#6b7280',
+                            success: '#10b981',
+                            danger: '#ef4444',
+                            warning: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom styles -->
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0a0b0d;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #3db27f 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background: #111217;
+            border: 1px solid #1e2433;
+            border-radius: 12px;
+        }
+
+        .card-hover:hover {
+            border-color: #3db27f;
+            transition: border-color 0.2s ease;
+        }
+
+        .signal-bullish { color: #10b981; }
+        .signal-bearish { color: #ef4444; }
+        .signal-neutral { color: #f59e0b; }
+
+        .pnl-positive { color: #10b981; }
+        .pnl-negative { color: #ef4444; }
+
+        .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status-idle { background: rgba(107, 114, 128, 0.2); color: #9ca3af; }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+        .nav-link {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(61, 178, 127, 0.1);
+            color: #3db27f;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #111217;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #1e2433;
+            border-radius: 3px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen text-atlas-text">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-atlas-bg/95 backdrop-blur border-b border-atlas-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-atlas-primary to-atlas-secondary flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">A</span>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold gradient-text">ATLAS</span>
+                        <span class="text-xs text-atlas-muted block -mt-1">AI Trading System</span>
+                    </div>
+                </div>
+
+                <!-- Nav Links -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="/atlas" class="nav-link {% if active_page == 'portfolio' %}active{% endif %}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <span>Portfolio</span>
+                        </span>
+                    </a>
+                    <a href="/atlas/agents" class="nav-link {% if active_page == 'agents' %}active{% endif %}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            <span>Agent Swarm</span>
+                        </span>
+                    </a>
+                    <a href="/atlas/decisions" class="nav-link {% if active_page == 'decisions' %}active{% endif %}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>CIO Decisions</span>
+                        </span>
+                    </a>
+                    <a href="/atlas/chat" class="nav-link {% if active_page == 'chat' %}active{% endif %}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            <span>Chat</span>
+                        </span>
+                    </a>
+                    <a href="/atlas/briefing" class="nav-link {% if active_page == 'briefing' %}active{% endif %}">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span>Briefing</span>
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Status indicator -->
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 text-sm">
+                        <div class="pulse-dot"></div>
+                        <span class="text-atlas-muted">Live</span>
+                    </div>
+                    <div id="spy-price" class="text-sm px-3 py-1 rounded-lg bg-atlas-card border border-atlas-border">
+                        <span class="text-atlas-muted">SPY:</span>
+                        <span class="font-medium">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile nav -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-atlas-bg/95 backdrop-blur border-t border-atlas-border">
+        <div class="grid grid-cols-5 gap-1 p-2">
+            <a href="/atlas" class="flex flex-col items-center py-2 text-xs {% if active_page == 'portfolio' %}text-atlas-primary{% else %}text-atlas-muted{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Portfolio
+            </a>
+            <a href="/atlas/agents" class="flex flex-col items-center py-2 text-xs {% if active_page == 'agents' %}text-atlas-primary{% else %}text-atlas-muted{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                Agents
+            </a>
+            <a href="/atlas/decisions" class="flex flex-col items-center py-2 text-xs {% if active_page == 'decisions' %}text-atlas-primary{% else %}text-atlas-muted{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Decisions
+            </a>
+            <a href="/atlas/chat" class="flex flex-col items-center py-2 text-xs {% if active_page == 'chat' %}text-atlas-primary{% else %}text-atlas-muted{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                Chat
+            </a>
+            <a href="/atlas/briefing" class="flex flex-col items-center py-2 text-xs {% if active_page == 'briefing' %}text-atlas-primary{% else %}text-atlas-muted{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Briefing
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <main class="pt-20 pb-24 md:pb-8 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="hidden md:block border-t border-atlas-border py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between text-sm text-atlas-muted">
+                <div>ATLAS AI Trading System &copy; 2026</div>
+                <div class="flex items-center space-x-4">
+                    <span>Data from SEC EDGAR, yfinance</span>
+                    <span>|</span>
+                    <span>Powered by Claude</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global scripts -->
+    <script>
+        // Fetch SPY price
+        async function updateSPY() {
+            try {
+                const resp = await fetch('/api/market/spy');
+                const data = await resp.json();
+                const el = document.getElementById('spy-price');
+                const changeClass = data.change >= 0 ? 'pnl-positive' : 'pnl-negative';
+                const sign = data.change >= 0 ? '+' : '';
+                el.innerHTML = `
+                    <span class="text-atlas-muted">SPY:</span>
+                    <span class="font-medium">$${data.price.toFixed(2)}</span>
+                    <span class="${changeClass}">(${sign}${data.change.toFixed(2)}%)</span>
+                `;
+            } catch (e) {
+                console.error('Error fetching SPY:', e);
+            }
+        }
+
+        // Update on load and every 30 seconds
+        updateSPY();
+        setInterval(updateSPY, 30000);
+
+        // Utility functions
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        function formatPercent(value) {
+            const sign = value >= 0 ? '+' : '';
+            return `${sign}${value.toFixed(2)}%`;
+        }
+
+        function formatNumber(value) {
+            return new Intl.NumberFormat('en-US').format(value);
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

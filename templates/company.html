@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% block title %}{{ company.ticker }} - Deep Dive{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Company Header -->
+    <div class="card p-6">
+        <div class="flex items-start justify-between">
+            <div>
+                <div class="flex items-center space-x-3">
+                    <h1 class="text-3xl font-bold text-white">{{ company.ticker }}</h1>
+                    {% if position %}
+                        {% if position.direction == 'LONG' %}
+                            <span class="px-3 py-1 text-sm rounded-full bg-atlas-success/20 text-atlas-success">LONG {{ position.shares }} shares</span>
+                        {% else %}
+                            <span class="px-3 py-1 text-sm rounded-full bg-atlas-danger/20 text-atlas-danger">SHORT {{ position.shares }} shares</span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <p class="text-lg text-atlas-muted mt-1">{{ company.name or company.ticker }}</p>
+                <div class="flex items-center space-x-4 mt-2 text-sm text-atlas-muted">
+                    {% if company.sector %}
+                    <span>{{ company.sector }}</span>
+                    {% endif %}
+                    {% if company.industry %}
+                    <span>|</span>
+                    <span>{{ company.industry }}</span>
+                    {% endif %}
+                    {% if company.market_cap %}
+                    <span>|</span>
+                    <span>Mkt Cap: ${{ "{:,.0f}".format(company.market_cap / 1000000) }}M</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if position %}
+            <div class="text-right">
+                <div class="text-2xl font-bold {% if position.unrealized_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                    {% if position.unrealized_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(position.unrealized_pnl) }}
+                </div>
+                <div class="text-sm {% if position.unrealized_pnl_pct >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                    {% if position.unrealized_pnl_pct >= 0 %}+{% endif %}{{ "{:.2f}".format(position.unrealized_pnl_pct) }}%
+                </div>
+                <div class="text-sm text-atlas-muted mt-1">
+                    Entry: ${{ "{:.2f}".format(position.entry_price) }} | Current: ${{ "{:.2f}".format(position.current_price) }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Position Details (if we have one) -->
+    {% if position %}
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">Active Position</h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+            <div>
+                <div class="text-atlas-muted text-sm">Position Value</div>
+                <div class="text-xl font-bold text-white">${{ "{:,.0f}".format(position.value) }}</div>
+            </div>
+            <div>
+                <div class="text-atlas-muted text-sm">Agent</div>
+                <div class="text-xl font-bold text-white">{{ position.agent or '--' }}</div>
+            </div>
+            <div>
+                <div class="text-atlas-muted text-sm">Confidence</div>
+                <div class="text-xl font-bold text-white">{{ (position.confidence * 100) | int if position.confidence else '--' }}%</div>
+            </div>
+            <div>
+                <div class="text-atlas-muted text-sm">Type</div>
+                <div class="text-xl font-bold text-white">{{ position.type | replace('_', ' ') | title }}</div>
+            </div>
+        </div>
+
+        {% if position.thesis %}
+        <div class="p-4 bg-atlas-bg rounded-lg mb-4">
+            <h3 class="text-sm font-semibold text-atlas-primary mb-2">Thesis</h3>
+            <p class="text-atlas-text">{{ position.thesis }}</p>
+        </div>
+        {% endif %}
+
+        {% if position.invalidation %}
+        <div class="p-4 bg-atlas-danger/10 border border-atlas-danger/20 rounded-lg mb-4">
+            <h3 class="text-sm font-semibold text-atlas-danger mb-2">Invalidation</h3>
+            <p class="text-atlas-text">{{ position.invalidation }}</p>
+        </div>
+        {% endif %}
+
+        {% if position.stop_loss or position.target %}
+        <div class="grid grid-cols-2 gap-4">
+            {% if position.stop_loss %}
+            <div class="p-4 bg-atlas-danger/10 border border-atlas-danger/20 rounded-lg text-center">
+                <div class="text-xs text-atlas-danger mb-1">Stop Loss</div>
+                <div class="text-2xl font-mono text-atlas-danger">${{ "{:.2f}".format(position.stop_loss) }}</div>
+            </div>
+            {% endif %}
+            {% if position.target %}
+            <div class="p-4 bg-atlas-success/10 border border-atlas-success/20 rounded-lg text-center">
+                <div class="text-xs text-atlas-success mb-1">Target</div>
+                <div class="text-2xl font-mono text-atlas-success">${{ "{:.2f}".format(position.target) }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Desk Briefs -->
+    {% if briefs %}
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">Desk Analysis History</h2>
+        <div class="space-y-4">
+            {% for brief in briefs %}
+            <div class="p-4 bg-atlas-bg rounded-lg border border-atlas-border">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <span class="font-semibold text-white">{{ brief.desk_name }}</span>
+                        <span class="text-atlas-muted text-sm ml-2">{{ brief.analysis_date }}</span>
+                    </div>
+                    <span class="px-3 py-1 text-sm font-semibold rounded-full
+                        {% if brief.signal_direction == 'BULLISH' %}bg-atlas-success/20 text-atlas-success
+                        {% elif brief.signal_direction == 'BEARISH' %}bg-atlas-danger/20 text-atlas-danger
+                        {% else %}bg-atlas-warning/20 text-atlas-warning{% endif %}">
+                        {{ brief.signal_direction }} {{ (brief.confidence * 100) | int if brief.confidence else '' }}%
+                    </span>
+                </div>
+
+                {% if brief.cio_briefing %}
+                <p class="text-sm text-atlas-text mb-3">{{ brief.cio_briefing }}</p>
+                {% endif %}
+
+                {% if brief.bull_case or brief.bear_case %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    {% if brief.bull_case %}
+                    <div class="p-3 bg-atlas-success/10 rounded-lg">
+                        <div class="text-xs text-atlas-success font-semibold mb-1">Bull Case</div>
+                        <p class="text-sm text-atlas-text">{{ brief.bull_case }}</p>
+                    </div>
+                    {% endif %}
+                    {% if brief.bear_case %}
+                    <div class="p-3 bg-atlas-danger/10 rounded-lg">
+                        <div class="text-xs text-atlas-danger font-semibold mb-1">Bear Case</div>
+                        <p class="text-sm text-atlas-text">{{ brief.bear_case }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Institutional Holdings -->
+    {% if holdings %}
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">Institutional Holdings (13F)</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="text-left text-atlas-muted border-b border-atlas-border">
+                    <tr>
+                        <th class="pb-3 font-medium">Fund</th>
+                        <th class="pb-3 font-medium text-right">Shares</th>
+                        <th class="pb-3 font-medium text-right">Value</th>
+                        <th class="pb-3 font-medium">Quarter</th>
+                        <th class="pb-3 font-medium">Change</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in holdings %}
+                    <tr class="border-b border-atlas-border/50">
+                        <td class="py-3 text-white">{{ h.fund_name }}</td>
+                        <td class="py-3 text-right font-mono">{{ "{:,}".format(h.shares) }}</td>
+                        <td class="py-3 text-right font-mono">${{ "{:,.0f}".format(h.value) }}</td>
+                        <td class="py-3 text-atlas-muted">{{ h.quarter }}</td>
+                        <td class="py-3">
+                            {% if h.change_type == 'NEW' %}
+                                <span class="text-atlas-success">NEW</span>
+                            {% elif h.change_type == 'INCREASED' %}
+                                <span class="text-atlas-success">+{{ "{:.1f}".format(h.change_pct or 0) }}%</span>
+                            {% elif h.change_type == 'DECREASED' %}
+                                <span class="text-atlas-danger">{{ "{:.1f}".format(h.change_pct or 0) }}%</span>
+                            {% elif h.change_type == 'CLOSED' %}
+                                <span class="text-atlas-danger">CLOSED</span>
+                            {% else %}
+                                <span class="text-atlas-muted">--</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Trade History -->
+    {% if trades %}
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">Trade History</h2>
+        <div class="space-y-3">
+            {% for trade in trades %}
+            <div class="p-4 bg-atlas-bg rounded-lg flex items-center justify-between">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        {% if trade.direction == 'LONG' %}
+                            <span class="text-atlas-success font-semibold">LONG</span>
+                        {% else %}
+                            <span class="text-atlas-danger font-semibold">SHORT</span>
+                        {% endif %}
+                        <span class="text-atlas-muted">{{ "{:,}".format(trade.shares) }} @ ${{ "{:.2f}".format(trade.entry_price) }}</span>
+                    </div>
+                    <div class="text-sm text-atlas-muted mt-1">{{ trade.entry_date }} {% if trade.exit_date %}→ {{ trade.exit_date }}{% endif %}</div>
+                </div>
+                {% if trade.realized_pnl is defined %}
+                <div class="text-right">
+                    <div class="font-bold {% if trade.realized_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                        {% if trade.realized_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(trade.realized_pnl) }}
+                    </div>
+                    {% if trade.realized_pnl_pct %}
+                    <div class="text-sm {% if trade.realized_pnl_pct >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                        {% if trade.realized_pnl_pct >= 0 %}+{% endif %}{{ "{:.2f}".format(trade.realized_pnl_pct) }}%
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Thesis (if exists) -->
+    {% if thesis %}
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">Current Thesis</h2>
+        <div class="space-y-4">
+            <div class="flex items-center space-x-4">
+                <span class="px-3 py-1 text-sm font-semibold rounded-full
+                    {% if thesis.direction == 'LONG' %}bg-atlas-success/20 text-atlas-success
+                    {% else %}bg-atlas-danger/20 text-atlas-danger{% endif %}">
+                    {{ thesis.direction }}
+                </span>
+                {% if thesis.confidence %}
+                <span class="text-atlas-muted">Confidence: {{ (thesis.confidence * 100) | int }}%</span>
+                {% endif %}
+                <span class="px-2 py-1 text-xs rounded bg-atlas-muted/20 text-atlas-muted">{{ thesis.status }}</span>
+            </div>
+
+            {% if thesis.bull_case %}
+            <div class="p-4 bg-atlas-success/10 rounded-lg">
+                <h3 class="text-sm font-semibold text-atlas-success mb-2">Bull Case</h3>
+                <p class="text-atlas-text">{{ thesis.bull_case }}</p>
+            </div>
+            {% endif %}
+
+            {% if thesis.bear_case %}
+            <div class="p-4 bg-atlas-danger/10 rounded-lg">
+                <h3 class="text-sm font-semibold text-atlas-danger mb-2">Bear Case</h3>
+                <p class="text-atlas-text">{{ thesis.bear_case }}</p>
+            </div>
+            {% endif %}
+
+            {% if thesis.catalyst %}
+            <div class="p-4 bg-atlas-secondary/10 rounded-lg">
+                <h3 class="text-sm font-semibold text-atlas-secondary mb-2">Catalyst</h3>
+                <p class="text-atlas-text">{{ thesis.catalyst }}</p>
+            </div>
+            {% endif %}
+
+            {% if thesis.invalidation_criteria %}
+            <div class="p-4 bg-atlas-warning/10 rounded-lg">
+                <h3 class="text-sm font-semibold text-atlas-warning mb-2">Invalidation</h3>
+                <p class="text-atlas-text">{{ thesis.invalidation_criteria }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Chat CTA -->
+    <div class="card p-6 bg-gradient-to-r from-atlas-primary/10 to-atlas-secondary/10 border-atlas-primary/30">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-1">Ask About {{ company.ticker }}</h3>
+                <p class="text-atlas-muted">Get real-time analysis from sector desk agents</p>
+            </div>
+            <a href="/atlas/chat?ticker={{ company.ticker }}" class="px-6 py-3 bg-atlas-primary hover:bg-atlas-primary/80 text-white font-semibold rounded-lg transition-colors">
+                Ask Agents
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

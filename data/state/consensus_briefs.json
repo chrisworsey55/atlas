@@ -1,0 +1,149 @@
+[
+  {
+    "ticker": "NVDA",
+    "analyst_count": 60,
+    "consensus_rating": "STRONG_BUY",
+    "buy_hold_sell": {
+      "buy": 57,
+      "hold": 2,
+      "sell": 1
+    },
+    "buy_pct": 95.0,
+    "price_target": {
+      "mean": 264,
+      "median": 264,
+      "low": 140,
+      "high": 380
+    },
+    "current_price": 180,
+    "upside_to_target_pct": 46.8,
+    "atlas_vs_consensus": {
+      "atlas_intrinsic": 285,
+      "consensus_target": 264,
+      "atlas_position": "MORE_BULLISH",
+      "divergence_pct": 8.0,
+      "edge_assessment": "Moderate edge \u2014 we're above consensus but not dramatically. Still riding the momentum train."
+    },
+    "estimate_revisions": {
+      "eps_current_q_30d": "STABLE",
+      "eps_next_q_30d": "STABLE",
+      "revenue_current_q_30d": "STABLE",
+      "direction": "STABLE",
+      "interpretation": "Estimates are stable \u2014 no momentum either way. Analysts are waiting for catalysts."
+    },
+    "earnings_history": {
+      "beat_rate_8q": 100.0,
+      "avg_surprise_pct": 5.2,
+      "pattern": "CONSISTENT_BEATER",
+      "interpretation": "Perfect beat streak with meaningful surprises \u2014 management has credibility and conservative guidance muscle memory"
+    },
+    "crowding": {
+      "buy_pct": 95.0,
+      "assessment": "EXTREMELY_CROWDED",
+      "risk": "Dangerously crowded \u2014 95% buy rating leaves no room for upgrades.",
+      "positioning_risk": "Any disappointment will cause violent selloff as crowded longs scramble for exits"
+    },
+    "recent_changes": [
+      {
+        "date": "2026-03-04",
+        "firm": "Unknown",
+        "action": "No clear changes",
+        "note": "Data shows unknown firms with no rating changes"
+      }
+    ],
+    "contrarian_opportunity": {
+      "is_contrarian": true,
+      "atlas_edge": "High \u2014 we're more bullish than an already extremely bullish consensus. Risky but high conviction needed.",
+      "potential_catalyst": "Another earnings beat could trigger final wave of FOMO, but positioning is dangerous"
+    },
+    "signal": "BULLISH",
+    "confidence": 0.6,
+    "verdict": "NVDA is extremely crowded with 95% buy ratings \u2014 this is RED FLAG territory where any disappointment causes violent selling. However, the company has a perfect earnings beat streak and our ATLAS model is even more bullish than consensus. This is either the final melt-up phase or a dangerous trap. The earnings track record suggests betting with management, but positioning risk is severe.",
+    "brief_for_cio": "NVDA dangerously crowded at 95% buy ratings but perfect earnings streak continues. ATLAS more bullish than consensus. High reward but extreme positioning risk \u2014 any disappointment triggers violent selloff.",
+    "analyzed_at": "2026-03-04T11:22:24.316662",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_consensus": {
+      "ticker": "NVDA",
+      "company_name": "NVIDIA Corp.",
+      "sector": "Technology",
+      "timestamp": "2026-03-04T11:22:10.484914",
+      "current_price": 180.05,
+      "price_target": {
+        "low": 140.0,
+        "mean": 264.24878,
+        "median": 263.915,
+        "high": 380.0
+      },
+      "upside_to_target_pct": 46.8,
+      "rating_distribution": {
+        "strong_buy": 9,
+        "buy": 48,
+        "hold": 2,
+        "sell": 1,
+        "strong_sell": 0,
+        "total": 60
+      },
+      "consensus_rating": "STRONG_BUY",
+      "buy_pct": 95.0,
+      "analyst_count": 60
+    },
+    "raw_revisions": {
+      "ticker": "NVDA",
+      "revision_trend": "STABLE",
+      "eps_current_q": {
+        "avg": 1.78066,
+        "low": 1.69,
+        "high": 1.99,
+        "num_analysts": 38.0
+      },
+      "eps_growth_current_y": 1.1983,
+      "revenue_current_q": {
+        "avg": 78444862650.0,
+        "low": 77618000000.0,
+        "high": 80717000000.0,
+        "num_analysts": 37.0
+      },
+      "upgrades_30d": 0,
+      "downgrades_30d": 0
+    },
+    "raw_earnings_history": {
+      "ticker": "NVDA",
+      "quarters_analyzed": 4,
+      "beats": 4,
+      "misses": 0,
+      "beat_rate": 100.0,
+      "average_surprise_pct": 5.2,
+      "pattern": "CONSISTENT_BEATER",
+      "history": [
+        {
+          "date": "2026-01-31",
+          "eps_actual": 1.62,
+          "eps_estimate": 1.53812,
+          "beat": "True",
+          "surprise_pct": 5.3
+        },
+        {
+          "date": "2025-10-31",
+          "eps_actual": 1.3,
+          "eps_estimate": 1.25647,
+          "beat": "True",
+          "surprise_pct": 3.5
+        },
+        {
+          "date": "2025-07-31",
+          "eps_actual": 1.05,
+          "eps_estimate": 1.00867,
+          "beat": "True",
+          "surprise_pct": 4.1
+        },
+        {
+          "date": "2025-04-30",
+          "eps_actual": 0.81,
+          "eps_estimate": 0.74988,
+          "beat": "True",
+          "surprise_pct": 8.0
+        }
+      ]
+    }
+  }
+]

@@ -1,49 +1,527 @@
-{
-  "generated_at": "2026-03-03T06:00:00Z",
-  "valuations": {
-    "APO": {
-      "ticker": "APO",
-      "name": "Apollo Global Management",
-      "sector": "Financials",
-      "pe_ratio": 14.2,
-      "forward_pe": 12.8,
-      "peg_ratio": 0.85,
-      "ev_ebitda": 9.5,
-      "price_to_book": 2.1,
-      "dividend_yield": 1.8,
-      "revenue_growth_3y": 18.5,
-      "eps_growth_3y": 22.3,
-      "roe": 18.7,
-      "debt_to_equity": 0.45,
-      "fcf_yield": 8.2,
-      "valuation_score": 85,
-      "quality_score": 82,
-      "assessment": "UNDERVALUED",
-      "fair_value_estimate": 165.00,
-      "current_price": 142.50,
-      "upside_pct": 15.8
+[
+  {
+    "ticker": "AVGO",
+    "company_name": "Broadcom Inc",
+    "sector": "Semiconductors",
+    "current_price": 309.89,
+    "shares_outstanding": 4741273799,
+    "market_cap": 1469273341952,
+    "analysis_date": "2026-03-03",
+    "dcf_valuation": {
+      "base_case": 385,
+      "bull_case": 450,
+      "bear_case": 320,
+      "key_assumptions": {
+        "revenue_growth_5yr_cagr": "14%",
+        "terminal_fcf_margin": "37%",
+        "wacc": "9.2%",
+        "terminal_growth": "2.5%",
+        "risk_free_rate": "4.2%",
+        "equity_risk_premium": "5.8%",
+        "beta": 0.95
+      },
+      "year_by_year_fcf": {
+        "year_1": "$27.5B",
+        "year_2": "$31.0B",
+        "year_3": "$34.2B",
+        "year_4": "$37.1B",
+        "year_5": "$39.8B",
+        "terminal_value": "$1,845B"
+      },
+      "sensitivity_table": {
+        "wacc_8_tg_2": 440,
+        "wacc_9_tg_2": 380,
+        "wacc_10_tg_2": 335,
+        "wacc_8_tg_25": 485,
+        "wacc_9_tg_25": 415,
+        "wacc_10_tg_25": 360,
+        "wacc_8_tg_3": 550,
+        "wacc_9_tg_3": 465,
+        "wacc_10_tg_3": 395
+      },
+      "methodology_notes": "FCF growth driven by VMware synergies and semiconductor content expansion in AI/datacenter"
     },
-    "NVDA": {
-      "ticker": "NVDA",
-      "name": "NVIDIA Corporation",
-      "sector": "Technology",
-      "pe_ratio": 65.0,
-      "forward_pe": 35.0,
-      "peg_ratio": 1.5,
-      "ev_ebitda": 45.0,
-      "price_to_book": 35.0,
-      "dividend_yield": 0.03,
-      "revenue_growth_3y": 85.0,
-      "eps_growth_3y": 120.0,
-      "roe": 95.0,
-      "debt_to_equity": 0.25,
-      "fcf_yield": 2.8,
-      "valuation_score": 45,
-      "quality_score": 95,
-      "assessment": "FAIRLY_VALUED",
-      "fair_value_estimate": 135.00,
-      "current_price": 138.00,
-      "upside_pct": -2.2
-    }
+    "comps_valuation": {
+      "fair_value_range_low": 280,
+      "fair_value_range_high": 360,
+      "comps_used": [
+        {
+          "ticker": "QCOM",
+          "ev_ebitda": 12.8,
+          "ev_revenue": 4.2,
+          "p_e": 16.5
+        },
+        {
+          "ticker": "TXN",
+          "ev_ebitda": 14.5,
+          "ev_revenue": 5.8,
+          "p_e": 19.2
+        },
+        {
+          "ticker": "MRVL",
+          "ev_ebitda": 18.5,
+          "ev_revenue": 6.5,
+          "p_e": 28.0
+        },
+        {
+          "ticker": "AMD",
+          "ev_ebitda": 22.0,
+          "ev_revenue": 7.8,
+          "p_e": 35.0
+        }
+      ],
+      "peer_median_ev_ebitda": 16.5,
+      "target_ev_ebitda": 4.6,
+      "premium_or_discount": "-72%",
+      "premium_justified": false,
+      "justification": "AVGO trades at massive discount to semis due to debt load from VMware acquisition masking underlying profitability"
+    },
+    "precedent_transactions": {
+      "relevant_deals": [
+        {
+          "deal": "Broadcom/VMware",
+          "date": "2023",
+          "ev_revenue": 12.5,
+          "ev_ebitda": 45.0
+        },
+        {
+          "deal": "AMD/Xilinx",
+          "date": "2022",
+          "ev_revenue": 11.2,
+          "ev_ebitda": 38.5
+        },
+        {
+          "deal": "NVDA/Mellanox",
+          "date": "2020",
+          "ev_revenue": 9.8,
+          "ev_ebitda": 28.0
+        }
+      ],
+      "implied_value_low": 420,
+      "implied_value_high": 520,
+      "control_premium_assumption": "30%",
+      "notes": "Strategic semiconductor M&A commands premium for technology synergies and market consolidation"
+    },
+    "sotp_valuation": {
+      "segments": [
+        {
+          "name": "Semiconductor Solutions",
+          "revenue": "$35B",
+          "ebitda": "$20B",
+          "valuation_multiple": "18x EBITDA",
+          "segment_value": "$360B",
+          "methodology": "In-line semi multiple for diversified portfolio"
+        },
+        {
+          "name": "Infrastructure Software (VMware)",
+          "revenue": "$28B",
+          "ebitda": "$15B",
+          "valuation_multiple": "20x EBITDA",
+          "segment_value": "$300B",
+          "methodology": "Software multiple for enterprise infrastructure recurring revenue"
+        }
+      ],
+      "gross_asset_value": 660000000000,
+      "less_net_debt": 29350000000,
+      "equity_value": 630650000000,
+      "per_share_value": 133,
+      "notes": "Segments valued separately show significant undervaluation versus current trading multiple"
+    },
+    "asset_based_valuation": {
+      "book_value_per_share": 59.22,
+      "tangible_book_per_share": 38.59,
+      "net_current_asset_value": -5.2,
+      "goodwill_and_intangibles": 97800000000,
+      "relevance": "LOW",
+      "notes": "Asset-heavy from M&A. Value is in cash generation capability, not balance sheet assets."
+    },
+    "synthesis": {
+      "intrinsic_value_low": 320,
+      "intrinsic_value_high": 450,
+      "intrinsic_value_midpoint": 385,
+      "current_price": 309.89,
+      "upside_to_midpoint_pct": 24.2,
+      "margin_of_safety_pct": 19.4,
+      "verdict": "UNDERVALUED",
+      "confidence": 82,
+      "confidence_reasoning": "Strong FCF generation with clear synergy path, but EV/EBITDA distorted by acquisition accounting",
+      "key_risks": [
+        "Semiconductor cyclicality exposure",
+        "VMware integration execution risk",
+        "High debt load limits financial flexibility",
+        "Customer concentration in cloud hyperscalers",
+        "Regulatory scrutiny on large tech M&A"
+      ],
+      "key_catalysts": [
+        "VMware cost synergies realization ($3.5B target)",
+        "AI infrastructure spending acceleration",
+        "Debt paydown improving credit profile",
+        "Potential dividend increase as FCF grows",
+        "Operating leverage from revenue scale"
+      ],
+      "what_market_is_missing": "Market focused on debt-inflated multiples rather than underlying FCF generation power and VMware integration upside"
+    },
+    "brief_for_cio": "AVGO is UNDERVALUED at $310 vs $385 intrinsic value (24% upside). Current EV/EBITDA of 4.6x is misleading due to VMware acquisition accounting. DCF shows $320-450 range. Strong 39% FCF margin with $25B+ annual generation supports debt paydown and growth investment. Key catalyst is VMware synergy execution. BUY with 3-4% position size.",
+    "desk": "fundamental",
+    "analyzed_at": "2026-03-03T15:40:35.044414",
+    "model_used": "claude-sonnet-4-20250514"
+  },
+  {
+    "ticker": "NVDA",
+    "company_name": "NVIDIA Corporation",
+    "sector": "Technology - Semiconductors",
+    "current_price": 178.15,
+    "shares_outstanding": 24300000000,
+    "market_cap": 4330422009856,
+    "analysis_date": "2026-03-03",
+    "dcf_valuation": {
+      "base_case": 285,
+      "bull_case": 420,
+      "bear_case": 165,
+      "key_assumptions": {
+        "revenue_growth_5yr_cagr": "18%",
+        "terminal_fcf_margin": "32%",
+        "wacc": "9.8%",
+        "terminal_growth": "2.5%",
+        "risk_free_rate": "4.2%",
+        "equity_risk_premium": "5.8%",
+        "beta": 1.65
+      },
+      "year_by_year_fcf": {
+        "year_1": "$98.5B",
+        "year_2": "$115.2B",
+        "year_3": "$132.8B",
+        "year_4": "$148.6B",
+        "year_5": "$162.1B",
+        "terminal_value": "$6,485B"
+      },
+      "sensitivity_table": {
+        "wacc_8_tg_2": 350,
+        "wacc_9_tg_2": 295,
+        "wacc_10_tg_2": 250,
+        "wacc_8_tg_25": 385,
+        "wacc_9_tg_25": 315,
+        "wacc_10_tg_25": 270,
+        "wacc_8_tg_3": 420,
+        "wacc_9_tg_3": 340,
+        "wacc_10_tg_3": 285
+      },
+      "methodology_notes": "Conservative FCF margin normalization from 27% to 32% terminal, assuming AI infrastructure spend moderates"
+    },
+    "comps_valuation": {
+      "fair_value_range_low": 140,
+      "fair_value_range_high": 220,
+      "comps_used": [
+        {
+          "ticker": "MSFT",
+          "ev_ebitda": 17.1,
+          "ev_revenue": 9.8,
+          "p_e": 24.9
+        },
+        {
+          "ticker": "AAPL",
+          "ev_ebitda": 25.6,
+          "ev_revenue": 9.0,
+          "p_e": 33.4
+        },
+        {
+          "ticker": "GOOGL",
+          "ev_ebitda": 24.3,
+          "ev_revenue": 9.1,
+          "p_e": 27.5
+        },
+        {
+          "ticker": "META",
+          "ev_ebitda": 16.3,
+          "ev_revenue": 8.2,
+          "p_e": 27.5
+        }
+      ],
+      "peer_median_ev_ebitda": 20.8,
+      "target_ev_ebitda": 32.9,
+      "premium_or_discount": "+58%",
+      "premium_justified": false,
+      "justification": "Current 33x EV/EBITDA vs peer median 21x implies unsustainable growth premium - even AAPL at 26x"
+    },
+    "precedent_transactions": {
+      "relevant_deals": [
+        {
+          "deal": "Broadcom/VMware",
+          "date": "2023",
+          "ev_revenue": 12.0,
+          "ev_ebitda": 28.0
+        },
+        {
+          "deal": "AMD/Xilinx",
+          "date": "2022",
+          "ev_revenue": 10.5,
+          "ev_ebitda": 35.0
+        },
+        {
+          "deal": "Intel/Mobileye",
+          "date": "2017",
+          "ev_revenue": 15.0,
+          "ev_ebitda": 45.0
+        }
+      ],
+      "implied_value_low": 200,
+      "implied_value_high": 280,
+      "control_premium_assumption": "30%",
+      "notes": "NVDA untouchable due to size and regulatory scrutiny - theoretical exercise only"
+    },
+    "sotp_valuation": {
+      "segments": [
+        {
+          "name": "Data Center (AI/HPC)",
+          "revenue": "$140B",
+          "ebitda": "$95B",
+          "valuation_multiple": "30x EBITDA",
+          "segment_value": "$2,850B",
+          "methodology": "Premium for AI dominance but cyclical risk"
+        },
+        {
+          "name": "Gaming/Consumer",
+          "revenue": "$35B",
+          "ebitda": "$20B",
+          "valuation_multiple": "18x EBITDA",
+          "segment_value": "$360B",
+          "methodology": "Mature gaming market multiple"
+        },
+        {
+          "name": "Professional Visualization",
+          "revenue": "$18B",
+          "ebitda": "$10B",
+          "valuation_multiple": "20x EBITDA",
+          "segment_value": "$200B",
+          "methodology": "Stable enterprise segment"
+        },
+        {
+          "name": "Automotive/Other",
+          "revenue": "$23B",
+          "ebitda": "$8B",
+          "valuation_multiple": "15x EBITDA",
+          "segment_value": "$120B",
+          "methodology": "Emerging automotive/robotics potential"
+        }
+      ],
+      "gross_asset_value": 3530000000000,
+      "less_net_debt": -51140000000,
+      "equity_value": 3581140000000,
+      "per_share_value": 147,
+      "notes": "SOTP shows current valuation stretched even with premium data center multiple"
+    },
+    "asset_based_valuation": {
+      "book_value_per_share": 6.47,
+      "tangible_book_per_share": 5.61,
+      "net_current_asset_value": 2.15,
+      "goodwill_and_intangibles": 20830000000,
+      "relevance": "VERY LOW",
+      "notes": "NVDA is pure intellectual property and R&D story - assets irrelevant to valuation"
+    },
+    "synthesis": {
+      "intrinsic_value_low": 165,
+      "intrinsic_value_high": 285,
+      "intrinsic_value_midpoint": 225,
+      "current_price": 178.15,
+      "upside_to_midpoint_pct": 26.3,
+      "margin_of_safety_pct": -7.4,
+      "verdict": "FAIRLY VALUED",
+      "confidence": 65,
+      "confidence_reasoning": "Exceptional business but stretched valuation at 33x EBITDA - moderate upside if AI growth sustains",
+      "key_risks": [
+        "AI infrastructure spending cyclical peak",
+        "China export restrictions tightening",
+        "Competition from AMD, Intel custom chips",
+        "Hyperscaler customers developing own silicon",
+        "Valuation leaves no room for disappointment"
+      ],
+      "key_catalysts": [
+        "Sustained enterprise AI adoption acceleration",
+        "Sovereign AI infrastructure buildouts globally",
+        "Robotics/automotive revenue inflection",
+        "New product cycles (Blackwell, Rubin)",
+        "Margin expansion from software/services mix"
+      ],
+      "what_market_is_missing": "Market pricing in permanent AI infrastructure supercycle - ignoring cyclical semiconductor history and competition threat"
+    },
+    "brief_for_cio": "NVDA is FAIRLY VALUED at $178 vs $225 intrinsic value (26% upside). Exceptional AI franchise but 33x EBITDA leaves little margin for error. DCF supports $285 if growth sustains, but comps suggest $140-220 range more realistic. No margin of safety at current levels. HOLD - wait for better entry point below $160 or clear evidence AI spending cycle extends beyond 2026.",
+    "desk": "fundamental",
+    "analyzed_at": "2026-03-03T16:41:36.645076",
+    "model_used": "claude-sonnet-4-20250514"
+  },
+  {
+    "ticker": "LLY",
+    "company_name": "Eli Lilly and Company",
+    "sector": "Pharmaceuticals",
+    "current_price": 1003.31,
+    "shares_outstanding": 892992420,
+    "market_cap": 897981284352,
+    "analysis_date": "2026-03-03",
+    "dcf_valuation": {
+      "base_case": 920,
+      "bull_case": 1150,
+      "bear_case": 680,
+      "key_assumptions": {
+        "revenue_growth_5yr_cagr": "18%",
+        "terminal_fcf_margin": "22%",
+        "wacc": "8.8%",
+        "terminal_growth": "2.5%",
+        "risk_free_rate": "4.2%",
+        "equity_risk_premium": "5.5%",
+        "beta": 0.85
+      },
+      "year_by_year_fcf": {
+        "year_1": "$8.5B",
+        "year_2": "$12.8B",
+        "year_3": "$16.2B",
+        "year_4": "$19.1B",
+        "year_5": "$21.8B",
+        "terminal_value": "$690B"
+      },
+      "sensitivity_table": {
+        "wacc_8_tg_2": 1020,
+        "wacc_9_tg_2": 880,
+        "wacc_10_tg_2": 760,
+        "wacc_8_tg_25": 1100,
+        "wacc_9_tg_25": 920,
+        "wacc_10_tg_25": 810,
+        "wacc_8_tg_3": 1200,
+        "wacc_9_tg_3": 1000,
+        "wacc_10_tg_3": 870
+      },
+      "methodology_notes": "Normalized FCF from current 3% margin to 22% over 5 years as Mounjaro/Zepbound scale and R&D normalizes"
+    },
+    "comps_valuation": {
+      "fair_value_range_low": 850,
+      "fair_value_range_high": 1100,
+      "comps_used": [
+        {
+          "ticker": "NVO",
+          "ev_ebitda": 12.8,
+          "ev_revenue": 7.2,
+          "p_e": 28.5
+        },
+        {
+          "ticker": "JNJ",
+          "ev_ebitda": 14.2,
+          "ev_revenue": 4.8,
+          "p_e": 15.8
+        },
+        {
+          "ticker": "PFE",
+          "ev_ebitda": 8.5,
+          "ev_revenue": 2.1,
+          "p_e": 12.2
+        },
+        {
+          "ticker": "MRK",
+          "ev_ebitda": 10.5,
+          "ev_revenue": 4.5,
+          "p_e": 16.5
+        }
+      ],
+      "peer_median_ev_ebitda": 11.7,
+      "target_ev_ebitda": 29.9,
+      "premium_or_discount": "+156%",
+      "premium_justified": true,
+      "justification": "Mounjaro/Zepbound franchise justifies premium to diversified peers given $50B+ obesity market opportunity"
+    },
+    "precedent_transactions": {
+      "relevant_deals": [
+        {
+          "deal": "Pfizer/Seagen",
+          "date": "2023",
+          "ev_revenue": 8.5,
+          "ev_ebitda": 18.0
+        },
+        {
+          "deal": "J&J/Abiomed",
+          "date": "2022",
+          "ev_revenue": 12.0,
+          "ev_ebitda": 25.0
+        },
+        {
+          "deal": "AbbVie/Allergan",
+          "date": "2020",
+          "ev_revenue": 6.8,
+          "ev_ebitda": 14.5
+        }
+      ],
+      "implied_value_low": 950,
+      "implied_value_high": 1200,
+      "control_premium_assumption": "30%",
+      "notes": "Pharma M&A for obesity/diabetes assets commanding premium multiples given market size"
+    },
+    "sotp_valuation": {
+      "segments": [
+        {
+          "name": "Diabetes/Obesity (Mounjaro/Zepbound)",
+          "revenue": "$25B",
+          "ebitda": "$20B",
+          "valuation_multiple": "35x EBITDA",
+          "segment_value": "$700B",
+          "methodology": "Premium multiple for category-defining obesity drugs"
+        },
+        {
+          "name": "Oncology Portfolio",
+          "revenue": "$15B",
+          "ebitda": "$12B",
+          "valuation_multiple": "18x EBITDA",
+          "segment_value": "$216B",
+          "methodology": "Standard oncology multiple"
+        },
+        {
+          "name": "Other Products",
+          "revenue": "$25B",
+          "ebitda": "$18B",
+          "valuation_multiple": "12x EBITDA",
+          "segment_value": "$216B",
+          "methodology": "Mature pharma multiple"
+        }
+      ],
+      "gross_asset_value": 1132000000000,
+      "less_net_debt": 36600000000,
+      "equity_value": 1095400000000,
+      "per_share_value": 1226,
+      "notes": "Market undervaluing the obesity franchise potential - $100B+ peak sales opportunity"
+    },
+    "asset_based_valuation": {
+      "book_value_per_share": 29.66,
+      "tangible_book_per_share": 23.05,
+      "net_current_asset_value": -45.2,
+      "goodwill_and_intangibles": 5900000000,
+      "relevance": "VERY LOW",
+      "notes": "LLY is an IP-driven business - asset value irrelevant, all value in drug portfolio and pipeline"
+    },
+    "synthesis": {
+      "intrinsic_value_low": 850,
+      "intrinsic_value_high": 1150,
+      "intrinsic_value_midpoint": 1000,
+      "current_price": 1003.31,
+      "upside_to_midpoint_pct": -0.3,
+      "margin_of_safety_pct": 15.3,
+      "verdict": "FAIRLY VALUED",
+      "confidence": 72,
+      "confidence_reasoning": "High visibility on Mounjaro/Zepbound growth but execution risk on manufacturing scale-up and competitive threats",
+      "key_risks": [
+        "GLP-1 competition from Novo Nordisk and others intensifying",
+        "Manufacturing capacity constraints limiting growth",
+        "Pricing pressure from payers on obesity drugs",
+        "Patent cliff on legacy diabetes drugs",
+        "Regulatory risk on obesity drug safety profile"
+      ],
+      "key_catalysts": [
+        "Mounjaro obesity approval and launch acceleration",
+        "Manufacturing capacity expansions coming online",
+        "Pipeline readouts in Alzheimer's (donanemab)",
+        "International expansion of GLP-1 franchise",
+        "Potential obesity combination therapies"
+      ],
+      "what_market_is_missing": "Market correctly pricing in obesity opportunity but underestimating manufacturing execution risk and competitive intensity"
+    },
+    "brief_for_cio": "LLY is FAIRLY VALUED at $1003 vs $1000 intrinsic value (flat). Mounjaro/Zepbound franchise driving massive growth but stock already reflects $50B+ obesity opportunity. Key risk is GLP-1 competition and manufacturing constraints. Key catalyst is capacity expansion. HOLD - great business at full price.",
+    "desk": "fundamental",
+    "analyzed_at": "2026-03-03T16:42:32.787556",
+    "model_used": "claude-sonnet-4-20250514"
   }
-}
+]

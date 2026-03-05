@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+{% block title %}Chat{% endblock %}
+
+{% block extra_head %}
+<style>
+    .chat-container {
+        height: calc(100vh - 200px);
+        min-height: 500px;
+    }
+
+    .messages-container {
+        height: calc(100% - 80px);
+        overflow-y: auto;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+
+    .message-user {
+        background: linear-gradient(135deg, #3db27f 0%, #2a9d6f 100%);
+    }
+
+    .message-assistant {
+        background: #1a1f2e;
+        border: 1px solid #2a3142;
+    }
+
+    .typing-indicator span {
+        animation: typing 1.4s infinite;
+        display: inline-block;
+    }
+
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-4px); }
+    }
+
+    .agent-chip {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .agent-chip:hover {
+        transform: translateY(-1px);
+    }
+
+    .agent-chip.selected {
+        border-color: #3db27f;
+        background: rgba(61, 178, 127, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Agent Chat</h1>
+            <p class="text-atlas-muted mt-1">Talk to the CIO or any sector agent directly</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button id="clear-chat" class="px-4 py-2 text-sm border border-atlas-border rounded-lg hover:border-atlas-danger hover:text-atlas-danger transition-colors">
+                Clear History
+            </button>
+        </div>
+    </div>
+
+    <!-- Agent Selector -->
+    <div class="card p-4">
+        <div class="text-sm text-atlas-muted mb-3">Select Agent (or use CIO for unified routing)</div>
+        <div class="flex flex-wrap gap-2">
+            <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card selected" data-agent="cio">
+                <span class="font-semibold">CIO</span>
+                <span class="text-atlas-muted ml-1">Unified</span>
+            </button>
+            <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="druckenmiller">
+                <span class="font-semibold">Druckenmiller</span>
+                <span class="text-atlas-muted ml-1">Macro</span>
+            </button>
+            <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="adversarial">
+                <span class="font-semibold">Adversarial</span>
+                <span class="text-atlas-muted ml-1">Risk</span>
+            </button>
+            <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="fundamental">
+                <span class="font-semibold">Fundamental</span>
+                <span class="text-atlas-muted ml-1">Valuation</span>
+            </button>
+            <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="bond">
+                <span class="font-semibold">Bond</span>
+                <span class="text-atlas-muted ml-1">Fixed Income</span>
+            </button>
+            <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="semiconductor">
+                <span class="font-semibold">Semiconductor</span>
+            </button>
+            <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="biotech">
+                <span class="font-semibold">Biotech</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="card chat-container flex flex-col">
+        <!-- Messages -->
+        <div id="messages" class="messages-container p-4 space-y-4 scrollbar-thin">
+            <!-- Welcome message -->
+            <div class="message message-assistant rounded-lg p-4 ml-0">
+                <div class="flex items-center space-x-2 mb-2">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-atlas-primary to-atlas-secondary flex items-center justify-center">
+                        <span class="text-white text-sm font-bold">A</span>
+                    </div>
+                    <span class="font-semibold text-atlas-primary">ATLAS CIO</span>
+                </div>
+                <p class="text-atlas-text">Welcome to ATLAS. I'm your AI CIO - ask me about portfolio positions, market views, or specific companies. I'll consult the relevant desk agents and synthesize their analysis.</p>
+                <div class="mt-3 text-sm text-atlas-muted">
+                    Try: "What's our biggest risk?" or "Should we add to AVGO?" or "Morning briefing"
+                </div>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="p-4 border-t border-atlas-border">
+            <form id="chat-form" class="flex space-x-4">
+                <input
+                    type="text"
+                    id="chat-input"
+                    placeholder="Ask about positions, market views, specific companies..."
+                    class="flex-1 bg-atlas-bg border border-atlas-border rounded-lg px-4 py-3 text-atlas-text placeholder-atlas-muted focus:outline-none focus:border-atlas-primary"
+                    autocomplete="off"
+                >
+                <button type="submit" class="px-6 py-3 bg-atlas-primary hover:bg-atlas-primary/80 text-white font-semibold rounded-lg transition-colors flex items-center space-x-2">
+                    <span>Send</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card p-4">
+        <div class="text-sm text-atlas-muted mb-3">Quick Questions</div>
+        <div class="flex flex-wrap gap-2">
+            <button class="quick-action px-4 py-2 text-sm rounded-lg border border-atlas-border hover:border-atlas-primary hover:text-atlas-primary transition-colors">
+                What's our biggest risk?
+            </button>
+            <button class="quick-action px-4 py-2 text-sm rounded-lg border border-atlas-border hover:border-atlas-primary hover:text-atlas-primary transition-colors">
+                Morning briefing
+            </button>
+            <button class="quick-action px-4 py-2 text-sm rounded-lg border border-atlas-border hover:border-atlas-primary hover:text-atlas-primary transition-colors">
+                Walk me through the TLT short thesis
+            </button>
+            <button class="quick-action px-4 py-2 text-sm rounded-lg border border-atlas-border hover:border-atlas-primary hover:text-atlas-primary transition-colors">
+                What if the Fed surprises with a hike?
+            </button>
+            <button class="quick-action px-4 py-2 text-sm rounded-lg border border-atlas-border hover:border-atlas-primary hover:text-atlas-primary transition-colors">
+                Is NVDA overvalued?
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let selectedAgent = 'cio';
+    const messagesContainer = document.getElementById('messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+
+    // Check for ticker param
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticker = urlParams.get('ticker');
+    if (ticker) {
+        chatInput.value = `Tell me about ${ticker}`;
+        chatInput.focus();
+    }
+
+    // Agent selection
+    document.querySelectorAll('.agent-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.agent-chip').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedAgent = this.dataset.agent;
+        });
+    });
+
+    // Quick actions
+    document.querySelectorAll('.quick-action').forEach(btn => {
+        btn.addEventListener('click', function() {
+            chatInput.value = this.textContent.trim();
+            chatForm.dispatchEvent(new Event('submit'));
+        });
+    });
+
+    // Clear chat
+    document.getElementById('clear-chat').addEventListener('click', async function() {
+        if (confirm('Clear conversation history?')) {
+            try {
+                await fetch(`/api/atlas/chat/${selectedAgent}/history`, { method: 'DELETE' });
+                // Keep only welcome message
+                const welcome = messagesContainer.firstElementChild;
+                messagesContainer.innerHTML = '';
+                messagesContainer.appendChild(welcome);
+            } catch (e) {
+                console.error('Error clearing history:', e);
+            }
+        }
+    });
+
+    // Add message to UI
+    function addMessage(content, isUser, agentName = null, metadata = null) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'message-user ml-auto' : 'message-assistant ml-0'} rounded-lg p-4`;
+
+        if (isUser) {
+            messageDiv.innerHTML = `<p class="text-white">${escapeHtml(content)}</p>`;
+        } else {
+            const agentColor = agentName === 'CIO' ? 'from-atlas-gold to-yellow-600' :
+                              agentName === 'Druckenmiller' ? 'from-atlas-primary to-atlas-success' :
+                              agentName === 'Adversarial' ? 'from-atlas-danger to-red-700' :
+                              'from-atlas-secondary to-blue-700';
+
+            let metaHtml = '';
+            if (metadata) {
+                if (metadata.agents_consulted && metadata.agents_consulted.length > 0) {
+                    metaHtml += `<div class="text-xs text-atlas-muted mt-2">Consulted: ${metadata.agents_consulted.join(', ')}</div>`;
+                }
+                if (metadata.signal) {
+                    const signalClass = metadata.signal === 'BULLISH' ? 'text-atlas-success' :
+                                       metadata.signal === 'BEARISH' ? 'text-atlas-danger' : 'text-atlas-warning';
+                    metaHtml += `<div class="mt-2"><span class="px-2 py-1 text-xs rounded ${signalClass} bg-opacity-20">${metadata.signal}</span>`;
+                    if (metadata.confidence) {
+                        metaHtml += ` <span class="text-xs text-atlas-muted">${Math.round(metadata.confidence * 100)}% confidence</span>`;
+                    }
+                    metaHtml += `</div>`;
+                }
+            }
+
+            messageDiv.innerHTML = `
+                <div class="flex items-center space-x-2 mb-2">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br ${agentColor} flex items-center justify-center">
+                        <span class="text-white text-sm font-bold">${(agentName || 'A')[0]}</span>
+                    </div>
+                    <span class="font-semibold text-atlas-primary">${agentName || 'ATLAS'}</span>
+                </div>
+                <div class="text-atlas-text prose prose-sm prose-invert max-w-none">${formatMarkdown(content)}</div>
+                ${metaHtml}
+            `;
+        }
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Add typing indicator
+    function addTypingIndicator() {
+        const indicator = document.createElement('div');
+        indicator.id = 'typing-indicator';
+        indicator.className = 'message message-assistant rounded-lg p-4 ml-0';
+        indicator.innerHTML = `
+            <div class="typing-indicator text-atlas-muted">
+                <span>.</span><span>.</span><span>.</span>
+            </div>
+        `;
+        messagesContainer.appendChild(indicator);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) indicator.remove();
+    }
+
+    // Format markdown-ish content
+    function formatMarkdown(text) {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code class="bg-atlas-bg px-1 rounded">$1</code>')
+            .replace(/\n\n/g, '</p><p class="mt-2">')
+            .replace(/\n/g, '<br>')
+            .replace(/---/g, '<hr class="my-3 border-atlas-border">');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Submit handler
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        // Add user message
+        addMessage(message, true);
+        chatInput.value = '';
+
+        // Show typing indicator
+        addTypingIndicator();
+
+        try {
+            let url, body;
+
+            if (selectedAgent === 'cio') {
+                url = '/api/atlas/chat';
+                body = { message };
+            } else {
+                url = `/api/atlas/chat/${selectedAgent}`;
+                body = { message };
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            const data = await response.json();
+
+            removeTypingIndicator();
+
+            if (data.error) {
+                addMessage(`Error: ${data.error}`, false, 'System');
+            } else {
+                const agentName = data.agent || data.agents_consulted?.join(', ') || selectedAgent;
+                addMessage(data.response, false, agentName, {
+                    agents_consulted: data.agents_consulted,
+                    signal: data.signal,
+                    confidence: data.confidence
+                });
+            }
+        } catch (error) {
+            removeTypingIndicator();
+            addMessage(`Connection error: ${error.message}`, false, 'System');
+        }
+    });
+
+    // Focus input on load
+    chatInput.focus();
+</script>
+{% endblock %}

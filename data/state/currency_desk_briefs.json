@@ -1,0 +1,92 @@
+[
+  {
+    "analysis_date": "2026-03-03",
+    "signal": "BEARISH_USD",
+    "confidence": 0.75,
+    "dollar_index": {
+      "current_level": 99.29,
+      "trend": "WEAKENING",
+      "assessment": "DXY below 100 handle signals continued USD weakness after recent declines from highs."
+    },
+    "rate_differentials": {
+      "us_vs_eu_2y": null,
+      "us_vs_jp_2y": null,
+      "direction": "NARROWING",
+      "assessment": "Rate differentials likely narrowing as other central banks maintain restrictive policy while Fed appears dovish."
+    },
+    "risk_sentiment": {
+      "regime": "RISK_OFF",
+      "vix_level": 26.19,
+      "assessment": "Elevated VIX above 25 indicates risk-off conditions but unusually high gold prices suggest USD safe haven demand is weak."
+    },
+    "growth_differential": {
+      "us_vs_eu": "US_STRONGER",
+      "us_vs_jp": "US_STRONGER",
+      "assessment": "US GDP at 7.45% YoY shows exceptional growth outperformance but this hasn't translated to USD strength."
+    },
+    "key_pairs": {
+      "eurusd": {
+        "current": 1.1605,
+        "signal": "BULLISH",
+        "target": 1.18,
+        "stop": 1.145
+      },
+      "usdjpy": {
+        "current": 157.77,
+        "signal": "BEARISH",
+        "target": 155.0,
+        "stop": 159.5
+      },
+      "gbpusd": {
+        "current": 1.3294,
+        "signal": "BULLISH",
+        "target": 1.345,
+        "stop": 1.315
+      },
+      "audusd": {
+        "current": 0.702,
+        "signal": "NEUTRAL",
+        "target": 0.71,
+        "stop": 0.695
+      }
+    },
+    "positioning": {
+      "primary_trade": "Short USD/JPY targeting 155.00 as BoJ intervention risk rises and USD weakens",
+      "hedge_trade": "Long USD/CHF as safe haven hedge given elevated VIX",
+      "carry_trades": "avoid due to risk-off environment and narrowing differentials"
+    },
+    "key_levels": {
+      "dxy_resistance": 101.5,
+      "dxy_support": 98.0,
+      "eurusd_key_level": 1.165,
+      "usdjpy_intervention_risk": 158.0
+    },
+    "catalysts": {
+      "upcoming": [
+        "Fed meeting signals",
+        "ECB policy decision",
+        "BoJ intervention watch",
+        "Non-farm payrolls"
+      ],
+      "risks": [
+        "BoJ intervention above 158",
+        "Geopolitical escalation",
+        "Credit market stress",
+        "Fed pivot hawkish"
+      ]
+    },
+    "bull_case_usd": "Exceptional 7.45% GDP growth and 4.3% unemployment support USD fundamentals. Risk-off VIX spike could trigger flight-to-safety flows despite current weakness.",
+    "bear_case_usd": "DXY breaking below 100 signals major trend change as rate differentials narrow. Gold at $5,136 shows investors fleeing USD despite strong growth data.",
+    "brief_for_cio": "USD weakness accelerating despite strong fundamentals - fade this move. Primary trade: short USD/JPY to 155 on intervention risk. Hedge with long USD/CHF on risk-off.",
+    "desk": "currency",
+    "analyzed_at": "2026-03-03T11:51:00.173684",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "dxy": 99.28700256347656,
+      "eurusd": 1.160496711730957,
+      "usdjpy": 157.7689971923828,
+      "fed_funds_rate": 3.64,
+      "vix": 26.190000534057617
+    }
+  }
+]

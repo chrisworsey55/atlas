@@ -1,0 +1,77 @@
+[
+  {
+    "analysis_date": "2026-03-03",
+    "signal": "BEARISH_DURATION",
+    "confidence": 0.85,
+    "yield_curve": {
+      "shape": "NORMAL",
+      "2y_yield": 3.47,
+      "10y_yield": 4.13,
+      "2s10s_spread": 66,
+      "curve_direction": "STABLE",
+      "assessment": "Normal upward sloping curve with healthy steepness suggesting no imminent recession concerns."
+    },
+    "fed_policy": {
+      "current_rate": 3.75,
+      "market_implied_terminal": null,
+      "cuts_priced_12m": null,
+      "stance": "NEUTRAL",
+      "assessment": "Fed funds rate appears appropriately positioned with real rates near neutral given 2.67% core PCE."
+    },
+    "credit_spreads": {
+      "hy_spread": 3,
+      "ig_spread": 1,
+      "spread_direction": "STABLE",
+      "risk_appetite": "RISK_ON",
+      "assessment": "Extremely tight credit spreads signal peak complacency and excessive risk appetite in credit markets."
+    },
+    "inflation": {
+      "breakeven_5y": 2.46,
+      "breakeven_10y": 2.29,
+      "real_10y_yield": 1.84,
+      "expectations_trend": "STABLE",
+      "assessment": "Inflation expectations anchored near Fed target while core PCE at 2.67% suggests persistence above target."
+    },
+    "positioning": {
+      "duration_stance": "SHORT",
+      "curve_trade": "FLATTENER",
+      "credit_stance": "UNDERWEIGHT",
+      "recommended_instruments": [
+        "TBT",
+        "PST",
+        "SHY",
+        "VMOT"
+      ]
+    },
+    "key_levels": {
+      "10y_resistance": 4.3,
+      "10y_support": 3.9,
+      "critical_spread_level": 100
+    },
+    "catalysts": {
+      "upcoming": [
+        "FOMC meeting March 19-20",
+        "PCE data March 28",
+        "Q1 GDP preliminary April 25"
+      ],
+      "risks": [
+        "Credit spread normalization",
+        "Inflation reacceleration",
+        "Strong GDP growth continuation"
+      ]
+    },
+    "bull_case": "Fed may need to cut if 7.45% GDP growth proves unsustainable and credit markets stress emerges. Current real yields above 1.8% provide attractive entry point if growth falters.",
+    "bear_case": "Explosive 7.45% GDP growth with core PCE at 2.67% suggests economy running hot while credit spreads at 3bps indicate dangerous complacency. Duration vulnerable to inflation surprise and credit normalization.",
+    "brief_for_cio": "SHORT DURATION: 7.45% GDP growth, 2.67% core PCE, 3bp HY spreads scream overheating economy and peak complacency. Position for higher rates and credit spread widening via TBT/PST.",
+    "desk": "bond",
+    "analyzed_at": "2026-03-03T11:48:51.591420",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "treasury_2y": 3.47,
+      "treasury_10y": 4.13,
+      "yield_curve_10y_2y": 0.58,
+      "fed_funds_rate": 3.64,
+      "high_yield_spread": 3.12
+    }
+  }
+]

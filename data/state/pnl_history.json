@@ -1,35 +1,143 @@
-{
-  "portfolio_start_value": 1000000,
-  "portfolio_current_value": 999820,
-  "last_updated": "2026-03-04",
-  "trades": [
-    {
-      "date": "2026-03-04",
-      "ticker": "BE",
-      "action": "BUY",
-      "shares": 329,
-      "price": 151.95,
-      "value": 49991.55,
-      "allocation_pct": 5.0,
-      "notes": "New position - AI data centre power thesis via Aschenbrenner fund"
-    },
-    {
-      "date": "2026-03-04",
-      "ticker": "BIL",
-      "action": "SELL",
-      "shares": 547,
-      "price": 91.39,
-      "value": 49990.33,
-      "allocation_pct": -5.0,
-      "notes": "Reduced cash allocation from 85% to 80% to fund BE position"
-    }
-  ],
-  "daily_pnl": [
-    {
-      "date": "2026-03-04",
-      "portfolio_value": 999820,
-      "daily_return_pct": 0.0,
-      "cumulative_return_pct": -0.02
-    }
-  ]
-}
+[
+  {
+    "date": "2026-03-03T06:51:38.640962",
+    "total_pnl": 0.00,
+    "portfolio_value": 1000000.00,
+    "cash": 1000000,
+    "position_count": 1,
+    "positions": [
+      {
+        "ticker": "TLT",
+        "direction": "SHORT",
+        "type": "ACTIVE_TRADE",
+        "shares": 1116,
+        "entry_price": 89.61,
+        "current_price": 89.61,
+        "pnl": 0.00,
+        "pnl_pct": 0.00
+      }
+    ]
+  },
+  {
+    "date": "2026-03-03T06:59:38.498051",
+    "total_pnl": 0.00,
+    "portfolio_value": 1000000.00,
+    "active_pnl": 0.00,
+    "autonomous_pnl": 0.00,
+    "cash_value": 849927.00,
+    "hurdle_return": 123.29,
+    "alpha": -123.29,
+    "days_elapsed": 1,
+    "position_count": 2,
+    "positions": [
+      {
+        "ticker": "TLT",
+        "direction": "SHORT",
+        "type": "ACTIVE_TRADE",
+        "shares": 1116,
+        "entry_price": 89.61,
+        "current_price": 89.61,
+        "pnl": 0.00,
+        "pnl_pct": 0.00
+      },
+      {
+        "ticker": "BIL",
+        "direction": "LONG",
+        "type": "CASH_MANAGEMENT",
+        "shares": 9300,
+        "entry_price": 91.39,
+        "current_price": 91.39,
+        "pnl": 0.00,
+        "pnl_pct": 0.00
+      }
+    ]
+  },
+  {
+    "date": "2026-03-03T07:42:44.146471",
+    "total_pnl": 0.00,
+    "portfolio_value": 1000000.00,
+    "active_pnl": 0.00,
+    "autonomous_pnl": 0.00,
+    "cash_value": 849927.00,
+    "hurdle_return": 123.29,
+    "alpha": -123.29,
+    "days_elapsed": 1,
+    "position_count": 3,
+    "positions": [
+      {
+        "ticker": "TLT",
+        "direction": "SHORT",
+        "type": "ACTIVE_TRADE",
+        "shares": 1116,
+        "entry_price": 89.61,
+        "current_price": 89.61,
+        "pnl": 0.00,
+        "pnl_pct": 0.00
+      },
+      {
+        "ticker": "BIL",
+        "direction": "LONG",
+        "type": "CASH_MANAGEMENT",
+        "shares": 9300,
+        "entry_price": 91.39,
+        "current_price": 91.39,
+        "pnl": 0.00,
+        "pnl_pct": 0.00
+      },
+      {
+        "ticker": "AVGO",
+        "direction": "LONG",
+        "type": "AUTONOMOUS",
+        "shares": 157,
+        "entry_price": 318.82,
+        "current_price": 318.82,
+        "pnl": 0.00,
+        "pnl_pct": 0.00
+      }
+    ]
+  },
+  {
+    "date": "2026-03-03T15:18:34.909690",
+    "total_pnl": -722.24,
+    "portfolio_value": 999277.76,
+    "active_pnl": 100.44,
+    "autonomous_pnl": -822.68,
+    "cash_value": 849927.00,
+    "hurdle_return": 123.29,
+    "alpha": -845.53,
+    "days_elapsed": 1,
+    "position_count": 3,
+    "positions": [
+      {
+        "ticker": "TLT",
+        "direction": "SHORT",
+        "type": "ACTIVE_TRADE",
+        "shares": 1116,
+        "entry_price": 89.61,
+        "current_price": 89.52,
+        "pnl": 100.44,
+        "pnl_pct": 0.10
+      },
+      {
+        "ticker": "BIL",
+        "direction": "LONG",
+        "type": "CASH_MANAGEMENT",
+        "shares": 9300,
+        "entry_price": 91.39,
+        "current_price": 91.39,
+        "pnl": 0.00,
+        "pnl_pct": 0.00
+      },
+      {
+        "ticker": "AVGO",
+        "direction": "LONG",
+        "type": "AUTONOMOUS",
+        "shares": 157,
+        "entry_price": 318.82,
+        "current_price": 313.58,
+        "pnl": -822.68,
+        "pnl_pct": -1.64
+      }
+    ]
+  }
+]

@@ -6,8 +6,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env from gic-underwriting directory
-load_dotenv(Path.home() / "gic-underwriting" / ".env")
+# Load .env from parent directory (gic-underwriting)
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 # Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,3 +51,17 @@ FILING_SCAN_INTERVAL_HOURS = 6
 FULL_RISK_REVIEW_INTERVAL_HOURS = 24
 THIRTEENF_SCAN_INTERVAL_HOURS = 24  # 13Fs only update quarterly but check daily
 ANALYST_SCAN_INTERVAL_HOURS = 12
+
+# SMTP Configuration for email briefings
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASS = os.getenv("SMTP_PASS", "")
+BRIEFING_FROM = os.getenv("BRIEFING_FROM", "atlas@generalintelligence.capital")
+BRIEFING_TO = os.getenv("BRIEFING_TO", "chris@generalintelligencecapital.com")
+
+# State directories
+STATE_DIR = BASE_DIR / "data" / "state"
+BRIEFINGS_DIR = STATE_DIR / "briefings"
+STATE_DIR.mkdir(parents=True, exist_ok=True)
+BRIEFINGS_DIR.mkdir(parents=True, exist_ok=True)

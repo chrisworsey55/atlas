@@ -1,0 +1,58 @@
+[
+  {
+    "cycle_id": "2026-03-04-11-23",
+    "timestamp": "2026-03-04T11:23:50.506811",
+    "dry_run": true,
+    "signals": {
+      "filings": {
+        "count": 113,
+        "immediate": 0,
+        "high": 0
+      },
+      "macro": {
+        "tilt": "DEFENSIVE",
+        "liquidity_regime": "NEUTRAL",
+        "conviction": 0.7
+      },
+      "bond": {
+        "signal": "BEARISH_DURATION",
+        "confidence": 0.85
+      },
+      "consensus": {
+        "TLT": {
+          "rating": null,
+          "crowding": null
+        },
+        "GLD": {
+          "rating": null,
+          "crowding": null
+        },
+        "BIL": {
+          "rating": null,
+          "crowding": null
+        },
+        "AVGO": {
+          "rating": null,
+          "crowding": null
+        }
+      }
+    },
+    "cio_decision": {
+      "action": "HOLD",
+      "reason": "Default hold - no strong signals"
+    },
+    "adversarial_review": null,
+    "execution": null,
+    "risk_status": {
+      "status": "WARNING",
+      "violations": [],
+      "warnings": [
+        "Position TLT at 10.5% exceeds 10.0% limit",
+        "Position GLD at 15.8% exceeds 10.0% limit",
+        "Position BIL at 68.5% exceeds 10.0% limit"
+      ],
+      "drawdown_pct": 0.0,
+      "high_water_mark": 949475.62
+    }
+  }
+]

@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}CIO Decisions{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-white">CIO Decisions</h1>
+            <p class="text-atlas-muted mt-1">Trade history with full thesis documentation</p>
+        </div>
+        <div class="flex items-center space-x-4 text-sm">
+            <div class="px-3 py-1 rounded-lg bg-atlas-card border border-atlas-border">
+                <span class="text-atlas-muted">Open:</span>
+                <span class="text-white font-medium">{{ trades_summary.open_count or 0 }}</span>
+            </div>
+            <div class="px-3 py-1 rounded-lg bg-atlas-card border border-atlas-border">
+                <span class="text-atlas-muted">Closed:</span>
+                <span class="text-white font-medium">{{ trades_summary.closed_count or 0 }}</span>
+            </div>
+            <div class="px-3 py-1 rounded-lg bg-atlas-card border border-atlas-border">
+                <span class="text-atlas-muted">Total P&L:</span>
+                <span class="font-medium {% if trades_summary.total_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                    {% if trades_summary.total_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(trades_summary.total_pnl or 0) }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Distribution -->
+    {% if trades_summary.by_agent %}
+    <div class="card p-5">
+        <h2 class="text-lg font-semibold text-white mb-4">Trades by Agent</h2>
+        <div class="flex flex-wrap gap-3">
+            {% for agent, count in trades_summary.by_agent.items() %}
+            <div class="px-4 py-2 rounded-lg bg-atlas-bg border border-atlas-border">
+                <span class="text-atlas-muted">{{ agent }}:</span>
+                <span class="text-white font-medium ml-1">{{ count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Trades List -->
+    <div class="space-y-4">
+        {% for trade in trades %}
+        <div class="card overflow-hidden">
+            <!-- Trade Header -->
+            <div class="p-5 border-b border-atlas-border">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <a href="/atlas/company/{{ trade.ticker }}" class="text-xl font-bold text-white hover:text-atlas-primary">
+                                {{ trade.ticker }}
+                            </a>
+                            {% if trade.direction == 'LONG' %}
+                                <span class="px-2 py-1 text-sm rounded bg-atlas-success/20 text-atlas-success">LONG</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-sm rounded bg-atlas-danger/20 text-atlas-danger">SHORT</span>
+                            {% endif %}
+                        </div>
+                        <span class="px-2 py-1 text-xs rounded-full
+                            {% if trade.status == 'OPEN' %}status-active
+                            {% elif trade.status == 'CLOSED' %}bg-atlas-muted/20 text-atlas-muted
+                            {% else %}status-pending{% endif %}">
+                            {{ trade.status }}
+                        </span>
+                    </div>
+
+                    <div class="text-right">
+                        {% if trade.unrealized_pnl is defined %}
+                        <div class="text-lg font-bold {% if trade.unrealized_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                            {% if trade.unrealized_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(trade.unrealized_pnl) }}
+                        </div>
+                        <div class="text-sm {% if trade.unrealized_pnl_pct >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                            {% if trade.unrealized_pnl_pct >= 0 %}+{% endif %}{{ "{:.2f}".format(trade.unrealized_pnl_pct or 0) }}%
+                        </div>
+                        {% elif trade.realized_pnl is defined %}
+                        <div class="text-lg font-bold {% if trade.realized_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
+                            {% if trade.realized_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(trade.realized_pnl) }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Trade Details -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4 text-sm">
+                    <div>
+                        <div class="text-atlas-muted">Shares</div>
+                        <div class="font-mono text-white">{{ "{:,}".format(trade.shares or 0) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-atlas-muted">Entry Price</div>
+                        <div class="font-mono text-white">${{ "{:.2f}".format(trade.entry_price or 0) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-atlas-muted">Current/Exit</div>
+                        <div class="font-mono text-white">${{ "{:.2f}".format(trade.current_price or trade.exit_price or 0) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-atlas-muted">Entry Date</div>
+                        <div class="text-white">{{ trade.entry_date[:10] if trade.entry_date else '--' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-atlas-muted">Agent</div>
+                        <div class="text-white">{{ trade.agent or '--' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thesis -->
+            {% if trade.thesis %}
+            <div class="p-5 bg-atlas-bg/50">
+                <h3 class="text-sm font-semibold text-atlas-primary mb-2">Investment Thesis</h3>
+                <p class="text-sm text-atlas-text">{{ trade.thesis }}</p>
+
+                {% if trade.invalidation %}
+                <div class="mt-4 p-3 bg-atlas-danger/10 border border-atlas-danger/20 rounded-lg">
+                    <h4 class="text-sm font-semibold text-atlas-danger mb-1">Invalidation Criteria</h4>
+                    <p class="text-sm text-atlas-text">{{ trade.invalidation }}</p>
+                </div>
+                {% endif %}
+
+                {% if trade.stop_loss or trade.target %}
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    {% if trade.stop_loss %}
+                    <div class="p-3 bg-atlas-danger/10 border border-atlas-danger/20 rounded-lg">
+                        <div class="text-xs text-atlas-danger mb-1">Stop Loss</div>
+                        <div class="text-lg font-mono text-atlas-danger">${{ "{:.2f}".format(trade.stop_loss) }}</div>
+                    </div>
+                    {% endif %}
+                    {% if trade.target %}
+                    <div class="p-3 bg-atlas-success/10 border border-atlas-success/20 rounded-lg">
+                        <div class="text-xs text-atlas-success mb-1">Target</div>
+                        <div class="text-lg font-mono text-atlas-success">${{ "{:.2f}".format(trade.target) }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if trade.confidence %}
+                <div class="mt-4">
+                    <div class="flex items-center justify-between text-sm mb-1">
+                        <span class="text-atlas-muted">Conviction</span>
+                        <span class="text-white">{{ (trade.confidence * 100) | int }}%</span>
+                    </div>
+                    <div class="h-2 bg-atlas-bg rounded-full overflow-hidden">
+                        <div class="h-full rounded-full
+                            {% if trade.confidence >= 0.8 %}bg-atlas-success
+                            {% elif trade.confidence >= 0.6 %}bg-atlas-warning
+                            {% else %}bg-atlas-danger{% endif %}"
+                            style="width: {{ (trade.confidence * 100) | int }}%"></div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if trade.time_horizon %}
+                <div class="mt-4 text-sm">
+                    <span class="text-atlas-muted">Time Horizon:</span>
+                    <span class="text-white ml-1">{{ trade.time_horizon }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Signals (if present) -->
+            {% if trade.signals %}
+            <div class="p-5 border-t border-atlas-border">
+                <h3 class="text-sm font-semibold text-atlas-secondary mb-3">Macro Signals at Entry</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    {% if trade.signals.liquidity_regime %}
+                    <div>
+                        <div class="text-atlas-muted">Liquidity Regime</div>
+                        <div class="text-white">{{ trade.signals.liquidity_regime }}</div>
+                    </div>
+                    {% endif %}
+                    {% if trade.signals.fed_funds %}
+                    <div>
+                        <div class="text-atlas-muted">Fed Funds</div>
+                        <div class="text-white">{{ "{:.2f}".format(trade.signals.fed_funds) }}%</div>
+                    </div>
+                    {% endif %}
+                    {% if trade.signals.m2_yoy %}
+                    <div>
+                        <div class="text-atlas-muted">M2 YoY</div>
+                        <div class="text-white">{{ "{:.2f}".format(trade.signals.m2_yoy) }}%</div>
+                    </div>
+                    {% endif %}
+                    {% if trade.signals.core_pce %}
+                    <div>
+                        <div class="text-atlas-muted">Core PCE</div>
+                        <div class="text-white">{{ "{:.2f}".format(trade.signals.core_pce) }}%</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="card p-8 text-center">
+            <div class="text-atlas-muted">
+                <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p>No trades recorded yet. The CIO agent will document decisions here.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

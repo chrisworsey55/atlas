@@ -12,6 +12,23 @@ Key signals:
 
 SYSTEM_PROMPT = """You are a senior institutional flow analyst at a top-tier hedge fund. Your job is to analyze 13F filings from the world's best investors and produce actionable intelligence for the CIO.
 
+## CRITICAL: 13F DATA STALENESS WARNING
+
+⚠️ 13F data is ALWAYS STALE. Understanding the lag is critical:
+- 13Fs report positions as of quarter-end (Dec 31, Mar 31, Jun 30, Sep 30)
+- Funds have 45 days after quarter-end to file
+- By the time you see it, positions may have changed significantly
+
+ALWAYS include this context in your briefing:
+- "This data is from Q[X] 13F filings (positions as of [QUARTER_END_DATE], filed ~45 days later)"
+- "Positions may have changed substantially since the reporting date"
+
+For faster signals, cross-reference with:
+- Form 4 insider transactions (2-day filing requirement)
+- 8-K material events
+- 13D/13G filings for activist positions
+- Real-time price action suggesting large flows
+
 ## Your Role
 
 You track 16 elite hedge funds/investors:
@@ -24,6 +41,19 @@ You track 16 elite hedge funds/investors:
 These funds collectively manage hundreds of billions and consistently outperform. When multiple converge on a thesis, pay attention.
 
 ## Your Analytical Framework
+
+### CRITICAL: FOCUS ON CHANGES, NOT STATIC POSITIONS
+
+Static positions are near-worthless. What matters is:
+1. **NEW POSITIONS** — wasn't there last quarter, is now (strongest signal)
+2. **POSITION INCREASES > 25%** — fund is adding conviction
+3. **POSITION DECREASES > 25%** — fund is reducing conviction
+4. **COMPLETE EXITS** — fund had position, now has zero (thesis broken or played out)
+5. **CONCENTRATION CHANGES** — going from 2% to 8% of portfolio = meaningful conviction shift
+
+Calculate change_pct = (current_shares - prior_shares) / prior_shares * 100
+
+Ignore: Positions that are unchanged or changed < 10% (just rebalancing noise)
 
 ### 1. CONSENSUS BUILDS
 When 3+ tracked funds accumulate the same stock:
@@ -191,43 +221,58 @@ def build_flow_analysis_prompt(
     fund_holdings: dict,
     historical_holdings: dict = None,
     market_context: str = None,
+    quarter: str = None,
+    quarter_end_date: str = None,
 ) -> str:
     """
     Build the user prompt with 13F data for Claude to analyze.
-    
+
     Args:
         fund_holdings: dict of fund_name -> DataFrame with current holdings
         historical_holdings: dict of fund_name -> DataFrame with prior quarter
         market_context: optional string with recent market events
+        quarter: e.g., "Q4-2025"
+        quarter_end_date: e.g., "2025-12-31"
     """
+    # Determine quarter info for staleness warning
+    if not quarter:
+        quarter = "Q4-2025"  # Default
+    if not quarter_end_date:
+        quarter_end_date = "2025-12-31"  # Default
+
     prompt_parts = [
         "## 13F INSTITUTIONAL HOLDINGS DATA",
         f"## ANALYSIS DATE: {datetime.now().strftime('%Y-%m-%d')}",
         "",
+        "⚠️ STALENESS WARNING:",
+        f"This data is from {quarter} 13F filings (positions as of {quarter_end_date}, filed ~45 days later).",
+        "Positions may have changed substantially since the reporting date.",
+        "Cross-reference with Form 4 insider transactions and 8-K events for faster signals.",
+        "",
     ]
-    
+
     # Summary statistics
     total_funds = len(fund_holdings)
-    total_positions = sum(len(df) for df in fund_holdings.values())
+    total_positions = sum(len(df) for df in fund_holdings.values() if df is not None)
     prompt_parts.extend([
         f"Total funds analyzed: {total_funds}",
         f"Total positions across all funds: {total_positions}",
         "",
     ])
-    
+
     # Add each fund's top positions
     for fund_name, df in fund_holdings.items():
         prompt_parts.append(f"### {fund_name}")
-        
+
         if df is None or len(df) == 0:
             prompt_parts.append("  No holdings data available")
             continue
-        
+
         # Calculate portfolio value
         total_value = df['value'].sum() if 'value' in df.columns else 0
         prompt_parts.append(f"  Portfolio Value: ${total_value:,.0f}")
         prompt_parts.append(f"  Total Positions: {len(df)}")
-        
+
         # Top 10 holdings
         if 'value' in df.columns:
             top10 = df.nlargest(10, 'value')
@@ -235,20 +280,73 @@ def build_flow_analysis_prompt(
             for _, row in top10.iterrows():
                 name = row.get('name', 'N/A')[:25]
                 value = row.get('value', 0)
+                shares = row.get('shares', 0)
                 pct = (value / total_value * 100) if total_value > 0 else 0
-                prompt_parts.append(f"    - {name:25} ${value:>12,.0f} ({pct:.1f}%)")
-        
+                change_str = ""
+                if 'change_type' in row and row.get('change_type'):
+                    change_type = row['change_type']
+                    change_pct = row.get('change_pct', 0) or 0
+                    if change_type == 'NEW':
+                        change_str = " [NEW POSITION]"
+                    elif change_type == 'INCREASED' and abs(change_pct) >= 25:
+                        change_str = f" [+{change_pct:.0f}% increase]"
+                    elif change_type == 'DECREASED' and abs(change_pct) >= 25:
+                        change_str = f" [{change_pct:.0f}% decrease]"
+                prompt_parts.append(f"    - {name:25} ${value:>12,.0f} ({pct:.1f}%){change_str}")
+
         prompt_parts.append("")
-    
-    # Add historical comparison if available
+
+    # Add quarter-over-quarter changes summary
     if historical_holdings:
         prompt_parts.extend([
-            "## QUARTER-OVER-QUARTER CHANGES",
-            "(Comparing current to prior quarter)",
+            "## QUARTER-OVER-QUARTER CHANGES (FOCUS HERE)",
+            f"(Comparing {quarter} to prior quarter)",
             "",
+            "### NEW POSITIONS (wasn't there last Q, is now)",
         ])
-        # Would add change analysis here
-    
+        # Extract new positions
+        new_positions = []
+        exits = []
+        big_increases = []
+        big_decreases = []
+
+        for fund_name, current_df in fund_holdings.items():
+            prior_df = historical_holdings.get(fund_name)
+            if current_df is None or prior_df is None:
+                continue
+
+            current_tickers = set(current_df['ticker'].tolist()) if 'ticker' in current_df.columns else set()
+            prior_tickers = set(prior_df['ticker'].tolist()) if 'ticker' in prior_df.columns else set()
+
+            # New positions
+            for ticker in current_tickers - prior_tickers:
+                row = current_df[current_df['ticker'] == ticker].iloc[0] if len(current_df[current_df['ticker'] == ticker]) > 0 else None
+                if row is not None:
+                    new_positions.append({
+                        'fund': fund_name,
+                        'ticker': ticker,
+                        'value': row.get('value', 0),
+                    })
+
+            # Exits
+            for ticker in prior_tickers - current_tickers:
+                exits.append({
+                    'fund': fund_name,
+                    'ticker': ticker,
+                })
+
+        for pos in sorted(new_positions, key=lambda x: x['value'], reverse=True)[:20]:
+            prompt_parts.append(f"  - {pos['fund']}: {pos['ticker']} (${pos['value']:,.0f})")
+
+        prompt_parts.extend([
+            "",
+            "### COMPLETE EXITS (had position last Q, now zero)",
+        ])
+        for pos in exits[:20]:
+            prompt_parts.append(f"  - {pos['fund']}: {pos['ticker']} EXITED")
+
+        prompt_parts.append("")
+
     # Add market context if provided
     if market_context:
         prompt_parts.extend([
@@ -257,14 +355,16 @@ def build_flow_analysis_prompt(
             market_context,
             "",
         ])
-    
+
     prompt_parts.extend([
         "",
         "Analyze this 13F data using the institutional flow framework.",
-        "Identify consensus builds, crowding risks, contrarian signals, and conviction positions.",
+        "FOCUS ON CHANGES: new positions, exits, and significant increases/decreases (>25%).",
+        "Static positions are noise — changes are signal.",
+        "Include the staleness warning in your cio_briefing.",
         "Respond with ONLY valid JSON matching the specified schema.",
     ])
-    
+
     return "\n".join(prompt_parts)
 
 

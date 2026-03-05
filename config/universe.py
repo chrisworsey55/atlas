@@ -102,5 +102,67 @@ TRACKED_FUNDS = {
     "Greenlight Capital (Einhorn)": {"cik": "1079114", "style": "Value/short"},
 }
 
+# Macro ETFs for the Autonomous Agent
+# These provide exposure to asset classes beyond individual stocks
+MACRO_ETFS = {
+    # Equity Indices
+    "SPY":  {"sector": "Index", "name": "SPDR S&P 500 ETF", "asset_class": "equity"},
+    "QQQ":  {"sector": "Index", "name": "Invesco QQQ Trust (Nasdaq 100)", "asset_class": "equity"},
+    "IWM":  {"sector": "Index", "name": "iShares Russell 2000 ETF", "asset_class": "equity"},
+    "DIA":  {"sector": "Index", "name": "SPDR Dow Jones Industrial Average ETF", "asset_class": "equity"},
+
+    # International
+    "EEM":  {"sector": "International", "name": "iShares MSCI Emerging Markets ETF", "asset_class": "equity"},
+    "EFA":  {"sector": "International", "name": "iShares MSCI EAFE ETF", "asset_class": "equity"},
+    "FXI":  {"sector": "International", "name": "iShares China Large-Cap ETF", "asset_class": "equity"},
+    "EWJ":  {"sector": "International", "name": "iShares MSCI Japan ETF", "asset_class": "equity"},
+    "EWZ":  {"sector": "International", "name": "iShares MSCI Brazil ETF", "asset_class": "equity"},
+
+    # Fixed Income
+    "TLT":  {"sector": "Fixed Income", "name": "iShares 20+ Year Treasury Bond ETF", "asset_class": "bonds"},
+    "IEF":  {"sector": "Fixed Income", "name": "iShares 7-10 Year Treasury Bond ETF", "asset_class": "bonds"},
+    "SHY":  {"sector": "Fixed Income", "name": "iShares 1-3 Year Treasury Bond ETF", "asset_class": "bonds"},
+    "TIP":  {"sector": "Fixed Income", "name": "iShares TIPS Bond ETF", "asset_class": "bonds"},
+    "HYG":  {"sector": "Fixed Income", "name": "iShares iBoxx High Yield Corporate Bond ETF", "asset_class": "bonds"},
+    "LQD":  {"sector": "Fixed Income", "name": "iShares iBoxx Investment Grade Corporate Bond ETF", "asset_class": "bonds"},
+
+    # Commodities
+    "GLD":  {"sector": "Commodities", "name": "SPDR Gold Shares", "asset_class": "commodity"},
+    "SLV":  {"sector": "Commodities", "name": "iShares Silver Trust", "asset_class": "commodity"},
+    "USO":  {"sector": "Commodities", "name": "United States Oil Fund", "asset_class": "commodity"},
+    "UNG":  {"sector": "Commodities", "name": "United States Natural Gas Fund", "asset_class": "commodity"},
+    "DBA":  {"sector": "Commodities", "name": "Invesco DB Agriculture Fund", "asset_class": "commodity"},
+
+    # Currency
+    "UUP":  {"sector": "Currency", "name": "Invesco DB US Dollar Index Bullish Fund", "asset_class": "currency"},
+    "FXE":  {"sector": "Currency", "name": "Invesco CurrencyShares Euro Trust", "asset_class": "currency"},
+    "FXY":  {"sector": "Currency", "name": "Invesco CurrencyShares Japanese Yen Trust", "asset_class": "currency"},
+
+    # Volatility
+    "VXX":  {"sector": "Volatility", "name": "iPath Series B S&P 500 VIX Short-Term Futures ETN", "asset_class": "volatility"},
+    "SVXY": {"sector": "Volatility", "name": "ProShares Short VIX Short-Term Futures ETF", "asset_class": "volatility"},
+
+    # Sector ETFs
+    "XLF":  {"sector": "Financials", "name": "Financial Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLE":  {"sector": "Energy", "name": "Energy Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLK":  {"sector": "Technology", "name": "Technology Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLV":  {"sector": "Healthcare", "name": "Health Care Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLI":  {"sector": "Industrials", "name": "Industrial Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLP":  {"sector": "Consumer Staples", "name": "Consumer Staples Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLY":  {"sector": "Consumer Discretionary", "name": "Consumer Discretionary Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLB":  {"sector": "Materials", "name": "Materials Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLU":  {"sector": "Utilities", "name": "Utilities Select Sector SPDR Fund", "asset_class": "equity"},
+    "XLRE": {"sector": "Real Estate", "name": "Real Estate Select Sector SPDR Fund", "asset_class": "equity"},
+
+    # Thematic
+    "SMH":  {"sector": "Thematic", "name": "VanEck Semiconductor ETF", "asset_class": "equity"},
+    "IBB":  {"sector": "Thematic", "name": "iShares Biotechnology ETF", "asset_class": "equity"},
+    "XBI":  {"sector": "Thematic", "name": "SPDR S&P Biotech ETF (Equal Weight)", "asset_class": "equity"},
+    "ARKK": {"sector": "Thematic", "name": "ARK Innovation ETF", "asset_class": "equity"},
+}
+
+# Combined universe for the Autonomous Agent (stocks + ETFs)
+AUTONOMOUS_UNIVERSE = {**UNIVERSE, **MACRO_ETFS}
+
 # CIK lookup populated dynamically from SEC tickers file
 TICKER_TO_CIK = {}
