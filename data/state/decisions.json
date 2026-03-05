@@ -1,0 +1,54 @@
+[
+  {
+    "date": "2026-03-02",
+    "ticker": "TLT",
+    "action": "SHORT",
+    "shares": 1116,
+    "price": 89.61,
+    "agent": "druckenmiller",
+    "thesis": "Higher for longer rates thesis. Fed not cutting with AI capex driving inflationary spending cycle.",
+    "status": "OPEN"
+  },
+  {
+    "date": "2026-03-03",
+    "ticker": "AVGO",
+    "action": "BUY",
+    "shares": 157,
+    "price": 318.82,
+    "agent": "fundamental",
+    "thesis": "Most undervalued stock in S&P 500 screen. DCF intrinsic value $500 vs market price $314. 85% confidence.",
+    "status": "OPEN"
+  },
+  {
+    "date": "2026-03-03",
+    "ticker": "BE",
+    "action": "BUY",
+    "shares": 329,
+    "price": 151.95,
+    "agent": "aschenbrenner",
+    "thesis": "AI power bottleneck. Data centres need on-site fuel cells. $5B Brookfield partnership. $20B backlog.",
+    "status": "OPEN"
+  },
+  {
+    "date": "2026-03-04",
+    "ticker": "BE",
+    "action": "BUY",
+    "shares": 658,
+    "price": 160.36,
+    "agent": "aschenbrenner",
+    "thesis": "Size up to 15%. CIO and Aschenbrenner agent both recommended increasing position.",
+    "status": "OPEN"
+  },
+  {
+    "date": "2026-03-02",
+    "ticker": "GLD",
+    "action": "BUY",
+    "shares": 306,
+    "price": 490.00,
+    "agent": "manual",
+    "thesis": "Iran strike geopolitical hedge. REMOVED - traded without full agent swarm running.",
+    "status": "CLOSED",
+    "close_price": 468.00,
+    "pnl": -6024
+  }
+]

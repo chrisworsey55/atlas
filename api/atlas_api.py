@@ -1534,34 +1534,49 @@ def dashboard_decisions():
     """CIO decisions / trades dashboard."""
     # Use positions.json as primary source - it has all current positions with entry_price
     positions_data = load_state_file("positions.json") or {}
-    positions = positions_data.get("positions", []) if isinstance(positions_data, dict) else positions_data
+    raw_positions = positions_data.get("positions", []) if isinstance(positions_data, dict) else positions_data
     trades_raw = load_state_file("trades.json") or []
 
-    if not isinstance(positions, list):
-        positions = [positions] if positions else []
+    if not isinstance(raw_positions, list):
+        raw_positions = [raw_positions] if raw_positions else []
 
-    # Build trades list from positions (which has entry_price, current_price, P&L)
+    # Build trades list from positions with computed P&L fields
     trades = []
-    for pos in positions:
+    for pos in raw_positions:
+        entry_price = pos.get("entry_price", 0) or 0
+        current_price = pos.get("current_price", entry_price) or entry_price
+        shares = pos.get("shares", 0) or 0
+        direction = pos.get("direction", "LONG")
+
+        # Calculate value and P&L
+        value = shares * current_price
+        if direction == "SHORT":
+            unrealized_pnl = (entry_price - current_price) * shares
+        else:
+            unrealized_pnl = (current_price - entry_price) * shares
+        unrealized_pnl_pct = ((current_price - entry_price) / entry_price * 100) if entry_price > 0 else 0
+        if direction == "SHORT":
+            unrealized_pnl_pct = -unrealized_pnl_pct
+
         trade = {
             "id": pos.get("id"),
             "ticker": pos.get("ticker"),
-            "direction": pos.get("direction"),
-            "shares": pos.get("shares"),
-            "entry_price": pos.get("entry_price"),
-            "entry_date": pos.get("entry_date"),
-            "current_price": pos.get("current_price"),
-            "value": pos.get("value"),
-            "unrealized_pnl": pos.get("unrealized_pnl", 0),
-            "unrealized_pnl_pct": pos.get("unrealized_pnl_pct", 0),
+            "direction": direction,
+            "shares": shares,
+            "entry_price": entry_price,
+            "entry_date": pos.get("date_opened"),  # Use date_opened from positions.json
+            "current_price": current_price,
+            "value": value,
+            "unrealized_pnl": unrealized_pnl,
+            "unrealized_pnl_pct": unrealized_pnl_pct,
             "stop_loss": pos.get("stop_loss"),
             "target": pos.get("target"),
             "thesis": pos.get("thesis"),
             "invalidation": pos.get("invalidation"),
             "time_horizon": pos.get("time_horizon"),
-            "confidence": pos.get("confidence"),
-            "agent": pos.get("agent"),
-            "type": pos.get("type"),
+            "confidence": (pos.get("conviction", 0) or 0) / 100,
+            "agent": pos.get("agent_source", "manual"),
+            "type": "ACTIVE_TRADE" if pos.get("ticker") != "BIL" else "CASH_MANAGEMENT",
             "status": pos.get("status", "OPEN"),
         }
 
@@ -1573,8 +1588,8 @@ def dashboard_decisions():
 
         trades.append(trade)
 
-    # Sort by entry_date (most recent first)
-    trades.sort(key=lambda x: x.get('entry_date', ''), reverse=True)
+    # Sort by entry_date (most recent first), handle None values
+    trades.sort(key=lambda x: x.get('entry_date') or '', reverse=True)
 
     # Summary
     trades_summary = {
