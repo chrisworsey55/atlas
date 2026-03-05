@@ -1143,14 +1143,57 @@ def atlas_agents():
             return None
         return items[-1].get('analyzed_at') or items[-1].get('timestamp') or items[-1].get('analysis_date')
 
+    # Helper to check agent_source (lowercase matching)
+    def has_agent(agent_name):
+        return any(p.get('agent_source', '').lower() == agent_name.lower() for p in positions)
+
+    def count_agent_positions(agent_name):
+        return len([p for p in positions if p.get('agent_source', '').lower() == agent_name.lower()])
+
     agents = {
         "druckenmiller": {
             "name": "Druckenmiller Macro Agent",
             "type": "ACTIVE_TRADER",
-            "status": "ACTIVE" if any(p.get('agent') == 'Druckenmiller' for p in positions) else "IDLE",
-            "last_activity": get_latest_date([t for t in trades if t.get('agent') == 'Druckenmiller']),
-            "positions": len([p for p in positions if p.get('agent') == 'Druckenmiller']),
+            "status": "ACTIVE" if has_agent('druckenmiller') else "IDLE",
+            "last_activity": get_latest_date([t for t in trades if t.get('agent', '').lower() == 'druckenmiller']),
+            "positions": count_agent_positions('druckenmiller'),
             "description": "Macro-focused agent using FRED data to trade rates, currencies, commodities"
+        },
+        "aschenbrenner": {
+            "name": "Aschenbrenner AI Infra Agent",
+            "type": "ACTIVE_TRADER",
+            "status": "ACTIVE" if has_agent('aschenbrenner') else "IDLE",
+            "last_activity": get_latest_date([t for t in trades if t.get('agent', '').lower() == 'aschenbrenner']),
+            "positions": count_agent_positions('aschenbrenner'),
+            "description": "Tracks Leopold Aschenbrenner's AI infrastructure thesis - power, data centers, chips"
+        },
+        "fundamental": {
+            "name": "Fundamental Valuation Agent",
+            "type": "ACTIVE_TRADER",
+            "status": "ACTIVE" if has_agent('fundamental') else "IDLE",
+            "last_activity": get_latest_date(valuations),
+            "positions": count_agent_positions('fundamental'),
+            "description": "DCF and comps-based valuation screening across S&P 500"
+        },
+        "baker": {
+            "name": "Baker Brothers Biotech Agent",
+            "type": "ACTIVE_TRADER",
+            "status": "ACTIVE" if has_agent('baker') else "IDLE",
+            "positions": count_agent_positions('baker'),
+            "description": "Tracks Baker Brothers concentrated biotech bets from 13F filings"
+        },
+        "ackman": {
+            "name": "Ackman Activist Agent",
+            "type": "ACTIVE_TRADER",
+            "status": "ACTIVE" if has_agent('ackman') else "IDLE",
+            "positions": count_agent_positions('ackman'),
+            "description": "Tracks Bill Ackman's Pershing Square concentrated positions"
+        },
+        "news": {
+            "name": "News Sentiment Agent",
+            "type": "DATA_AGENT",
+            "status": "ACTIVE",
+            "description": "Real-time news monitoring and sentiment analysis for portfolio tickers"
         },
         "autonomous": {
             "name": "Autonomous Execution Agent",
@@ -1395,14 +1438,57 @@ def dashboard_agents():
             return None
         return items[-1].get('analyzed_at') or items[-1].get('timestamp') or items[-1].get('analysis_date')
 
+    # Helper to check agent_source (lowercase matching)
+    def has_agent(agent_name):
+        return any(p.get('agent_source', '').lower() == agent_name.lower() for p in positions)
+
+    def count_agent_positions(agent_name):
+        return len([p for p in positions if p.get('agent_source', '').lower() == agent_name.lower()])
+
     agents = {
         "druckenmiller": {
             "name": "Druckenmiller Macro Agent",
             "type": "ACTIVE_TRADER",
-            "status": "ACTIVE" if any(p.get('agent') == 'Druckenmiller' for p in positions) else "IDLE",
-            "last_activity": get_latest_date([t for t in trades if t.get('agent') == 'Druckenmiller']),
-            "positions": len([p for p in positions if p.get('agent') == 'Druckenmiller']),
+            "status": "ACTIVE" if has_agent('druckenmiller') else "IDLE",
+            "last_activity": get_latest_date([t for t in trades if t.get('agent', '').lower() == 'druckenmiller']),
+            "positions": count_agent_positions('druckenmiller'),
             "description": "Macro-focused agent using FRED data to trade rates, currencies, commodities"
+        },
+        "aschenbrenner": {
+            "name": "Aschenbrenner AI Infra Agent",
+            "type": "ACTIVE_TRADER",
+            "status": "ACTIVE" if has_agent('aschenbrenner') else "IDLE",
+            "last_activity": get_latest_date([t for t in trades if t.get('agent', '').lower() == 'aschenbrenner']),
+            "positions": count_agent_positions('aschenbrenner'),
+            "description": "Tracks Leopold Aschenbrenner's AI infrastructure thesis - power, data centers, chips"
+        },
+        "fundamental": {
+            "name": "Fundamental Valuation Agent",
+            "type": "ACTIVE_TRADER",
+            "status": "ACTIVE" if has_agent('fundamental') else "IDLE",
+            "last_activity": get_latest_date(valuations),
+            "positions": count_agent_positions('fundamental'),
+            "description": "DCF and comps-based valuation screening across S&P 500"
+        },
+        "baker": {
+            "name": "Baker Brothers Biotech Agent",
+            "type": "ACTIVE_TRADER",
+            "status": "ACTIVE" if has_agent('baker') else "IDLE",
+            "positions": count_agent_positions('baker'),
+            "description": "Tracks Baker Brothers concentrated biotech bets from 13F filings"
+        },
+        "ackman": {
+            "name": "Ackman Activist Agent",
+            "type": "ACTIVE_TRADER",
+            "status": "ACTIVE" if has_agent('ackman') else "IDLE",
+            "positions": count_agent_positions('ackman'),
+            "description": "Tracks Bill Ackman's Pershing Square concentrated positions"
+        },
+        "news": {
+            "name": "News Sentiment Agent",
+            "type": "DATA_AGENT",
+            "status": "ACTIVE",
+            "description": "Real-time news monitoring and sentiment analysis for portfolio tickers"
         },
         "autonomous": {
             "name": "Autonomous Execution Agent",
