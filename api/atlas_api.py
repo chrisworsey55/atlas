@@ -1176,7 +1176,7 @@ def atlas_agents():
             "description": "DCF and comps-based valuation screening across S&P 500"
         },
         "baker": {
-            "name": "Baker Brothers Biotech Agent",
+            "name": "Baker Deep Tech Agent",
             "type": "ACTIVE_TRADER",
             "status": "ACTIVE" if has_agent('baker') else "IDLE",
             "positions": count_agent_positions('baker'),
@@ -1471,7 +1471,7 @@ def dashboard_agents():
             "description": "DCF and comps-based valuation screening across S&P 500"
         },
         "baker": {
-            "name": "Baker Brothers Biotech Agent",
+            "name": "Baker Deep Tech Agent",
             "type": "ACTIVE_TRADER",
             "status": "ACTIVE" if has_agent('baker') else "IDLE",
             "positions": count_agent_positions('baker'),

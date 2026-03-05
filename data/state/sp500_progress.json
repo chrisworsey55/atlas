@@ -232,7 +232,11 @@
     "HSIC",
     "HSY"
   ],
-  "failed": [],
+  "failed": [
+    "AAL",
+    "ANSS",
+    "BIO"
+  ],
   "last_ticker": "HSY",
   "started_at": "2026-03-03T15:45:23.045518",
   "finished_at": "2026-03-04T06:17:17.739771"
