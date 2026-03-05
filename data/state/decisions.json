@@ -50,5 +50,35 @@
     "status": "CLOSED",
     "close_price": 468.00,
     "pnl": -6024
+  },
+  {
+    "date": "2026-03-05",
+    "ticker": "ADBE",
+    "action": "BUY",
+    "shares": 106,
+    "price": 281.82,
+    "agent": "fundamental",
+    "thesis": "Firefly AI monetisation. 36.7% upside. Staged entry — CRO approved conditional around March 20 earnings.",
+    "status": "OPEN"
+  },
+  {
+    "date": "2026-03-05",
+    "ticker": "GOOG",
+    "action": "BUY",
+    "shares": 99,
+    "price": 301.28,
+    "agent": "fundamental",
+    "thesis": "$73B FCF, Gemini integration, Cloud >35% growth. CRO flagged AI correlation — sized at 3%.",
+    "status": "OPEN"
+  },
+  {
+    "date": "2026-03-05",
+    "ticker": "APO",
+    "action": "BUY",
+    "shares": 269,
+    "price": 111.40,
+    "agent": "fundamental",
+    "thesis": "Alt asset manager diversification play. 30% upside. CRO cautious on credit cycle but approved at reduced size.",
+    "status": "OPEN"
   }
 ]
