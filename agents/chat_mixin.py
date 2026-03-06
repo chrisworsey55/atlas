@@ -43,13 +43,18 @@ def load_portfolio_state() -> Dict[str, Any]:
     try:
         if positions_file.exists():
             with open(positions_file, "r") as f:
-                positions = json.load(f)
-                result["positions"] = positions
+                data = json.load(f)
+                # Extract positions list from the file structure
+                positions_list = data.get("positions", []) if isinstance(data, dict) else data
+                result["positions"] = positions_list
                 result["loaded"] = True
-                
-                # Calculate totals
-                total_value = sum(p.get("value", 0) for p in positions)
-                total_pnl = sum(p.get("unrealized_pnl", 0) for p in positions)
+
+                # Get portfolio value from file or calculate from positions
+                total_value = data.get("portfolio_value", 0) if isinstance(data, dict) else 0
+                if not total_value:
+                    total_value = sum(p.get("shares", 0) * p.get("current_price", 0) for p in positions_list)
+
+                total_pnl = sum(p.get("unrealized_pnl", 0) for p in positions_list)
                 result["total_value"] = total_value
                 result["total_pnl"] = total_pnl
                 result["total_pnl_pct"] = (total_pnl / total_value * 100) if total_value > 0 else 0
