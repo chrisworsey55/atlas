@@ -80,5 +80,35 @@
     "agent": "fundamental",
     "thesis": "Alt asset manager diversification play. 30% upside. CRO cautious on credit cycle but approved at reduced size.",
     "status": "OPEN"
+  },
+  {
+    "date": "2026-03-06",
+    "ticker": "CRM",
+    "action": "BUY",
+    "shares": 149,
+    "price": 201.00,
+    "agent": "fundamental",
+    "thesis": "AI growth reacceleration via Agentforce platform. 39% upside to $280. CRO flagged high expectations risk — sized at 3% not 5%.",
+    "status": "OPEN"
+  },
+  {
+    "date": "2026-03-06",
+    "ticker": "UNH",
+    "action": "BUY",
+    "shares": 121,
+    "price": 289.00,
+    "agent": "fundamental",
+    "thesis": "Healthcare diversification. 29% upside to $373. Uncorrelated with AI theme. CRO flagged binary catalysts — scaled in at 3.5%.",
+    "status": "OPEN"
+  },
+  {
+    "date": "2026-03-06",
+    "ticker": "STX",
+    "action": "SHORT",
+    "shares": 54,
+    "price": 367.00,
+    "agent": "fundamental",
+    "thesis": "Most overvalued stock in S&P 500 screen. 71% overvalued at 92% confidence. First short position — tests system.",
+    "status": "OPEN"
   }
 ]
