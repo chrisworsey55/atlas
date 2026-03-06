@@ -27,10 +27,11 @@ logger = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 STATE_DIR = DATA_DIR / "state"
 
-# Rate limiting
-API_DELAY_SECONDS = 2  # Delay between API calls
+# Rate limiting - Yahoo Finance limits to ~2000 requests/hour
+API_DELAY_SECONDS = 3  # Delay between API calls (more conservative)
 BATCH_SIZE = 50  # Print progress every N tickers
 SAVE_INTERVAL = 10  # Save progress every N tickers
+RATE_LIMIT_PAUSE = 60  # Pause (seconds) when rate limited
 
 
 class UniverseScreener:
@@ -260,6 +261,12 @@ class UniverseScreener:
                 self.save_progress(progress)
                 break
             except Exception as e:
+                error_msg = str(e).lower()
+                if "rate" in error_msg or "too many" in error_msg:
+                    logger.warning(f"  Rate limited! Pausing {RATE_LIMIT_PAUSE}s...")
+                    time.sleep(RATE_LIMIT_PAUSE)
+                    # Don't add to failed - we'll retry on next run
+                    continue
                 logger.error(f"  {ticker}: Error - {e}")
                 progress["failed"].append(ticker)
 

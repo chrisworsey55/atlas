@@ -18,6 +18,8 @@ from pathlib import Path
 import anthropic
 import yfinance as yf
 import pandas as pd
+import time
+import random
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -128,7 +130,31 @@ class FundamentalAgent(ChatMixin):
         """
         logger.info(f"[{self.desk_name}] Gathering financials for {ticker}...")
 
-        stock = yf.Ticker(ticker)
+        # Retry logic with exponential backoff for rate limits
+        max_retries = 3
+        base_delay = 5
+
+        for attempt in range(max_retries):
+            try:
+                stock = yf.Ticker(ticker)
+                info = stock.info or {}
+
+                # Check for rate limit indicator
+                if not info or (info.get("regularMarketPrice") is None and info.get("currentPrice") is None):
+                    raise Exception("Empty response - possible rate limit")
+
+                break  # Success, exit retry loop
+
+            except Exception as e:
+                error_msg = str(e).lower()
+                if "rate" in error_msg or "too many" in error_msg or "empty response" in error_msg:
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt) + random.uniform(0, 2)
+                        logger.warning(f"  Rate limited, waiting {delay:.1f}s before retry {attempt + 2}/{max_retries}")
+                        time.sleep(delay)
+                        continue
+                raise  # Re-raise if not rate limit or out of retries
+
         info = stock.info or {}
 
         # Basic info
