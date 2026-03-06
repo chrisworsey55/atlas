@@ -44,11 +44,11 @@
     "ticker": "GLD",
     "action": "BUY",
     "shares": 306,
-    "price": 490.00,
+    "price": 490.0,
     "agent": "manual",
     "thesis": "Iran strike geopolitical hedge. REMOVED - traded without full agent swarm running.",
     "status": "CLOSED",
-    "close_price": 468.00,
+    "close_price": 468.0,
     "pnl": -6024
   },
   {
@@ -58,7 +58,7 @@
     "shares": 106,
     "price": 281.82,
     "agent": "fundamental",
-    "thesis": "Firefly AI monetisation. 36.7% upside. Staged entry — CRO approved conditional around March 20 earnings.",
+    "thesis": "Firefly AI monetisation. 36.7% upside. Staged entry \u2014 CRO approved conditional around March 20 earnings.",
     "status": "OPEN"
   },
   {
@@ -68,7 +68,7 @@
     "shares": 99,
     "price": 301.28,
     "agent": "fundamental",
-    "thesis": "$73B FCF, Gemini integration, Cloud >35% growth. CRO flagged AI correlation — sized at 3%.",
+    "thesis": "$73B FCF, Gemini integration, Cloud >35% growth. CRO flagged AI correlation \u2014 sized at 3%.",
     "status": "OPEN"
   },
   {
@@ -76,7 +76,7 @@
     "ticker": "APO",
     "action": "BUY",
     "shares": 269,
-    "price": 111.40,
+    "price": 111.4,
     "agent": "fundamental",
     "thesis": "Alt asset manager diversification play. 30% upside. CRO cautious on credit cycle but approved at reduced size.",
     "status": "OPEN"
@@ -86,9 +86,9 @@
     "ticker": "CRM",
     "action": "BUY",
     "shares": 149,
-    "price": 201.00,
+    "price": 201.0,
     "agent": "fundamental",
-    "thesis": "AI growth reacceleration via Agentforce platform. 39% upside to $280. CRO flagged high expectations risk — sized at 3% not 5%.",
+    "thesis": "AI growth reacceleration via Agentforce platform. 39% upside to $280. CRO flagged high expectations risk \u2014 sized at 3% not 5%.",
     "status": "OPEN"
   },
   {
@@ -96,9 +96,9 @@
     "ticker": "UNH",
     "action": "BUY",
     "shares": 121,
-    "price": 289.00,
+    "price": 289.0,
     "agent": "fundamental",
-    "thesis": "Healthcare diversification. 29% upside to $373. Uncorrelated with AI theme. CRO flagged binary catalysts — scaled in at 3.5%.",
+    "thesis": "Healthcare diversification. 29% upside to $373. Uncorrelated with AI theme. CRO flagged binary catalysts \u2014 scaled in at 3.5%.",
     "status": "OPEN"
   },
   {
@@ -106,9 +106,27 @@
     "ticker": "STX",
     "action": "SHORT",
     "shares": 54,
-    "price": 367.00,
+    "price": 367.0,
     "agent": "fundamental",
-    "thesis": "Most overvalued stock in S&P 500 screen. 71% overvalued at 92% confidence. First short position — tests system.",
+    "thesis": "Most overvalued stock in S&P 500 screen. 71% overvalued at 92% confidence. First short position \u2014 tests system.",
     "status": "OPEN"
+  },
+  {
+    "timestamp": "2026-03-06T16:29:41.836286-05:00",
+    "executed": false,
+    "reason": "No trade recommended",
+    "trade": null
+  },
+  {
+    "timestamp": "2026-03-06T16:35:57.704548-05:00",
+    "executed": false,
+    "reason": "Conviction 35% < 80% threshold",
+    "trade": null
+  },
+  {
+    "timestamp": "2026-03-06T16:38:38.307990-05:00",
+    "executed": false,
+    "reason": "Conviction 25% < 80% threshold",
+    "trade": null
   }
 ]

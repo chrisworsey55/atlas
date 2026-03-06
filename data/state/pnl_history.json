@@ -1,8 +1,8 @@
 [
   {
     "date": "2026-03-03T06:51:38.640962",
-    "total_pnl": 0.00,
-    "portfolio_value": 1000000.00,
+    "total_pnl": 0.0,
+    "portfolio_value": 1000000.0,
     "cash": 1000000,
     "position_count": 1,
     "positions": [
@@ -13,18 +13,18 @@
         "shares": 1116,
         "entry_price": 89.61,
         "current_price": 89.61,
-        "pnl": 0.00,
-        "pnl_pct": 0.00
+        "pnl": 0.0,
+        "pnl_pct": 0.0
       }
     ]
   },
   {
     "date": "2026-03-03T06:59:38.498051",
-    "total_pnl": 0.00,
-    "portfolio_value": 1000000.00,
-    "active_pnl": 0.00,
-    "autonomous_pnl": 0.00,
-    "cash_value": 849927.00,
+    "total_pnl": 0.0,
+    "portfolio_value": 1000000.0,
+    "active_pnl": 0.0,
+    "autonomous_pnl": 0.0,
+    "cash_value": 849927.0,
     "hurdle_return": 123.29,
     "alpha": -123.29,
     "days_elapsed": 1,
@@ -37,8 +37,8 @@
         "shares": 1116,
         "entry_price": 89.61,
         "current_price": 89.61,
-        "pnl": 0.00,
-        "pnl_pct": 0.00
+        "pnl": 0.0,
+        "pnl_pct": 0.0
       },
       {
         "ticker": "BIL",
@@ -47,18 +47,18 @@
         "shares": 9300,
         "entry_price": 91.39,
         "current_price": 91.39,
-        "pnl": 0.00,
-        "pnl_pct": 0.00
+        "pnl": 0.0,
+        "pnl_pct": 0.0
       }
     ]
   },
   {
     "date": "2026-03-03T07:42:44.146471",
-    "total_pnl": 0.00,
-    "portfolio_value": 1000000.00,
-    "active_pnl": 0.00,
-    "autonomous_pnl": 0.00,
-    "cash_value": 849927.00,
+    "total_pnl": 0.0,
+    "portfolio_value": 1000000.0,
+    "active_pnl": 0.0,
+    "autonomous_pnl": 0.0,
+    "cash_value": 849927.0,
     "hurdle_return": 123.29,
     "alpha": -123.29,
     "days_elapsed": 1,
@@ -71,8 +71,8 @@
         "shares": 1116,
         "entry_price": 89.61,
         "current_price": 89.61,
-        "pnl": 0.00,
-        "pnl_pct": 0.00
+        "pnl": 0.0,
+        "pnl_pct": 0.0
       },
       {
         "ticker": "BIL",
@@ -81,8 +81,8 @@
         "shares": 9300,
         "entry_price": 91.39,
         "current_price": 91.39,
-        "pnl": 0.00,
-        "pnl_pct": 0.00
+        "pnl": 0.0,
+        "pnl_pct": 0.0
       },
       {
         "ticker": "AVGO",
@@ -91,8 +91,8 @@
         "shares": 157,
         "entry_price": 318.82,
         "current_price": 318.82,
-        "pnl": 0.00,
-        "pnl_pct": 0.00
+        "pnl": 0.0,
+        "pnl_pct": 0.0
       }
     ]
   },
@@ -102,7 +102,7 @@
     "portfolio_value": 999277.76,
     "active_pnl": 100.44,
     "autonomous_pnl": -822.68,
-    "cash_value": 849927.00,
+    "cash_value": 849927.0,
     "hurdle_return": 123.29,
     "alpha": -845.53,
     "days_elapsed": 1,
@@ -116,7 +116,7 @@
         "entry_price": 89.61,
         "current_price": 89.52,
         "pnl": 100.44,
-        "pnl_pct": 0.10
+        "pnl_pct": 0.1
       },
       {
         "ticker": "BIL",
@@ -125,8 +125,8 @@
         "shares": 9300,
         "entry_price": 91.39,
         "current_price": 91.39,
-        "pnl": 0.00,
-        "pnl_pct": 0.00
+        "pnl": 0.0,
+        "pnl_pct": 0.0
       },
       {
         "ticker": "AVGO",
@@ -139,5 +139,134 @@
         "pnl_pct": -1.64
       }
     ]
+  },
+  {
+    "date": "2026-03-06",
+    "time": "16:29",
+    "total_pnl": -20441.15,
+    "positions": {
+      "CRM": {
+        "pnl": 165.39,
+        "current": 202.11
+      },
+      "UNH": {
+        "pnl": -304.92,
+        "current": 286.48
+      },
+      "STX": {
+        "pnl": 766.8,
+        "current": 352.8
+      },
+      "BE": {
+        "pnl": -22069.32,
+        "current": 135.19
+      },
+      "TLT": {
+        "pnl": 1283.4,
+        "current": 88.46
+      },
+      "AVGO": {
+        "pnl": 548.02,
+        "current": 330.48
+      },
+      "ADBE": {
+        "pnl": 190.8,
+        "current": 283.62
+      },
+      "GOOG": {
+        "pnl": -295.02,
+        "current": 298.3
+      },
+      "APO": {
+        "pnl": -726.3,
+        "current": 108.7
+      }
+    }
+  },
+  {
+    "date": "2026-03-06",
+    "time": "16:34",
+    "total_pnl": -20441.15,
+    "positions": {
+      "CRM": {
+        "pnl": 165.39,
+        "current": 202.11
+      },
+      "UNH": {
+        "pnl": -304.92,
+        "current": 286.48
+      },
+      "STX": {
+        "pnl": 766.8,
+        "current": 352.8
+      },
+      "BE": {
+        "pnl": -22069.32,
+        "current": 135.19
+      },
+      "TLT": {
+        "pnl": 1283.4,
+        "current": 88.46
+      },
+      "AVGO": {
+        "pnl": 548.02,
+        "current": 330.48
+      },
+      "ADBE": {
+        "pnl": 190.8,
+        "current": 283.62
+      },
+      "GOOG": {
+        "pnl": -295.02,
+        "current": 298.3
+      },
+      "APO": {
+        "pnl": -726.3,
+        "current": 108.7
+      }
+    }
+  },
+  {
+    "date": "2026-03-06",
+    "time": "16:36",
+    "total_pnl": -20441.15,
+    "positions": {
+      "CRM": {
+        "pnl": 165.39,
+        "current": 202.11
+      },
+      "UNH": {
+        "pnl": -304.92,
+        "current": 286.48
+      },
+      "STX": {
+        "pnl": 766.8,
+        "current": 352.8
+      },
+      "BE": {
+        "pnl": -22069.32,
+        "current": 135.19
+      },
+      "TLT": {
+        "pnl": 1283.4,
+        "current": 88.46
+      },
+      "AVGO": {
+        "pnl": 548.02,
+        "current": 330.48
+      },
+      "ADBE": {
+        "pnl": 190.8,
+        "current": 283.62
+      },
+      "GOOG": {
+        "pnl": -295.02,
+        "current": 298.3
+      },
+      "APO": {
+        "pnl": -726.3,
+        "current": 108.7
+      }
+    }
   }
 ]

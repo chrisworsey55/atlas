@@ -1,0 +1,22 @@
+[Unit]
+Description=ATLAS Agent Execution Loop
+After=network.target atlas.service
+
+[Service]
+Type=simple
+User=azureuser
+WorkingDirectory=/home/azureuser/atlas
+ExecStart=/usr/bin/python3 -m agents.execution_loop --start
+Restart=always
+RestartSec=30
+Environment=PYTHONUNBUFFERED=1
+
+# Load environment variables from .env
+EnvironmentFile=/home/azureuser/atlas/.env
+
+# Logging
+StandardOutput=append:/var/log/atlas_loop.log
+StandardError=append:/var/log/atlas_loop.log
+
+[Install]
+WantedBy=multi-user.target

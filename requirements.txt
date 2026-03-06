@@ -15,6 +15,7 @@ edgartools>=2.0.0
 
 # Scheduling
 schedule>=1.2.0
+pytz>=2024.1
 
 # Web API
 fastapi>=0.109.0

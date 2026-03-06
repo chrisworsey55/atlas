@@ -73,5 +73,150 @@
       "fed_funds_rate": 3.64,
       "high_yield_spread": 3.12
     }
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "signal": "NEUTRAL",
+    "confidence": 0.25,
+    "yield_curve": {
+      "shape": "UNKNOWN",
+      "2y_yield": null,
+      "10y_yield": null,
+      "2s10s_spread": null,
+      "curve_direction": "UNKNOWN",
+      "assessment": "Cannot assess yield curve dynamics due to missing Treasury yield data"
+    },
+    "fed_policy": {
+      "current_rate": null,
+      "market_implied_terminal": null,
+      "cuts_priced_12m": null,
+      "stance": "UNKNOWN",
+      "assessment": "Fed policy stance unclear without fed funds rate and balance sheet data"
+    },
+    "credit_spreads": {
+      "hy_spread": null,
+      "ig_spread": null,
+      "spread_direction": "UNKNOWN",
+      "risk_appetite": "RISK_OFF",
+      "assessment": "VIX at 29.49 suggests elevated volatility but cannot assess credit spread dynamics"
+    },
+    "inflation": {
+      "breakeven_5y": null,
+      "breakeven_10y": null,
+      "real_10y_yield": null,
+      "expectations_trend": "UNKNOWN",
+      "assessment": "Cannot assess inflation expectations without breakeven and CPI data"
+    },
+    "positioning": {
+      "duration_stance": "NEUTRAL",
+      "curve_trade": "NEUTRAL",
+      "credit_stance": "UNDERWEIGHT",
+      "recommended_instruments": [
+        "HOLD",
+        "AWAIT_DATA"
+      ]
+    },
+    "key_levels": {
+      "10y_resistance": null,
+      "10y_support": null,
+      "critical_spread_level": null
+    },
+    "catalysts": {
+      "upcoming": [
+        "Need economic data release schedule",
+        "Fed meeting dates unknown"
+      ],
+      "risks": [
+        "Data quality deterioration",
+        "Market structure changes",
+        "Policy uncertainty"
+      ]
+    },
+    "bull_case": "VIX at 29.49 indicates stress that could drive flight-to-quality flows into Treasuries. Previous overheating conditions may have cooled.",
+    "bear_case": "Previous analysis showed extreme overheating (7.45% GDP, tight credit spreads). If conditions persist, duration remains vulnerable to higher rates.",
+    "brief_for_cio": "Critical data gap prevents proper analysis. Previous BEARISH_DURATION call based on overheating economy. VIX spike suggests potential regime change. Recommend data sourcing review before positioning.",
+    "desk": "bond",
+    "analyzed_at": "2026-03-06T21:34:14.979619",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "treasury_2y": null,
+      "treasury_10y": null,
+      "yield_curve_10y_2y": null,
+      "fed_funds_rate": null,
+      "high_yield_spread": null
+    }
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "signal": "NEUTRAL",
+    "confidence": 0.15,
+    "yield_curve": {
+      "shape": null,
+      "2y_yield": null,
+      "10y_yield": null,
+      "2s10s_spread": null,
+      "curve_direction": null,
+      "assessment": "Complete absence of yield data prevents curve analysis"
+    },
+    "fed_policy": {
+      "current_rate": null,
+      "market_implied_terminal": null,
+      "cuts_priced_12m": null,
+      "stance": null,
+      "assessment": "No Fed policy data available for assessment"
+    },
+    "credit_spreads": {
+      "hy_spread": null,
+      "ig_spread": null,
+      "spread_direction": "STABLE",
+      "risk_appetite": "RISK_OFF",
+      "assessment": "HYG at $79.69 and elevated VIX at 29.49 suggest defensive positioning"
+    },
+    "inflation": {
+      "breakeven_5y": null,
+      "breakeven_10y": null,
+      "real_10y_yield": null,
+      "expectations_trend": null,
+      "assessment": "No inflation data available to assess expectations trajectory"
+    },
+    "positioning": {
+      "duration_stance": "NEUTRAL",
+      "curve_trade": "NEUTRAL",
+      "credit_stance": "UNDERWEIGHT",
+      "recommended_instruments": [
+        "CASH",
+        "SHY"
+      ]
+    },
+    "key_levels": {
+      "10y_resistance": null,
+      "10y_support": null,
+      "critical_spread_level": null
+    },
+    "catalysts": {
+      "upcoming": [
+        "Data sourcing resolution needed",
+        "Fed meeting TBD",
+        "Inflation prints TBD"
+      ],
+      "risks": [
+        "Data blackout prevents risk assessment",
+        "VIX spike suggests hidden volatility",
+        "Market functioning concerns"
+      ]
+    },
+    "bull_case": "Elevated VIX at 29.49 suggests flight-to-quality demand for duration. S&P at 6740 may face correction driving Treasury demand.",
+    "bear_case": "Data gaps prevent proper risk assessment. Previous bearish call on overheating economy may still be valid with elevated equity markets.",
+    "brief_for_cio": "CRITICAL: Complete data outage prevents analysis. VIX spike to 29.49 signals stress. Recommend CASH position and immediate data sourcing review before any duration exposure.",
+    "desk": "bond",
+    "analyzed_at": "2026-03-06T21:36:57.548488",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "treasury_2y": null,
+      "treasury_10y": null,
+      "yield_curve_10y_2y": null,
+      "fed_funds_rate": null,
+      "high_yield_spread": null
+    }
   }
 ]

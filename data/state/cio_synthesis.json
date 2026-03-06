@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-03-07T10:30:00Z",
+  "summary": "Iran war escalation with Strait of Hormuz closure creates stagflation shock - oil +35% weekly while jobs crash -92k. Defensive positioning required while maintaining selective AI infrastructure exposure through crisis.",
+  "what_changed": [
+    "Critical escalation: Iran war reaches maximum intensity with Trump demanding unconditional surrender",
+    "Supply shock: Strait of Hormuz effectively closed (8 vs 120 ships/day normal), oil hitting $90+",
+    "Economic weakness: Jobs crashed -92k vs +50k expected, unemployment rising to 4.4%",
+    "Fed policy confusion: Stagflation setup prevents clear monetary response",
+    "Market stress: VIX spike to 29.49 signals crisis mode across all asset classes"
+  ],
+  "actions_to_consider": [
+    {
+      "action": "TRIM",
+      "ticker": "BE",
+      "urgency": "HIGH",
+      "rationale": "15% position too large in crisis - reduce to 8-10% given -22k unrealized loss and energy sector volatility"
+    },
+    {
+      "action": "ADD",
+      "ticker": "BIL",
+      "urgency": "HIGH",
+      "rationale": "Increase cash equivalent to 60-65% given crisis conditions and data outages preventing proper analysis"
+    },
+    {
+      "action": "HOLD",
+      "ticker": "TLT",
+      "urgency": "MEDIUM",
+      "rationale": "Short duration position working (+$1.3k) but stagflation creates complex Fed dynamics - monitor closely"
+    },
+    {
+      "action": "TRIM",
+      "ticker": "STX",
+      "urgency": "MEDIUM",
+      "rationale": "Short position profitable (+$767) but tech volatility high - consider partial profit taking"
+    },
+    {
+      "action": "HOLD",
+      "ticker": "AVGO",
+      "urgency": "LOW",
+      "rationale": "AI infrastructure thesis intact but monitor correlation with broader tech selloff"
+    }
+  ],
+  "what_to_watch": [
+    "Strait of Hormuz shipping data - any signs of reopening or further deterioration",
+    "Fed communications on stagflation response - rate policy in conflicted environment",
+    "Trump administration Iran policy escalation or de-escalation signals",
+    "Next employment data to confirm trend vs one-off weakness",
+    "Data sourcing issues resolution - critical for bond desk analysis",
+    "BE position stop loss at $129.16 - currently at $135.19 and vulnerable"
+  ],
+  "portfolio_conviction": 25,
+  "risk_adjusted_view": "RISK_OFF",
+  "top_conviction_trade": {
+    "ticker": "BIL",
+    "action": "BUY",
+    "size_pct": 10,
+    "thesis": "Crisis demands maximum liquidity preservation. Data outages prevent proper analysis across asset classes. Cash is the only position with full conviction until geopolitical shock stabilizes and data flows resume."
+  },
+  "generated_at": "2026-03-06T16:38:38.306060-05:00",
+  "model_used": "claude-sonnet-4-20250514",
+  "has_high_urgency": true
+}

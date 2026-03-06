@@ -82,6 +82,45 @@ def get_spy_current() -> dict:
         print(f"Error fetching SPY current: {e}")
         return {"price": 0, "change": 0}
 
+def fetch_live_prices(tickers: list) -> dict:
+    """Fetch live prices from yfinance for a list of tickers.
+
+    Returns dict mapping ticker -> price. Excludes BIL (cash equivalent).
+    """
+    # Filter out BIL and empty tickers
+    tickers_to_fetch = [t for t in tickers if t and t != 'BIL']
+    if not tickers_to_fetch:
+        return {}
+
+    try:
+        # Use yf.download for batch efficiency
+        data = yf.download(tickers_to_fetch, period='1d', progress=False)
+        if data.empty:
+            return {}
+
+        prices = {}
+        # Handle single ticker case (no multi-level columns)
+        if len(tickers_to_fetch) == 1:
+            ticker = tickers_to_fetch[0]
+            if 'Close' in data.columns and len(data) > 0:
+                prices[ticker] = round(float(data['Close'].iloc[-1]), 2)
+        else:
+            # Multi-ticker case - columns are MultiIndex
+            for ticker in tickers_to_fetch:
+                try:
+                    if ('Close', ticker) in data.columns or ticker in data['Close'].columns:
+                        price = data['Close'][ticker].iloc[-1]
+                        if not (price != price):  # Check for NaN
+                            prices[ticker] = round(float(price), 2)
+                except (KeyError, IndexError):
+                    pass
+
+        return prices
+    except Exception as e:
+        print(f"Error fetching live prices: {e}")
+        return {}
+
+
 def time_ago(dt) -> str:
     """Convert datetime to '2 min ago' style string."""
     if not dt:
@@ -1318,12 +1357,18 @@ def dashboard_portfolio():
     meta = load_state_file("portfolio_meta.json") or {}
     pnl_history = load_state_file("pnl_history.json") or []
 
+    # Fetch live prices from yfinance
+    tickers = [p.get('ticker') for p in raw_positions if p.get('ticker')]
+    live_prices = fetch_live_prices(tickers)
+
     # Transform positions to include computed fields for the template
     positions = []
     total_pnl = 0
     for p in raw_positions:
+        ticker = p.get('ticker')
         entry_price = p.get('entry_price', 0) or 0
-        current_price = p.get('current_price', entry_price) or entry_price
+        # Use live price if available, otherwise fall back to stored price
+        current_price = live_prices.get(ticker) or p.get('current_price', entry_price) or entry_price
         shares = p.get('shares', 0) or 0
         direction = p.get('direction', 'LONG')
 

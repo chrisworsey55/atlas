@@ -83,5 +83,169 @@
       "dollar_index": 99.2760009765625,
       "vix": 26.09000015258789
     }
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "signal": "BEARISH",
+    "confidence": 0.7,
+    "gold": {
+      "price": 5177.8,
+      "real_yield_impact": "HEADWIND",
+      "usd_impact": "NEUTRAL",
+      "safe_haven_demand": "MODERATE",
+      "signal": "BEARISH",
+      "assessment": "Gold at $5178 remains extremely elevated with elevated VIX providing only modest safe haven support against structural headwinds."
+    },
+    "silver": {
+      "price": 84.54,
+      "gold_silver_ratio": 61.3,
+      "industrial_demand": "MODERATE",
+      "signal": "BEARISH",
+      "assessment": "Silver at $84.54 remains historically extreme despite gold/silver ratio normalizing to 61.3x from previous extremes."
+    },
+    "copper": {
+      "price": 5.84,
+      "china_demand": "MODERATE",
+      "green_transition_demand": "STABLE",
+      "signal": "BEARISH",
+      "assessment": "Copper at $5.84 per pound is well above elevated threshold of $5.00, signaling unsustainable pricing levels."
+    },
+    "real_rates": {
+      "10y_real_yield": null,
+      "direction": "STABLE",
+      "gold_implication": "BEARISH",
+      "assessment": "Unable to assess real rates due to missing data, but previous analysis showed critical 2% threshold reached."
+    },
+    "macro_drivers": {
+      "inflation_trend": "STABLE",
+      "fed_policy_impact": "RESTRICTIVE",
+      "dollar_trend": "STABLE",
+      "assessment": "VIX at 29.49 shows elevated stress but DXY at 98.87 remains contained, creating mixed signals for metals."
+    },
+    "positioning": {
+      "gold_stance": "UNDERWEIGHT",
+      "silver_stance": "UNDERWEIGHT",
+      "copper_stance": "UNDERWEIGHT",
+      "gold_silver_trade": "neutral - ratio normalized",
+      "recommended_instruments": [
+        "DUST",
+        "JDST",
+        "JNUG puts"
+      ]
+    },
+    "key_levels": {
+      "gold_resistance": 5200,
+      "gold_support": 4800,
+      "silver_key_level": 75.0,
+      "copper_key_level": 5.0
+    },
+    "catalysts": {
+      "upcoming": [
+        "Fed policy signals",
+        "Real rates data release",
+        "China demand indicators"
+      ],
+      "risks": [
+        "Geopolitical escalation",
+        "Banking stress continuation",
+        "Supply disruptions"
+      ]
+    },
+    "bull_case": "Elevated VIX signals continued safe haven demand while supply constraints could support prices. Banking stress and geopolitical tensions may drive flight to safety flows into precious metals despite elevated levels.",
+    "bear_case": "Metals remain at historically extreme levels with gold above $5000 and copper above $5.80. Real rates likely still restrictive based on previous analysis. Opportunity cost extremely high at these price levels with significant downside risk.",
+    "brief_for_cio": "Maintain bearish metals stance. Gold $5178 and copper $5.84 remain extreme despite VIX spike. Previous real rate headwinds likely persist. Recommend continued shorts via DUST/JDST.",
+    "desk": "metals",
+    "analyzed_at": "2026-03-06T21:35:02.266163",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "gold": 5177.7998046875,
+      "silver": 84.53500366210938,
+      "copper": 5.840000152587891,
+      "gold_silver_ratio": 61.25036470552984,
+      "dollar_index": 98.87200164794922,
+      "vix": 29.489999771118164
+    }
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "signal": "BEARISH",
+    "confidence": 0.65,
+    "gold": {
+      "price": 5175.2,
+      "real_yield_impact": "HEADWIND",
+      "usd_impact": "NEUTRAL",
+      "safe_haven_demand": "MODERATE",
+      "signal": "BEARISH",
+      "assessment": "Gold at $5175 remains historically extreme despite VIX spike to 29.49, suggesting structural bearish forces outweigh safe haven flows."
+    },
+    "silver": {
+      "price": 84.41,
+      "gold_silver_ratio": 61.3,
+      "industrial_demand": "MODERATE",
+      "signal": "BEARISH",
+      "assessment": "Silver at $84 is severely elevated with gold/silver ratio 61.3x suggesting both metals overvalued but silver relatively less so."
+    },
+    "copper": {
+      "price": 5.84,
+      "china_demand": null,
+      "green_transition_demand": "STABLE",
+      "signal": "BEARISH",
+      "assessment": "Copper at $5.84 remains well above $5.00 elevated threshold, indicating extreme valuation vulnerable to growth concerns."
+    },
+    "real_rates": {
+      "10y_real_yield": null,
+      "direction": "STABLE",
+      "gold_implication": "BEARISH",
+      "assessment": "Without current real yield data, previous bearish real rate environment likely persists given extreme gold levels."
+    },
+    "macro_drivers": {
+      "inflation_trend": null,
+      "fed_policy_impact": null,
+      "dollar_trend": "STABLE",
+      "assessment": "DXY at 98.87 provides neutral USD backdrop while elevated VIX 29.49 creates modest safe haven support."
+    },
+    "positioning": {
+      "gold_stance": "UNDERWEIGHT",
+      "silver_stance": "UNDERWEIGHT",
+      "copper_stance": "UNDERWEIGHT",
+      "gold_silver_trade": "neutral - both overvalued",
+      "recommended_instruments": [
+        "DUST",
+        "JDST",
+        "short GLD"
+      ]
+    },
+    "key_levels": {
+      "gold_resistance": 5200,
+      "gold_support": 4800,
+      "silver_key_level": 75,
+      "copper_key_level": 5.5
+    },
+    "catalysts": {
+      "upcoming": [
+        "Fed meeting",
+        "CPI data",
+        "China PMI"
+      ],
+      "risks": [
+        "Geopolitical escalation",
+        "Financial crisis",
+        "Dollar collapse"
+      ]
+    },
+    "bull_case": "Elevated VIX suggests crisis potential that could drive safe haven flows. Dollar weakness below 99 removes major headwind for gold.",
+    "bear_case": "All metals remain at extreme valuations well above historical norms. Real rates likely still positive creating opportunity cost for gold. Growth concerns threaten copper demand.",
+    "brief_for_cio": "Maintain bearish metals stance. Gold $5175 copper $5.84 extreme despite VIX spike. Previous real rate headwinds likely persist. Recommend shorts via DUST/JDST, target gold sub-$4800.",
+    "desk": "metals",
+    "analyzed_at": "2026-03-06T21:37:42.024250",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "gold": 5175.2001953125,
+      "silver": 84.41000366210938,
+      "copper": 5.8394999504089355,
+      "gold_silver_ratio": 61.310270948792585,
+      "dollar_index": 98.87000274658203,
+      "vix": 29.489999771118164
+    }
   }
 ]

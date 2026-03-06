@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-03-06T16:38:05.776031-05:00",
+  "views": {
+    "druckenmiller": {
+      "status": "SUCCESS",
+      "tilt": "DEFENSIVE",
+      "conviction": 0.3,
+      "headline": "I don't see a fat pitch \u2014 limited data with elevated VIX suggests caution until liquidity picture clarifies.",
+      "brief": "Missing Fed data, employment, inflation \u2014 can't see the picture. VIX at 29 says something's wrong. Raise cash, wait for clarity. No fat pitches when you're trading blind."
+    },
+    "aschenbrenner": {
+      "status": "SUCCESS",
+      "tilt": "NEUTRAL",
+      "conviction": 0,
+      "headline": "Give me a ticker and I'll tell you if it's solving tomorrow's bottleneck or yesterday's consensus trade",
+      "brief": ""
+    },
+    "baker": {
+      "status": "ERROR",
+      "error": "BakerAgent.analyze() missing 1 required positional argument: 'ticker'"
+    },
+    "ackman": {
+      "status": "ERROR",
+      "error": "AckmanAgent.analyze() missing 1 required positional argument: 'ticker'"
+    }
+  }
+}

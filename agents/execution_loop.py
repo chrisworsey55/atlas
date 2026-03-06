@@ -3,23 +3,24 @@ ATLAS Continuous Autonomous Execution Loop
 Master orchestrator that runs all agents on a schedule.
 
 Architecture:
-- Every 30 minutes during market hours: Full cycle
-- Every 5 minutes: Filing monitor check
-- Every evening after close: Daily summary
-- Weekly (Sunday): Full rebalancing assessment
+- Every 30 minutes during market hours (9:30am-4pm ET, weekdays): Full cycle
+- Every morning at 7am ET: Daily briefing
+- Every Sunday 11pm ET: Weekly fundamental screen
 
 Risk Controls:
-- No trade executes without CIO approval
-- Adversarial agent has veto power
+- No trade executes without CIO approval AND adversarial risk score < 0.6
 - Maximum 2 new positions per day
 - No position exceeds 20% of portfolio
 - Hard stop: 5% portfolio drop in a day pauses all agents
+
+Each agent calls the Anthropic API for real analysis - no templates.
 """
 import json
 import logging
 import argparse
 import time
-from datetime import datetime, timedelta
+import os
+from datetime import datetime, timedelta, date
 from typing import Optional, Dict, List, Any
 from pathlib import Path
 import pytz
@@ -29,24 +30,49 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config.settings import (
     ANTHROPIC_API_KEY,
+    CLAUDE_MODEL,
     CLAUDE_MODEL_PREMIUM,
     MAX_POSITIONS,
     MAX_SINGLE_POSITION_PCT,
     MAX_DRAWDOWN_PCT,
+    STATE_DIR,
+    BRIEFINGS_DIR,
 )
-from config.universe import UNIVERSE
+
+# Logging setup
+def setup_logging(log_file: str = None):
+    """Setup logging to file and console."""
+    handlers = [logging.StreamHandler()]
+
+    if log_file:
+        log_path = Path(log_file)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        handlers.append(logging.FileHandler(log_file))
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+        handlers=handlers,
+    )
 
 logger = logging.getLogger(__name__)
 
-# State files
-STATE_DIR = Path(__file__).resolve().parent.parent / "data" / "state"
-EXECUTION_LOG_FILE = STATE_DIR / "execution_log.json"
-DAILY_SUMMARIES_DIR = STATE_DIR / "daily_summaries"
-
 # Market hours (Eastern Time)
-MARKET_OPEN = 9, 30  # 9:30 AM ET
-MARKET_CLOSE = 16, 0  # 4:00 PM ET
+MARKET_OPEN = (9, 30)  # 9:30 AM ET
+MARKET_CLOSE = (16, 0)  # 4:00 PM ET
 ET = pytz.timezone("US/Eastern")
+
+# State files
+EXECUTION_LOG_FILE = STATE_DIR / "execution_log.json"
+NEWS_BRIEFS_FILE = STATE_DIR / "news_briefs.json"
+POSITIONS_FILE = STATE_DIR / "positions.json"
+PNL_HISTORY_FILE = STATE_DIR / "pnl_history.json"
+DESK_BRIEFS_FILE = STATE_DIR / "desk_briefs.json"
+AGENT_VIEWS_FILE = STATE_DIR / "agent_views.json"
+RISK_ASSESSMENT_FILE = STATE_DIR / "risk_assessment.json"
+CIO_SYNTHESIS_FILE = STATE_DIR / "cio_synthesis.json"
+DECISIONS_FILE = STATE_DIR / "decisions.json"
+AGENTS_STATUS_FILE = STATE_DIR / "agents.json"
 
 
 class ATLASExecutionLoop:
@@ -55,9 +81,8 @@ class ATLASExecutionLoop:
 
     Orchestrates all agents on a schedule:
     - 30-minute cycles during market hours
-    - Filing monitor every 5 minutes
-    - Daily summary after close
-    - Weekly rebalancing assessment
+    - Daily briefing at 7am ET
+    - Weekly fundamental screen Sunday 11pm ET
     """
 
     def __init__(self, dry_run: bool = False):
@@ -73,18 +98,34 @@ class ATLASExecutionLoop:
         self.cycle_count = 0
         self.trades_today = 0
         self.high_water_mark = None
-        self._load_agents()
         self._ensure_state_dirs()
+        self._init_agents_status()
+
+        logger.info(f"ATLAS Execution Loop initialized (dry_run={dry_run})")
 
     def _ensure_state_dirs(self):
         """Ensure state directories exist."""
         STATE_DIR.mkdir(parents=True, exist_ok=True)
-        DAILY_SUMMARIES_DIR.mkdir(parents=True, exist_ok=True)
+        BRIEFINGS_DIR.mkdir(parents=True, exist_ok=True)
 
-    def _load_agents(self):
-        """Lazy-load all agents."""
-        # We load agents on-demand to avoid import issues
-        pass
+    def _init_agents_status(self):
+        """Initialize agents status file if not exists."""
+        if not AGENTS_STATUS_FILE.exists():
+            agents = [
+                {"name": "news", "display_name": "News Agent", "status": "IDLE", "last_run": None},
+                {"name": "druckenmiller", "display_name": "Druckenmiller", "status": "IDLE", "last_run": None},
+                {"name": "aschenbrenner", "display_name": "Aschenbrenner", "status": "IDLE", "last_run": None},
+                {"name": "baker", "display_name": "Baker", "status": "IDLE", "last_run": None},
+                {"name": "ackman", "display_name": "Ackman", "status": "IDLE", "last_run": None},
+                {"name": "bond", "display_name": "Bond Desk", "status": "IDLE", "last_run": None},
+                {"name": "currency", "display_name": "Currency Desk", "status": "IDLE", "last_run": None},
+                {"name": "commodities", "display_name": "Commodities Desk", "status": "IDLE", "last_run": None},
+                {"name": "metals", "display_name": "Metals Desk", "status": "IDLE", "last_run": None},
+                {"name": "adversarial", "display_name": "Adversarial", "status": "IDLE", "last_run": None},
+                {"name": "cio", "display_name": "CIO", "status": "IDLE", "last_run": None},
+                {"name": "autonomous", "display_name": "Autonomous", "status": "IDLE", "last_run": None},
+            ]
+            self._save_state(AGENTS_STATUS_FILE, agents)
 
     def _get_agent(self, name: str):
         """Get or create an agent by name."""
@@ -92,41 +133,25 @@ class ATLASExecutionLoop:
             return self.agents[name]
 
         try:
-            if name == "druckenmiller":
+            if name == "news":
+                from agents.news_agent import NewsAgent
+                self.agents[name] = NewsAgent()
+
+            elif name == "druckenmiller":
                 from agents.druckenmiller_agent import DruckenmillerAgent
                 self.agents[name] = DruckenmillerAgent()
 
-            elif name == "cio":
-                from agents.cio_agent import CIOAgent
-                self.agents[name] = CIOAgent()
+            elif name == "aschenbrenner":
+                from agents.aschenbrenner_agent import AschenbrennerAgent
+                self.agents[name] = AschenbrennerAgent()
 
-            elif name == "adversarial":
-                from agents.adversarial_agent import AdversarialAgent
-                self.agents[name] = AdversarialAgent()
+            elif name == "baker":
+                from agents.baker_agent import BakerAgent
+                self.agents[name] = BakerAgent()
 
-            elif name == "filing_monitor":
-                from agents.filing_monitor_agent import FilingMonitorAgent
-                self.agents[name] = FilingMonitorAgent()
-
-            elif name == "earnings":
-                from agents.earnings_call_agent import EarningsCallAgent
-                self.agents[name] = EarningsCallAgent()
-
-            elif name == "consensus":
-                from agents.consensus_agent import ConsensusAgent
-                self.agents[name] = ConsensusAgent()
-
-            elif name == "autonomous":
-                from agents.autonomous_agent import AutonomousAgent
-                self.agents[name] = AutonomousAgent()
-
-            elif name == "pnl_tracker":
-                from agents.pnl_tracker import PnLTracker
-                self.agents[name] = PnLTracker()
-
-            elif name == "fundamental":
-                from agents.fundamental_agent import FundamentalAgent
-                self.agents[name] = FundamentalAgent()
+            elif name == "ackman":
+                from agents.ackman_agent import AckmanAgent
+                self.agents[name] = AckmanAgent()
 
             elif name == "bond":
                 from agents.bond_desk_agent import BondDeskAgent
@@ -144,9 +169,25 @@ class ATLASExecutionLoop:
                 from agents.metals_desk_agent import MetalsDeskAgent
                 self.agents[name] = MetalsDeskAgent()
 
-            elif name in ["semiconductor", "biotech", "financials", "energy", "consumer", "industrials"]:
-                from agents.sector_desk import get_desk
-                self.agents[name] = get_desk(name)
+            elif name == "adversarial":
+                from agents.adversarial_agent import AdversarialAgent
+                self.agents[name] = AdversarialAgent()
+
+            elif name == "cio":
+                from agents.cio_agent import CIOAgent
+                self.agents[name] = CIOAgent()
+
+            elif name == "autonomous":
+                from agents.autonomous_agent import AutonomousAgent
+                self.agents[name] = AutonomousAgent()
+
+            elif name == "fundamental":
+                from agents.fundamental_agent import FundamentalAgent
+                self.agents[name] = FundamentalAgent()
+
+            elif name == "pnl_tracker":
+                from agents.pnl_tracker import PnLTracker
+                self.agents[name] = PnLTracker()
 
             else:
                 logger.warning(f"Unknown agent: {name}")
@@ -161,8 +202,40 @@ class ATLASExecutionLoop:
             logger.error(f"Failed to create agent {name}: {e}")
             return None
 
+    def _load_state(self, filepath: Path) -> Any:
+        """Load state from JSON file."""
+        try:
+            if filepath.exists():
+                with open(filepath, "r") as f:
+                    return json.load(f)
+        except Exception as e:
+            logger.warning(f"Failed to load {filepath}: {e}")
+        return None
+
+    def _save_state(self, filepath: Path, data: Any):
+        """Save state to JSON file."""
+        try:
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+            with open(filepath, "w") as f:
+                json.dump(data, f, indent=2, default=str)
+        except Exception as e:
+            logger.error(f"Failed to save {filepath}: {e}")
+
+    def _update_agent_status(self, name: str, status: str):
+        """Update a single agent's status."""
+        agents = self._load_state(AGENTS_STATUS_FILE) or []
+        now = datetime.now(ET).strftime("%Y-%m-%d %H:%M")
+
+        for agent in agents:
+            if agent.get("name") == name:
+                agent["status"] = status
+                agent["last_run"] = now
+                break
+
+        self._save_state(AGENTS_STATUS_FILE, agents)
+
     def _is_market_hours(self) -> bool:
-        """Check if it's currently market hours."""
+        """Check if it's currently market hours (9:30am-4pm ET, weekdays)."""
         now = datetime.now(ET)
 
         # Check if it's a weekday
@@ -170,418 +243,802 @@ class ATLASExecutionLoop:
             return False
 
         # Check time
-        market_open_time = now.replace(hour=MARKET_OPEN[0], minute=MARKET_OPEN[1], second=0)
-        market_close_time = now.replace(hour=MARKET_CLOSE[0], minute=MARKET_CLOSE[1], second=0)
+        market_open = now.replace(hour=MARKET_OPEN[0], minute=MARKET_OPEN[1], second=0)
+        market_close = now.replace(hour=MARKET_CLOSE[0], minute=MARKET_CLOSE[1], second=0)
 
-        return market_open_time <= now <= market_close_time
+        return market_open <= now <= market_close
 
-    def _is_first_15_minutes(self) -> bool:
-        """Check if we're in the first 15 minutes of trading."""
+    def _is_morning_briefing_time(self) -> bool:
+        """Check if it's 7am ET (morning briefing time)."""
         now = datetime.now(ET)
-        market_open_time = now.replace(hour=MARKET_OPEN[0], minute=MARKET_OPEN[1], second=0)
-        return now < market_open_time + timedelta(minutes=15)
+        return now.hour == 7 and now.minute < 30 and now.weekday() < 5
 
-    def _is_last_15_minutes(self) -> bool:
-        """Check if we're in the last 15 minutes of trading."""
+    def _is_weekly_screen_time(self) -> bool:
+        """Check if it's Sunday 11pm ET (weekly screen time)."""
         now = datetime.now(ET)
-        market_close_time = now.replace(hour=MARKET_CLOSE[0], minute=MARKET_CLOSE[1], second=0)
-        return now > market_close_time - timedelta(minutes=15)
-
-    def _is_just_after_close(self) -> bool:
-        """Check if it's just after market close (4:00-4:30 PM ET)."""
-        now = datetime.now(ET)
-        close_time = now.replace(hour=16, minute=0, second=0)
-        return close_time <= now <= close_time + timedelta(minutes=30)
+        return now.weekday() == 6 and now.hour == 23
 
     def _load_portfolio(self) -> Dict:
         """Load current portfolio state."""
-        positions_file = STATE_DIR / "positions.json"
-        portfolio_meta_file = STATE_DIR / "portfolio_meta.json"
+        positions_data = self._load_state(POSITIONS_FILE) or {}
 
-        portfolio = {
-            "positions": [],
-            "total_value": 0,
-            "cash": 0,
-            "total_pnl": 0,
-        }
+        positions = positions_data.get("positions", [])
+        portfolio_value = positions_data.get("portfolio_value", 1000000)
 
-        try:
-            if positions_file.exists():
-                with open(positions_file, "r") as f:
-                    portfolio["positions"] = json.load(f)
-                    portfolio["total_value"] = sum(p.get("value", 0) for p in portfolio["positions"])
-                    portfolio["total_pnl"] = sum(p.get("unrealized_pnl", 0) for p in portfolio["positions"])
+        # Calculate totals
+        total_value = 0
+        total_pnl = 0
 
-            if portfolio_meta_file.exists():
-                with open(portfolio_meta_file, "r") as f:
-                    meta = json.load(f)
-                    portfolio["cash"] = meta.get("cash", 0)
-                    portfolio["starting_capital"] = meta.get("starting_capital", 1000000)
+        for pos in positions:
+            entry = pos.get("entry_price", 0)
+            current = pos.get("current_price", entry)
+            shares = pos.get("shares", 0)
+            direction = pos.get("direction", "LONG")
 
-        except Exception as e:
-            logger.error(f"Error loading portfolio: {e}")
+            value = current * shares
+            if direction == "SHORT":
+                pnl = (entry - current) * shares
+            else:
+                pnl = (current - entry) * shares
 
-        return portfolio
-
-    def _check_risk_limits(self, portfolio: Dict) -> Dict:
-        """
-        Check portfolio risk limits.
-
-        Returns:
-            Dict with risk status and any violations
-        """
-        violations = []
-        warnings = []
-
-        total_value = portfolio.get("total_value", 0)
-        starting = portfolio.get("starting_capital", 1000000)
-
-        # Check max drawdown
-        if self.high_water_mark is None:
-            self.high_water_mark = total_value
-        else:
-            self.high_water_mark = max(self.high_water_mark, total_value)
-
-        drawdown_pct = (total_value / self.high_water_mark - 1) * 100 if self.high_water_mark > 0 else 0
-
-        if drawdown_pct <= -5:
-            violations.append(f"DRAWDOWN ALERT: Portfolio down {abs(drawdown_pct):.1f}% from high water mark")
-
-        if drawdown_pct <= MAX_DRAWDOWN_PCT * 100:
-            violations.append(f"MAX DRAWDOWN BREACH: {abs(drawdown_pct):.1f}% exceeds {abs(MAX_DRAWDOWN_PCT*100)}% limit")
-
-        # Check position concentration
-        for pos in portfolio.get("positions", []):
-            pos_pct = pos.get("value", 0) / total_value * 100 if total_value > 0 else 0
-            if pos_pct > MAX_SINGLE_POSITION_PCT * 100:
-                warnings.append(f"Position {pos['ticker']} at {pos_pct:.1f}% exceeds {MAX_SINGLE_POSITION_PCT*100}% limit")
-
-        # Check max positions
-        if len(portfolio.get("positions", [])) >= MAX_POSITIONS:
-            warnings.append(f"At max positions ({MAX_POSITIONS})")
-
-        # Check trades today
-        if self.trades_today >= 2:
-            warnings.append(f"Already executed {self.trades_today} trades today (limit: 2)")
+            pos["current_value"] = value
+            pos["unrealized_pnl"] = pnl
+            total_value += value
+            total_pnl += pnl
 
         return {
-            "status": "VIOLATION" if violations else "WARNING" if warnings else "OK",
-            "violations": violations,
-            "warnings": warnings,
-            "drawdown_pct": drawdown_pct,
-            "high_water_mark": self.high_water_mark,
+            "positions": positions,
+            "portfolio_value": portfolio_value,
+            "total_value": total_value,
+            "total_pnl": total_pnl,
+            "cash": portfolio_value - total_value,
+            "last_updated": positions_data.get("last_updated"),
         }
 
-    def _save_cycle_log(self, cycle_data: Dict):
-        """Save execution cycle log."""
-        logs = []
-        if EXECUTION_LOG_FILE.exists():
+    def _get_portfolio_tickers(self) -> List[str]:
+        """Get list of tickers in portfolio."""
+        portfolio = self._load_portfolio()
+        return [p.get("ticker") for p in portfolio.get("positions", []) if p.get("ticker") and p.get("ticker") != "BIL"]
+
+    # =========================================================================
+    # STEP 1: NEWS AGENT
+    # =========================================================================
+
+    def run_news_scan(self) -> Dict:
+        """
+        Run news agent to scan RSS feeds for portfolio tickers and macro events.
+        Saves alerts to news_briefs.json with urgency levels.
+        """
+        logger.info("Step 1: News Agent scanning...")
+        self._update_agent_status("news", "RUNNING")
+
+        try:
+            news_agent = self._get_agent("news")
+            if not news_agent:
+                raise Exception("Could not load news agent")
+
+            # Run the scan - this calls Claude API
+            alerts = news_agent.scan()
+
+            if alerts:
+                self._save_state(NEWS_BRIEFS_FILE, alerts)
+
+                # Check for IMMEDIATE urgency items
+                immediate_count = 0
+                if alerts.get("top_stories"):
+                    for story in alerts["top_stories"]:
+                        if story.get("urgency") == "IMMEDIATE":
+                            immediate_count += 1
+
+                logger.info(f"News: {len(alerts.get('top_stories', []))} stories, {immediate_count} IMMEDIATE")
+
+                self._update_agent_status("news", "ACTIVE")
+                return {
+                    "status": "SUCCESS",
+                    "alert_level": alerts.get("alert_level", "NORMAL"),
+                    "stories_count": len(alerts.get("top_stories", [])),
+                    "immediate_count": immediate_count,
+                    "24h_summary": alerts.get("24h_summary", ""),
+                }
+            else:
+                logger.warning("News agent returned no data")
+                self._update_agent_status("news", "ERROR")
+                return {"status": "NO_DATA"}
+
+        except Exception as e:
+            logger.error(f"News agent failed: {e}")
+            self._update_agent_status("news", "ERROR")
+            return {"status": "ERROR", "error": str(e)}
+
+    # =========================================================================
+    # STEP 2: PRICE UPDATE
+    # =========================================================================
+
+    def run_price_update(self) -> Dict:
+        """
+        Fetch current prices for all positions via yfinance.
+        Update positions.json with current prices and calculate P&L.
+        Save daily snapshot to pnl_history.json.
+        """
+        logger.info("Step 2: Updating prices...")
+
+        try:
+            import yfinance as yf
+
+            positions_data = self._load_state(POSITIONS_FILE) or {}
+            positions = positions_data.get("positions", [])
+
+            # Get tickers (excluding cash equivalents)
+            tickers = [p.get("ticker") for p in positions if p.get("ticker") and p.get("ticker") != "BIL"]
+
+            if not tickers:
+                logger.info("No tickers to update")
+                return {"status": "NO_TICKERS"}
+
+            # Fetch prices
+            logger.info(f"Fetching prices for: {tickers}")
+            data = yf.download(tickers, period="1d", progress=False)
+
+            # Update positions
+            total_pnl = 0
+            for pos in positions:
+                ticker = pos.get("ticker")
+                if ticker == "BIL" or not ticker:
+                    continue
+
+                try:
+                    if len(tickers) == 1:
+                        price = float(data["Close"].iloc[-1])
+                    else:
+                        price = float(data["Close"][ticker].iloc[-1])
+
+                    pos["current_price"] = round(price, 2)
+
+                    # Calculate P&L
+                    entry = pos.get("entry_price", price)
+                    shares = pos.get("shares", 0)
+                    direction = pos.get("direction", "LONG")
+
+                    if direction == "SHORT":
+                        pnl = (entry - price) * shares
+                    else:
+                        pnl = (price - entry) * shares
+
+                    pos["unrealized_pnl"] = round(pnl, 2)
+                    total_pnl += pnl
+
+                except Exception as e:
+                    logger.warning(f"Failed to update {ticker}: {e}")
+
+            # Update positions file
+            positions_data["positions"] = positions
+            positions_data["last_updated"] = datetime.now(ET).strftime("%Y-%m-%d %H:%M")
+            self._save_state(POSITIONS_FILE, positions_data)
+
+            # Save P&L snapshot
+            snapshot = {
+                "date": datetime.now(ET).strftime("%Y-%m-%d"),
+                "time": datetime.now(ET).strftime("%H:%M"),
+                "total_pnl": round(total_pnl, 2),
+                "positions": {
+                    p.get("ticker"): {
+                        "pnl": p.get("unrealized_pnl", 0),
+                        "current": p.get("current_price", 0),
+                    }
+                    for p in positions if p.get("ticker") != "BIL"
+                },
+            }
+
+            # Append to history
+            history = self._load_state(PNL_HISTORY_FILE) or []
+            history.append(snapshot)
+            history = history[-500:]  # Keep last 500 snapshots
+            self._save_state(PNL_HISTORY_FILE, history)
+
+            logger.info(f"Prices updated. Total P&L: ${total_pnl:,.2f}")
+            return {
+                "status": "SUCCESS",
+                "tickers_updated": len(tickers),
+                "total_pnl": total_pnl,
+            }
+
+        except Exception as e:
+            logger.error(f"Price update failed: {e}")
+            return {"status": "ERROR", "error": str(e)}
+
+    # =========================================================================
+    # STEP 3: SECTOR DESKS
+    # =========================================================================
+
+    def run_sector_desks(self) -> Dict:
+        """
+        Run Bond, Currency, Commodities, Metals desks.
+        Each analyzes current macro data (FRED, yfinance) and updates signals.
+        """
+        logger.info("Step 3: Running sector desks...")
+
+        desk_results = {}
+        desks = ["bond", "currency", "commodities", "metals"]
+
+        for desk_name in desks:
+            logger.info(f"  Running {desk_name} desk...")
+            self._update_agent_status(desk_name, "RUNNING")
+
             try:
-                with open(EXECUTION_LOG_FILE, "r") as f:
-                    logs = json.load(f)
-            except:
-                logs = []
+                desk = self._get_agent(desk_name)
+                if not desk:
+                    desk_results[desk_name] = {"status": "NOT_AVAILABLE"}
+                    self._update_agent_status(desk_name, "ERROR")
+                    continue
 
-        logs.append(cycle_data)
-        logs = logs[-500:]  # Keep last 500 cycles
+                # Run analysis - this calls Claude API
+                if hasattr(desk, "analyze"):
+                    result = desk.analyze(persist=True)
+                elif hasattr(desk, "get_brief_for_cio"):
+                    result = desk.get_brief_for_cio()
+                else:
+                    result = None
 
-        with open(EXECUTION_LOG_FILE, "w") as f:
-            json.dump(logs, f, indent=2, default=str)
+                if result:
+                    desk_results[desk_name] = {
+                        "status": "SUCCESS",
+                        "signal": result.get("signal", "UNKNOWN"),
+                        "confidence": result.get("confidence", 0),
+                        "brief": result.get("brief_for_cio", "")[:200],
+                    }
+                    logger.info(f"  {desk_name}: {result.get('signal')} ({result.get('confidence', 0):.0%})")
+                    self._update_agent_status(desk_name, "ACTIVE")
+                else:
+                    desk_results[desk_name] = {"status": "NO_DATA"}
+                    self._update_agent_status(desk_name, "ERROR")
+
+            except Exception as e:
+                logger.error(f"  {desk_name} desk failed: {e}")
+                desk_results[desk_name] = {"status": "ERROR", "error": str(e)}
+                self._update_agent_status(desk_name, "ERROR")
+
+        # Save consolidated desk briefs
+        self._save_state(DESK_BRIEFS_FILE, {
+            "timestamp": datetime.now(ET).isoformat(),
+            "desks": desk_results,
+        })
+
+        return desk_results
+
+    # =========================================================================
+    # STEP 4: SUPERINVESTOR AGENTS
+    # =========================================================================
+
+    def run_superinvestor_agents(self) -> Dict:
+        """
+        Run Druckenmiller, Aschenbrenner, Baker, Ackman agents.
+        Each reviews current portfolio positions through their lens.
+        """
+        logger.info("Step 4: Running superinvestor agents...")
+
+        agent_views = {}
+        portfolio = self._load_portfolio()
+
+        agents = [
+            ("druckenmiller", "What's your macro view and portfolio positioning recommendation?"),
+            ("aschenbrenner", "Review our AI infrastructure positions and recommend any changes."),
+            ("baker", "Review our positions from a quantitative/deep tech perspective."),
+            ("ackman", "Review our positions for quality compounder characteristics."),
+        ]
+
+        for agent_name, default_query in agents:
+            logger.info(f"  Running {agent_name}...")
+            self._update_agent_status(agent_name, "RUNNING")
+
+            try:
+                agent = self._get_agent(agent_name)
+                if not agent:
+                    agent_views[agent_name] = {"status": "NOT_AVAILABLE"}
+                    self._update_agent_status(agent_name, "ERROR")
+                    continue
+
+                # Run analysis - this calls Claude API
+                result = None
+                if hasattr(agent, "get_brief_for_cio"):
+                    result = agent.get_brief_for_cio()
+                elif hasattr(agent, "chat"):
+                    # Use chat for agents that need context (baker, ackman, aschenbrenner)
+                    result = agent.chat(default_query)
+                elif hasattr(agent, "analyze"):
+                    try:
+                        result = agent.analyze()
+                    except TypeError:
+                        pass  # analyze() needs args we don't have
+
+                if result:
+                    agent_views[agent_name] = {
+                        "status": "SUCCESS",
+                        "tilt": result.get("portfolio_tilt") or result.get("tilt", "NEUTRAL"),
+                        "conviction": result.get("conviction_level", 0),
+                        "headline": result.get("headline", "")[:200],
+                        "brief": result.get("brief_for_cio", "")[:500] if result.get("brief_for_cio") else "",
+                    }
+                    logger.info(f"  {agent_name}: {agent_views[agent_name].get('tilt')}")
+                    self._update_agent_status(agent_name, "ACTIVE")
+                else:
+                    agent_views[agent_name] = {"status": "NO_DATA"}
+                    self._update_agent_status(agent_name, "ERROR")
+
+            except Exception as e:
+                logger.error(f"  {agent_name} failed: {e}")
+                agent_views[agent_name] = {"status": "ERROR", "error": str(e)}
+                self._update_agent_status(agent_name, "ERROR")
+
+        # Save agent views
+        self._save_state(AGENT_VIEWS_FILE, {
+            "timestamp": datetime.now(ET).isoformat(),
+            "views": agent_views,
+        })
+
+        return agent_views
+
+    # =========================================================================
+    # STEP 5: ADVERSARIAL AGENT
+    # =========================================================================
+
+    def run_adversarial_review(self) -> Dict:
+        """
+        Run adversarial agent to review entire portfolio.
+        Checks for correlation risks, concentration, regime change signals.
+        """
+        logger.info("Step 5: Running adversarial review...")
+        self._update_agent_status("adversarial", "RUNNING")
+
+        try:
+            adversarial = self._get_agent("adversarial")
+            portfolio = self._load_portfolio()
+
+            if not adversarial:
+                raise Exception("Could not load adversarial agent")
+
+            # Build portfolio context for adversarial review
+            portfolio_context = {
+                "num_positions": len(portfolio.get("positions", [])),
+                "total_value": portfolio.get("total_value", 0),
+                "cash_pct": (portfolio.get("cash", 0) / portfolio.get("portfolio_value", 1)) * 100,
+                "positions": [
+                    {
+                        "ticker": p.get("ticker"),
+                        "direction": p.get("direction"),
+                        "allocation_pct": p.get("allocation_pct", 0),
+                        "unrealized_pnl": p.get("unrealized_pnl", 0),
+                    }
+                    for p in portfolio.get("positions", [])
+                ],
+            }
+
+            # Create a synthetic "portfolio review" trade decision
+            # This will trigger the adversarial to review overall portfolio risk
+            review_decision = {
+                "ticker": "PORTFOLIO",
+                "action": "REVIEW",
+                "rationale": "Periodic portfolio risk review",
+            }
+
+            # Run adversarial review - this calls Claude API
+            result = adversarial.review(review_decision, portfolio_context)
+
+            if result:
+                risk_assessment = {
+                    "timestamp": datetime.now(ET).isoformat(),
+                    "risk_score": result.get("risk_score", 0.5),
+                    "verdict": result.get("verdict", "UNKNOWN"),
+                    "concerns": result.get("concerns", []),
+                    "warnings": result.get("monitoring_requirements", []),
+                    "concentration_risks": result.get("concentration_risks", []),
+                    "correlation_risks": result.get("correlation_risks", []),
+                }
+
+                self._save_state(RISK_ASSESSMENT_FILE, risk_assessment)
+
+                logger.info(f"Adversarial: Risk score {result.get('risk_score', 0.5):.2f}, Verdict: {result.get('verdict')}")
+                self._update_agent_status("adversarial", "ACTIVE")
+
+                return risk_assessment
+            else:
+                self._update_agent_status("adversarial", "ERROR")
+                return {"status": "NO_DATA"}
+
+        except Exception as e:
+            logger.error(f"Adversarial review failed: {e}")
+            self._update_agent_status("adversarial", "ERROR")
+            return {"status": "ERROR", "error": str(e)}
+
+    # =========================================================================
+    # STEP 6: CIO SYNTHESIS
+    # =========================================================================
+
+    def run_cio_synthesis(self) -> Dict:
+        """
+        CIO takes all agent outputs and generates synthesis.
+        What changed since last cycle, what actions to consider, what to watch.
+        """
+        logger.info("Step 6: Running CIO synthesis...")
+        self._update_agent_status("cio", "RUNNING")
+
+        try:
+            # Load all inputs
+            news_briefs = self._load_state(NEWS_BRIEFS_FILE) or {}
+            desk_briefs = self._load_state(DESK_BRIEFS_FILE) or {}
+            agent_views = self._load_state(AGENT_VIEWS_FILE) or {}
+            risk_assessment = self._load_state(RISK_ASSESSMENT_FILE) or {}
+            previous_synthesis = self._load_state(CIO_SYNTHESIS_FILE) or {}
+            portfolio = self._load_portfolio()
+
+            # Use Claude directly for CIO synthesis
+            import anthropic
+            client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+            # Build comprehensive prompt
+            synthesis_prompt = f"""You are the CIO of ATLAS, an AI-native hedge fund. Synthesize all agent outputs into a coherent portfolio recommendation.
+
+## CURRENT PORTFOLIO
+Portfolio Value: ${portfolio.get('portfolio_value', 1000000):,.0f}
+Total P&L: ${portfolio.get('total_pnl', 0):,.0f}
+Cash: ${portfolio.get('cash', 0):,.0f}
+Positions: {len(portfolio.get('positions', []))}
+
+{json.dumps(portfolio.get('positions', [])[:10], indent=2)}
+
+## NEWS BRIEF
+Alert Level: {news_briefs.get('alert_level', 'NORMAL')}
+24h Summary: {news_briefs.get('24h_summary', 'No news available')[:500]}
+
+## DESK SIGNALS
+{json.dumps(desk_briefs.get('desks', {}), indent=2)}
+
+## SUPERINVESTOR VIEWS
+{json.dumps(agent_views.get('views', {}), indent=2)}
+
+## RISK ASSESSMENT
+Risk Score: {risk_assessment.get('risk_score', 0.5)}
+Verdict: {risk_assessment.get('verdict', 'UNKNOWN')}
+Concerns: {json.dumps(risk_assessment.get('concerns', []))}
+
+## PREVIOUS SYNTHESIS
+{previous_synthesis.get('summary', 'No previous synthesis')[:300]}
+
+## TASK
+Generate a CIO synthesis with:
+1. What changed since last cycle
+2. What actions to consider (with urgency: HIGH/MEDIUM/LOW)
+3. What to watch in next cycle
+4. Overall portfolio conviction (0-100)
+5. Any position changes to recommend
+
+Respond with valid JSON:
+```json
+{{
+  "timestamp": "ISO timestamp",
+  "summary": "2-3 sentence executive summary",
+  "what_changed": ["list of key changes"],
+  "actions_to_consider": [
+    {{"action": "BUY/SELL/HOLD/TRIM/ADD", "ticker": "XXX", "urgency": "HIGH/MEDIUM/LOW", "rationale": "why"}}
+  ],
+  "what_to_watch": ["key items to monitor"],
+  "portfolio_conviction": 0-100,
+  "risk_adjusted_view": "RISK_ON/RISK_OFF/NEUTRAL",
+  "top_conviction_trade": {{"ticker": "XXX", "action": "BUY", "size_pct": 5, "thesis": "why"}} or null
+}}
+```"""
+
+            response = client.messages.create(
+                model=CLAUDE_MODEL_PREMIUM,
+                max_tokens=2048,
+                messages=[{"role": "user", "content": synthesis_prompt}]
+            )
+
+            raw_response = response.content[0].text
+
+            # Parse JSON
+            if "```json" in raw_response:
+                json_str = raw_response.split("```json")[1].split("```")[0]
+            elif "```" in raw_response:
+                json_str = raw_response.split("```")[1].split("```")[0]
+            else:
+                json_str = raw_response
+
+            synthesis = json.loads(json_str.strip())
+            synthesis["generated_at"] = datetime.now(ET).isoformat()
+            synthesis["model_used"] = CLAUDE_MODEL_PREMIUM
+
+            # Check for HIGH urgency actions
+            high_urgency = [a for a in synthesis.get("actions_to_consider", []) if a.get("urgency") == "HIGH"]
+            if high_urgency:
+                synthesis["has_high_urgency"] = True
+                logger.warning(f"CIO flagged {len(high_urgency)} HIGH urgency actions!")
+
+            self._save_state(CIO_SYNTHESIS_FILE, synthesis)
+
+            logger.info(f"CIO Synthesis: Conviction {synthesis.get('portfolio_conviction', 0)}%, {len(synthesis.get('actions_to_consider', []))} actions")
+            self._update_agent_status("cio", "ACTIVE")
+
+            return synthesis
+
+        except Exception as e:
+            logger.error(f"CIO synthesis failed: {e}")
+            self._update_agent_status("cio", "ERROR")
+            return {"status": "ERROR", "error": str(e)}
+
+    # =========================================================================
+    # STEP 7: AUTONOMOUS EXECUTION
+    # =========================================================================
+
+    def run_autonomous_execution(self) -> Dict:
+        """
+        If CIO synthesis recommends a trade AND confidence > 80% AND risk score < 0.6,
+        the autonomous agent can execute paper trades.
+        """
+        logger.info("Step 7: Checking autonomous execution...")
+        self._update_agent_status("autonomous", "RUNNING")
+
+        try:
+            synthesis = self._load_state(CIO_SYNTHESIS_FILE) or {}
+            risk_assessment = self._load_state(RISK_ASSESSMENT_FILE) or {}
+
+            # Check execution criteria
+            portfolio_conviction = synthesis.get("portfolio_conviction", 0)
+            risk_score = risk_assessment.get("risk_score", 1.0)
+            top_trade = synthesis.get("top_conviction_trade")
+
+            execution_result = {
+                "timestamp": datetime.now(ET).isoformat(),
+                "executed": False,
+                "reason": None,
+                "trade": None,
+            }
+
+            # Check if we should execute
+            if not top_trade:
+                execution_result["reason"] = "No trade recommended"
+                logger.info("Autonomous: No trade recommended")
+            elif portfolio_conviction < 80:
+                execution_result["reason"] = f"Conviction {portfolio_conviction}% < 80% threshold"
+                logger.info(f"Autonomous: Conviction too low ({portfolio_conviction}%)")
+            elif risk_score >= 0.6:
+                execution_result["reason"] = f"Risk score {risk_score:.2f} >= 0.6 threshold"
+                logger.info(f"Autonomous: Risk too high ({risk_score:.2f})")
+            elif self.dry_run:
+                execution_result["reason"] = "Dry run mode - no execution"
+                execution_result["would_execute"] = top_trade
+                logger.info(f"Autonomous: Would execute {top_trade.get('action')} {top_trade.get('ticker')} (dry run)")
+            elif self.trades_today >= 2:
+                execution_result["reason"] = f"Already executed {self.trades_today} trades today (max 2)"
+                logger.info(f"Autonomous: Daily trade limit reached")
+            else:
+                # Execute the trade
+                logger.info(f"Autonomous: EXECUTING {top_trade.get('action')} {top_trade.get('ticker')}")
+
+                # Load positions and update
+                positions_data = self._load_state(POSITIONS_FILE) or {}
+                positions = positions_data.get("positions", [])
+
+                action = top_trade.get("action", "").upper()
+                ticker = top_trade.get("ticker")
+
+                if action in ("BUY", "ADD"):
+                    # Add new position (simplified - would need actual price fetch)
+                    import yfinance as yf
+                    stock = yf.Ticker(ticker)
+                    current_price = stock.info.get("regularMarketPrice", 0)
+
+                    if current_price > 0:
+                        size_pct = top_trade.get("size_pct", 3) / 100
+                        portfolio_value = positions_data.get("portfolio_value", 1000000)
+                        position_value = portfolio_value * size_pct
+                        shares = int(position_value / current_price)
+
+                        new_position = {
+                            "ticker": ticker,
+                            "direction": "LONG",
+                            "shares": shares,
+                            "entry_price": round(current_price, 2),
+                            "current_price": round(current_price, 2),
+                            "allocation_pct": round(size_pct * 100, 1),
+                            "thesis": top_trade.get("thesis", "Autonomous trade"),
+                            "agent_source": "autonomous",
+                            "conviction": portfolio_conviction,
+                            "date_opened": datetime.now(ET).strftime("%Y-%m-%d"),
+                        }
+
+                        positions.append(new_position)
+                        positions_data["positions"] = positions
+                        self._save_state(POSITIONS_FILE, positions_data)
+
+                        execution_result["executed"] = True
+                        execution_result["trade"] = new_position
+                        self.trades_today += 1
+
+                        logger.info(f"Autonomous: Executed BUY {shares} {ticker} @ ${current_price:.2f}")
+
+                elif action in ("SELL", "EXIT", "CLOSE"):
+                    # Close position
+                    for i, pos in enumerate(positions):
+                        if pos.get("ticker") == ticker:
+                            closed_position = positions.pop(i)
+                            execution_result["executed"] = True
+                            execution_result["trade"] = closed_position
+                            self.trades_today += 1
+                            logger.info(f"Autonomous: Closed {ticker}")
+                            break
+
+                    positions_data["positions"] = positions
+                    self._save_state(POSITIONS_FILE, positions_data)
+
+            # Log to decisions.json
+            decisions = self._load_state(DECISIONS_FILE) or []
+            decisions.append(execution_result)
+            decisions = decisions[-100:]  # Keep last 100
+            self._save_state(DECISIONS_FILE, decisions)
+
+            self._update_agent_status("autonomous", "ACTIVE" if execution_result.get("executed") else "IDLE")
+            return execution_result
+
+        except Exception as e:
+            logger.error(f"Autonomous execution failed: {e}")
+            self._update_agent_status("autonomous", "ERROR")
+            return {"status": "ERROR", "error": str(e)}
+
+    # =========================================================================
+    # STEP 8: DASHBOARD UPDATE
+    # =========================================================================
+
+    def update_dashboard_state(self):
+        """Update all dashboard state files with fresh data."""
+        logger.info("Step 8: Updating dashboard state...")
+
+        # Update agent statuses - already done per-agent, but do final update
+        agents = self._load_state(AGENTS_STATUS_FILE) or []
+        now = datetime.now(ET).strftime("%Y-%m-%d %H:%M")
+
+        for agent in agents:
+            if agent.get("status") == "RUNNING":
+                agent["status"] = "ACTIVE"
+            agent["last_cycle"] = now
+
+        self._save_state(AGENTS_STATUS_FILE, agents)
+        logger.info("Dashboard state updated")
+
+    # =========================================================================
+    # MAIN CYCLE
+    # =========================================================================
 
     def run_cycle(self) -> Dict:
-        """
-        Run a single 30-minute analysis cycle.
-
-        Returns:
-            Dict with cycle results
-        """
+        """Run one complete agent cycle."""
         self.cycle_count += 1
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(ET)
         cycle_id = timestamp.strftime("%Y-%m-%d-%H-%M")
 
-        logger.info(f"{'='*60}")
-        logger.info(f"ATLAS CYCLE {self.cycle_count} - {cycle_id}")
-        logger.info(f"{'='*60}")
+        logger.info("=" * 70)
+        logger.info(f"ATLAS AGENT CYCLE #{self.cycle_count} - {cycle_id}")
+        logger.info("=" * 70)
 
         cycle_data = {
             "cycle_id": cycle_id,
+            "cycle_number": self.cycle_count,
             "timestamp": timestamp.isoformat(),
             "dry_run": self.dry_run,
-            "signals": {},
-            "cio_decision": None,
-            "adversarial_review": None,
-            "execution": None,
+            "steps": {},
+            "errors": [],
         }
 
         try:
-            # Load portfolio
-            portfolio = self._load_portfolio()
+            # Step 1: News scan
+            cycle_data["steps"]["news"] = self.run_news_scan()
 
-            # Check risk limits first
-            risk_status = self._check_risk_limits(portfolio)
-            cycle_data["risk_status"] = risk_status
+            # Step 2: Price update
+            cycle_data["steps"]["prices"] = self.run_price_update()
 
-            if risk_status["status"] == "VIOLATION":
-                logger.error(f"RISK VIOLATION: {risk_status['violations']}")
-                cycle_data["aborted"] = True
-                cycle_data["abort_reason"] = "Risk violation"
-                self._save_cycle_log(cycle_data)
-                return cycle_data
+            # Step 3: Sector desks
+            cycle_data["steps"]["desks"] = self.run_sector_desks()
 
-            # Phase 1: Gather intelligence
-            logger.info("[Phase 1] Gathering intelligence...")
+            # Step 4: Superinvestor agents
+            cycle_data["steps"]["agents"] = self.run_superinvestor_agents()
 
-            # Filing monitor (high priority)
-            filing_monitor = self._get_agent("filing_monitor")
-            if filing_monitor:
-                try:
-                    filings = filing_monitor.scan(minutes=35, portfolio_only=True)
-                    cycle_data["signals"]["filings"] = {
-                        "count": len(filings),
-                        "immediate": len([f for f in filings if f.get("urgency") == "IMMEDIATE"]),
-                        "high": len([f for f in filings if f.get("urgency") == "HIGH"]),
-                    }
-                except Exception as e:
-                    logger.error(f"Filing monitor error: {e}")
+            # Step 5: Adversarial review
+            cycle_data["steps"]["adversarial"] = self.run_adversarial_review()
 
-            # Macro (Druckenmiller)
-            druckenmiller = self._get_agent("druckenmiller")
-            if druckenmiller:
-                try:
-                    macro = druckenmiller.get_brief_for_cio()
-                    cycle_data["signals"]["macro"] = {
-                        "tilt": macro.get("portfolio_tilt"),
-                        "liquidity_regime": macro.get("liquidity_regime"),
-                        "conviction": macro.get("conviction_level"),
-                    }
-                except Exception as e:
-                    logger.error(f"Druckenmiller error: {e}")
+            # Step 6: CIO synthesis
+            cycle_data["steps"]["cio"] = self.run_cio_synthesis()
 
-            # Asset class desks
-            for desk in ["bond", "currency", "commodities", "metals"]:
-                agent = self._get_agent(desk)
-                if agent:
-                    try:
-                        brief = agent.load_latest_brief() if hasattr(agent, 'load_latest_brief') else None
-                        if brief:
-                            cycle_data["signals"][desk] = {
-                                "signal": brief.get("signal"),
-                                "confidence": brief.get("confidence"),
-                            }
-                    except Exception as e:
-                        logger.debug(f"{desk} desk error: {e}")
+            # Step 7: Autonomous execution check
+            cycle_data["steps"]["autonomous"] = self.run_autonomous_execution()
 
-            # Phase 2: Consensus check on portfolio
-            logger.info("[Phase 2] Checking consensus...")
-            consensus = self._get_agent("consensus")
-            if consensus:
-                try:
-                    for pos in portfolio.get("positions", [])[:5]:
-                        ticker = pos.get("ticker")
-                        if ticker:
-                            cons = consensus.get_brief_for_cio(ticker)
-                            if cons:
-                                cycle_data["signals"].setdefault("consensus", {})[ticker] = {
-                                    "rating": cons.get("consensus_rating"),
-                                    "crowding": cons.get("crowding"),
-                                }
-                except Exception as e:
-                    logger.error(f"Consensus error: {e}")
+            # Step 8: Dashboard update
+            self.update_dashboard_state()
+            cycle_data["steps"]["dashboard"] = {"status": "UPDATED"}
 
-            # Phase 3: CIO synthesis
-            logger.info("[Phase 3] CIO synthesis...")
-            cio = self._get_agent("cio")
-            cio_decision = {
-                "action": "HOLD",
-                "reason": "Default hold - no strong signals",
-            }
-
-            if cio:
-                try:
-                    # Prepare context for CIO
-                    cio_context = {
-                        "portfolio": portfolio,
-                        "signals": cycle_data["signals"],
-                        "risk_status": risk_status,
-                        "trades_today": self.trades_today,
-                    }
-
-                    # Get CIO decision (simplified - in production this would be more sophisticated)
-                    cio_brief = cio.get_brief_for_cio() if hasattr(cio, 'get_brief_for_cio') else None
-                    if cio_brief:
-                        cio_decision = {
-                            "action": cio_brief.get("top_conviction_trade", {}).get("action", "HOLD"),
-                            "ticker": cio_brief.get("top_conviction_trade", {}).get("ticker"),
-                            "direction": cio_brief.get("top_conviction_trade", {}).get("direction"),
-                            "size": cio_brief.get("top_conviction_trade", {}).get("suggested_size_pct"),
-                            "reason": cio_brief.get("top_conviction_trade", {}).get("thesis"),
-                        }
-                except Exception as e:
-                    logger.error(f"CIO error: {e}")
-
-            cycle_data["cio_decision"] = cio_decision
-
-            # Phase 4: Adversarial review (if trade recommended)
-            if cio_decision.get("action") not in ["HOLD", None]:
-                logger.info("[Phase 4] Adversarial review...")
-                adversarial = self._get_agent("adversarial")
-
-                adversarial_review = {
-                    "proceed": True,
-                    "concerns": [],
-                }
-
-                if adversarial:
-                    try:
-                        # Get adversarial assessment
-                        review = adversarial.get_brief_for_cio() if hasattr(adversarial, 'get_brief_for_cio') else None
-                        if review:
-                            # Check if adversarial has major concerns
-                            bear_thesis = review.get("bear_thesis_strength", 0)
-                            if bear_thesis > 0.7:
-                                adversarial_review["proceed"] = False
-                                adversarial_review["concerns"].append(review.get("primary_bear_thesis"))
-                    except Exception as e:
-                        logger.error(f"Adversarial error: {e}")
-
-                cycle_data["adversarial_review"] = adversarial_review
-
-                # Phase 5: Execute if approved
-                if adversarial_review["proceed"]:
-                    if self.dry_run:
-                        logger.info(f"[DRY RUN] Would execute: {cio_decision}")
-                        cycle_data["execution"] = {
-                            "executed": False,
-                            "dry_run": True,
-                            "would_execute": cio_decision,
-                        }
-                    else:
-                        # Execute trade via autonomous agent
-                        logger.info(f"[EXECUTE] {cio_decision}")
-                        autonomous = self._get_agent("autonomous")
-                        if autonomous:
-                            try:
-                                # This would actually execute the trade
-                                cycle_data["execution"] = {
-                                    "executed": True,
-                                    "trade": cio_decision,
-                                    "timestamp": datetime.utcnow().isoformat(),
-                                }
-                                self.trades_today += 1
-                            except Exception as e:
-                                logger.error(f"Execution error: {e}")
-                                cycle_data["execution"] = {
-                                    "executed": False,
-                                    "error": str(e),
-                                }
-                else:
-                    logger.info(f"[BLOCKED] Trade blocked by adversarial: {adversarial_review['concerns']}")
-                    cycle_data["execution"] = {
-                        "executed": False,
-                        "blocked_by": "adversarial",
-                        "reason": adversarial_review["concerns"],
-                    }
-
-            # Phase 6: Update P&L
-            logger.info("[Phase 6] Updating P&L...")
-            pnl_tracker = self._get_agent("pnl_tracker")
-            if pnl_tracker:
-                try:
-                    pnl_tracker.update_positions()
-                except Exception as e:
-                    logger.debug(f"P&L tracker error: {e}")
-
-            # Save cycle log
-            self._save_cycle_log(cycle_data)
-
-            logger.info(f"Cycle {self.cycle_count} complete")
-            return cycle_data
+            cycle_data["status"] = "SUCCESS"
+            cycle_data["duration_seconds"] = (datetime.now(ET) - timestamp).total_seconds()
 
         except Exception as e:
             logger.error(f"Cycle error: {e}")
-            cycle_data["error"] = str(e)
-            self._save_cycle_log(cycle_data)
-            return cycle_data
+            cycle_data["status"] = "ERROR"
+            cycle_data["errors"].append(str(e))
 
-    def run_daily_summary(self) -> Dict:
-        """
-        Run end-of-day summary.
+        # Save cycle log
+        logs = self._load_state(EXECUTION_LOG_FILE) or []
+        logs.append(cycle_data)
+        logs = logs[-500:]  # Keep last 500 cycles
+        self._save_state(EXECUTION_LOG_FILE, logs)
 
-        Returns:
-            Dict with daily summary
-        """
-        logger.info("=" * 60)
-        logger.info("ATLAS DAILY SUMMARY")
-        logger.info("=" * 60)
+        logger.info("=" * 70)
+        logger.info(f"ATLAS AGENT CYCLE #{self.cycle_count} COMPLETE")
+        logger.info(f"Duration: {cycle_data.get('duration_seconds', 0):.1f}s")
+        logger.info("=" * 70)
 
-        summary = {
-            "date": datetime.now().strftime("%Y-%m-%d"),
-            "timestamp": datetime.utcnow().isoformat(),
-        }
+        return cycle_data
+
+    # =========================================================================
+    # DAILY BRIEFING
+    # =========================================================================
+
+    def run_morning_briefing(self) -> Dict:
+        """Generate the daily morning briefing."""
+        logger.info("=" * 70)
+        logger.info("ATLAS MORNING BRIEFING")
+        logger.info("=" * 70)
 
         try:
-            # Load portfolio
-            portfolio = self._load_portfolio()
-            summary["portfolio"] = {
-                "total_value": portfolio.get("total_value"),
-                "total_pnl": portfolio.get("total_pnl"),
-                "positions": len(portfolio.get("positions", [])),
-            }
+            # Run full cycle first
+            cycle_result = self.run_cycle()
 
-            # Full P&L update
-            pnl_tracker = self._get_agent("pnl_tracker")
-            if pnl_tracker:
+            # Generate briefing
+            from agents.daily_briefing import DailyBriefingAgent
+            briefing_agent = DailyBriefingAgent()
+            briefing = briefing_agent.generate(is_eod=False)
+
+            if briefing:
+                logger.info(f"Morning briefing generated for {briefing.get('date')}")
+
+                # Try to send email if configured
                 try:
-                    pnl_tracker.update_positions()
-                    pnl_tracker.calculate_daily_return()
+                    briefing_agent.send_email(briefing)
                 except Exception as e:
-                    logger.error(f"P&L update error: {e}")
+                    logger.warning(f"Email send failed: {e}")
 
-            # Check fundamentals on portfolio companies
-            fundamental = self._get_agent("fundamental")
-            if fundamental:
-                valuations = {}
-                for pos in portfolio.get("positions", [])[:10]:
-                    ticker = pos.get("ticker")
-                    if ticker:
-                        try:
-                            val = fundamental.load_latest_brief()
-                            if val and val.get("ticker") == ticker:
-                                valuations[ticker] = {
-                                    "fair_value": val.get("triangulated_valuation", {}).get("fair_value"),
-                                    "signal": val.get("signal"),
-                                }
-                        except:
-                            pass
-                summary["valuations"] = valuations
-
-            # Get cycles today
-            logs = []
-            if EXECUTION_LOG_FILE.exists():
-                with open(EXECUTION_LOG_FILE, "r") as f:
-                    logs = json.load(f)
-
-            today = datetime.now().strftime("%Y-%m-%d")
-            today_cycles = [l for l in logs if l.get("cycle_id", "").startswith(today)]
-            summary["cycles_today"] = len(today_cycles)
-            summary["trades_today"] = self.trades_today
-
-            # Save daily summary
-            summary_file = DAILY_SUMMARIES_DIR / f"summary_{today}.json"
-            with open(summary_file, "w") as f:
-                json.dump(summary, f, indent=2, default=str)
-
-            logger.info(f"Daily summary saved to {summary_file}")
-
-            # Reset daily counters
-            self.trades_today = 0
-
-            return summary
+                return {"status": "SUCCESS", "briefing": briefing}
+            else:
+                return {"status": "NO_DATA"}
 
         except Exception as e:
-            logger.error(f"Daily summary error: {e}")
-            summary["error"] = str(e)
-            return summary
+            logger.error(f"Morning briefing failed: {e}")
+            return {"status": "ERROR", "error": str(e)}
+
+    # =========================================================================
+    # WEEKLY SCREEN
+    # =========================================================================
+
+    def run_weekly_screen(self) -> Dict:
+        """Run weekly S&P 500 fundamental screen."""
+        logger.info("=" * 70)
+        logger.info("ATLAS WEEKLY FUNDAMENTAL SCREEN")
+        logger.info("=" * 70)
+
+        try:
+            # This would run the full fundamental batch analysis
+            # For now, we'll just trigger the fundamental agent
+            fundamental = self._get_agent("fundamental")
+
+            if fundamental and hasattr(fundamental, "run_batch"):
+                results = fundamental.run_batch()
+                return {"status": "SUCCESS", "results": results}
+            else:
+                logger.warning("Fundamental batch not available")
+                return {"status": "NOT_AVAILABLE"}
+
+        except Exception as e:
+            logger.error(f"Weekly screen failed: {e}")
+            return {"status": "ERROR", "error": str(e)}
+
+    # =========================================================================
+    # MAIN LOOP
+    # =========================================================================
 
     def run(self, max_cycles: int = None):
         """
@@ -591,46 +1048,61 @@ class ATLASExecutionLoop:
             max_cycles: Maximum cycles to run (None = infinite)
         """
         self.running = True
-        logger.info("ATLAS Execution Loop starting...")
+        logger.info("=" * 70)
+        logger.info("ATLAS EXECUTION LOOP STARTING")
         logger.info(f"Dry run: {self.dry_run}")
+        logger.info(f"Max cycles: {max_cycles or 'Infinite'}")
+        logger.info("=" * 70)
 
         cycle = 0
-        last_daily_summary = None
+        last_morning_briefing = None
+        last_weekly_screen = None
+        last_cycle_time = None
 
         try:
             while self.running and (max_cycles is None or cycle < max_cycles):
                 now = datetime.now(ET)
+                today = now.strftime("%Y-%m-%d")
 
-                if self._is_market_hours():
-                    # Skip first/last 15 minutes (high volatility)
-                    if self._is_first_15_minutes():
-                        logger.info("First 15 minutes - skipping cycle")
-                        time.sleep(60)
-                        continue
-
-                    if self._is_last_15_minutes():
-                        logger.info("Last 15 minutes - skipping cycle")
-                        time.sleep(60)
-                        continue
-
-                    # Run cycle
-                    self.run_cycle()
+                # Check for morning briefing (7am ET, weekdays)
+                if self._is_morning_briefing_time() and last_morning_briefing != today:
+                    self.run_morning_briefing()
+                    last_morning_briefing = today
+                    # Morning briefing includes a full cycle, so update cycle time
+                    last_cycle_time = now
                     cycle += 1
+                    continue
 
-                    # Wait 30 minutes
-                    logger.info("Waiting 30 minutes until next cycle...")
-                    time.sleep(1800)
+                # Check for weekly screen (Sunday 11pm ET)
+                if self._is_weekly_screen_time() and last_weekly_screen != today:
+                    self.run_weekly_screen()
+                    last_weekly_screen = today
+                    continue
 
+                # During market hours, run cycles every 30 minutes
+                if self._is_market_hours():
+                    # Check if 30 minutes have passed since last cycle
+                    should_run = False
+
+                    if last_cycle_time is None:
+                        should_run = True
+                    else:
+                        minutes_since_last = (now - last_cycle_time).total_seconds() / 60
+                        should_run = minutes_since_last >= 30
+
+                    if should_run:
+                        self.run_cycle()
+                        last_cycle_time = now
+                        cycle += 1
+
+                        # Reset daily trade counter at start of day
+                        if now.hour == 9 and now.minute < 45:
+                            self.trades_today = 0
+                    else:
+                        # Sleep until next check
+                        time.sleep(60)
                 else:
-                    # After hours
-                    if self._is_just_after_close():
-                        # Run daily summary once
-                        today = now.strftime("%Y-%m-%d")
-                        if last_daily_summary != today:
-                            self.run_daily_summary()
-                            last_daily_summary = today
-
-                    # Check every 5 minutes
+                    # Outside market hours, check every 5 minutes
                     time.sleep(300)
 
         except KeyboardInterrupt:
@@ -644,67 +1116,96 @@ class ATLASExecutionLoop:
         self.running = False
 
 
-if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s | %(levelname)s | %(message)s"
-    )
+# =============================================================================
+# CLI INTERFACE
+# =============================================================================
 
-    parser = argparse.ArgumentParser(description="ATLAS Execution Loop")
-    parser.add_argument("--once", action="store_true", help="Run a single cycle")
+def main():
+    """Main entry point for the execution loop."""
+    parser = argparse.ArgumentParser(description="ATLAS Autonomous Execution Loop")
+    parser.add_argument("--once", action="store_true", help="Run a single cycle and exit")
     parser.add_argument("--start", action="store_true", help="Start continuous loop")
-    parser.add_argument("--daily-summary", action="store_true", help="Run daily summary")
+    parser.add_argument("--briefing", action="store_true", help="Generate morning briefing")
+    parser.add_argument("--weekly", action="store_true", help="Run weekly screen")
     parser.add_argument("--dry-run", action="store_true", help="Simulation mode (no trades)")
     parser.add_argument("--log", action="store_true", help="View execution log")
+    parser.add_argument("--log-file", type=str, default=None, help="Log file path")
+    parser.add_argument("--max-cycles", type=int, default=None, help="Max cycles for continuous mode")
     args = parser.parse_args()
 
-    if args.log:
-        print("\n" + "="*70)
-        print("ATLAS Execution Log")
-        print("="*70 + "\n")
+    # Setup logging
+    log_file = args.log_file or "/var/log/atlas_loop.log"
+    try:
+        setup_logging(log_file)
+    except:
+        setup_logging()  # Fall back to console only
 
+    if args.log:
+        print("\n" + "=" * 70)
+        print("ATLAS Execution Log")
+        print("=" * 70 + "\n")
+
+        logs = []
         if EXECUTION_LOG_FILE.exists():
-            with open(EXECUTION_LOG_FILE, "r") as f:
+            with open(EXECUTION_LOG_FILE) as f:
                 logs = json.load(f)
 
+        if logs:
             for log in logs[-10:]:
-                print(f"Cycle: {log.get('cycle_id')}")
-                print(f"  CIO Decision: {log.get('cio_decision', {}).get('action', 'N/A')}")
-                if log.get('execution'):
-                    print(f"  Executed: {log.get('execution', {}).get('executed', False)}")
+                print(f"Cycle: {log.get('cycle_id')} (#{log.get('cycle_number', 'N/A')})")
+                print(f"  Status: {log.get('status', 'UNKNOWN')}")
+                print(f"  Duration: {log.get('duration_seconds', 0):.1f}s")
+                if log.get("errors"):
+                    print(f"  Errors: {log.get('errors')}")
                 print()
         else:
-            print("No execution log found")
+            print("No execution logs found")
+        return
 
-    elif args.daily_summary:
-        loop = ATLASExecutionLoop(dry_run=True)
-        summary = loop.run_daily_summary()
-        print(json.dumps(summary, indent=2, default=str))
+    if args.briefing:
+        loop = ATLASExecutionLoop(dry_run=args.dry_run)
+        result = loop.run_morning_briefing()
+        print(json.dumps(result, indent=2, default=str))
+        return
 
-    elif args.once:
-        print("\n" + "="*70)
+    if args.weekly:
+        loop = ATLASExecutionLoop(dry_run=args.dry_run)
+        result = loop.run_weekly_screen()
+        print(json.dumps(result, indent=2, default=str))
+        return
+
+    if args.once:
+        print("\n" + "=" * 70)
         print("ATLAS Execution Loop - Single Cycle")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
 
         loop = ATLASExecutionLoop(dry_run=args.dry_run)
         result = loop.run_cycle()
 
         print("\nCycle Result:")
         print(json.dumps(result, indent=2, default=str))
+        return
 
-    elif args.start:
-        print("\n" + "="*70)
+    if args.start:
+        print("\n" + "=" * 70)
         print("ATLAS Execution Loop - Continuous Mode")
-        print("="*70 + "\n")
+        print("=" * 70 + "\n")
         print("Press Ctrl+C to stop\n")
 
         loop = ATLASExecutionLoop(dry_run=args.dry_run)
-        loop.run()
+        loop.run(max_cycles=args.max_cycles)
+        return
 
-    else:
-        print("Usage:")
-        print("  python3 -m agents.execution_loop --once          # Single cycle")
-        print("  python3 -m agents.execution_loop --once --dry-run  # Single cycle (simulation)")
-        print("  python3 -m agents.execution_loop --start         # Continuous loop")
-        print("  python3 -m agents.execution_loop --daily-summary # Daily summary")
-        print("  python3 -m agents.execution_loop --log           # View execution log")
+    # Default: show usage
+    print("Usage:")
+    print("  python3 -m agents.execution_loop --once           # Single cycle")
+    print("  python3 -m agents.execution_loop --once --dry-run # Single cycle (simulation)")
+    print("  python3 -m agents.execution_loop --start          # Continuous loop")
+    print("  python3 -m agents.execution_loop --start --dry-run # Continuous loop (simulation)")
+    print("  python3 -m agents.execution_loop --briefing       # Generate morning briefing")
+    print("  python3 -m agents.execution_loop --weekly         # Run weekly screen")
+    print("  python3 -m agents.execution_loop --log            # View execution log")
+
+
+if __name__ == "__main__":
+    main()

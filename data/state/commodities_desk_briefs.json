@@ -92,5 +92,186 @@
       "dollar_index": 99.27899932861328,
       "vix": 25.899999618530273
     }
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "signal": "BULLISH",
+    "confidence": 0.75,
+    "crude_oil": {
+      "wti_price": 91.27,
+      "brent_price": 92.77,
+      "spread": 1.5,
+      "curve_structure": "BACKWARDATION",
+      "supply_demand_balance": "DEFICIT",
+      "signal": "BULLISH",
+      "assessment": "WTI breaking above $90 with backwardation structure signals tight supply-demand fundamentals amid geopolitical risk premium."
+    },
+    "natural_gas": {
+      "price": 3.17,
+      "curve_structure": "BACKWARDATION",
+      "storage_vs_average": "BELOW",
+      "signal": "NEUTRAL",
+      "assessment": "Natural gas in seasonal drawdown pattern with modest backwardation but approaching shoulder season demand weakness."
+    },
+    "supply_outlook": {
+      "opec_stance": "CUTTING",
+      "us_shale_growth": "SLOWING",
+      "non_opec_growth": "WEAK",
+      "assessment": "Supply discipline holding with OPEC+ cuts maintaining effectiveness while US shale growth momentum decelerating."
+    },
+    "demand_outlook": {
+      "global_growth_impact": "SUPPORTIVE",
+      "china_demand": "MODERATE",
+      "seasonal_factors": "NEUTRAL",
+      "assessment": "Underlying demand resilient with China recovery supporting consumption despite moving past winter heating season."
+    },
+    "macro_factors": {
+      "usd_impact": "NEUTRAL",
+      "rate_impact": "TAILWIND",
+      "inflation_demand": "MODERATE",
+      "assessment": "USD at 98.87 providing neutral backdrop while potential rate cycle peak supportive for commodity positioning."
+    },
+    "geopolitical_risk": {
+      "premium_level": "HIGH",
+      "key_risks": [
+        "Middle East tensions",
+        "Russia sanctions",
+        "China-Taiwan shipping lanes",
+        "Energy infrastructure attacks"
+      ],
+      "assessment": "Elevated VIX at 29.49 reflecting heightened geopolitical risk premium embedded in energy complex."
+    },
+    "positioning": {
+      "crude_stance": "LONG",
+      "gas_stance": "NEUTRAL",
+      "spread_trades": "Brent-WTI spread normalized from previous 7.18 to 1.50 - previous arbitrage opportunity closed",
+      "recommended_instruments": [
+        "USO",
+        "UCO",
+        "XLE",
+        "CL futures"
+      ]
+    },
+    "key_levels": {
+      "wti_resistance": 95.0,
+      "wti_support": 88.5,
+      "brent_key_level": 95.5,
+      "natgas_key_level": 3.5
+    },
+    "catalysts": {
+      "upcoming": [
+        "OPEC+ meeting March 15",
+        "US inventory data weekly",
+        "China PMI March 31"
+      ],
+      "risks": [
+        "Demand destruction above $100",
+        "OPEC+ compliance breakdown",
+        "Risk-off selloff"
+      ]
+    },
+    "bull_case": "WTI breaking $90 with backwardated curve confirms supply deficit. OPEC+ discipline plus slowing shale growth supports higher prices. Geopolitical risk premium justifies elevated levels.",
+    "bear_case": "High VIX signals risk-off environment that could pressure commodities. Above $90 WTI approaching demand destruction territory. Seasonal natural gas weakness ahead.",
+    "brief_for_cio": "Strong bullish pivot from previous neutral stance. WTI surged from $76 to $91 with curve flipping to backwardation. Recommend increasing energy allocation targeting $95 WTI. High conviction trade.",
+    "desk": "commodities",
+    "analyzed_at": "2026-03-06T21:34:47.391308",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "wti": 91.2699966430664,
+      "brent": 92.7699966430664,
+      "natgas": 3.1679999828338623,
+      "dollar_index": 98.87100219726562,
+      "vix": 29.489999771118164
+    }
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "signal": "BULLISH",
+    "confidence": 0.7,
+    "crude_oil": {
+      "wti_price": 91.3,
+      "brent_price": 92.86,
+      "spread": 1.56,
+      "curve_structure": "BACKWARDATION",
+      "supply_demand_balance": "DEFICIT",
+      "signal": "BULLISH",
+      "assessment": "WTI holding above $91 with tight Brent-WTI spread indicating strong global demand dynamics."
+    },
+    "natural_gas": {
+      "price": 3.16,
+      "curve_structure": "CONTANGO",
+      "storage_vs_average": "BELOW",
+      "signal": "NEUTRAL",
+      "assessment": "Natural gas at mid-cycle levels with storage drawdowns but contango structure limiting upside."
+    },
+    "supply_outlook": {
+      "opec_stance": "CUTTING",
+      "us_shale_growth": "SLOWING",
+      "non_opec_growth": "WEAK",
+      "assessment": "Supply discipline remains intact with OPEC+ cuts effective and US shale growth constrained."
+    },
+    "demand_outlook": {
+      "global_growth_impact": "SUPPORTIVE",
+      "china_demand": "STRONG",
+      "seasonal_factors": "NEUTRAL",
+      "assessment": "Spring demand transition but underlying fundamentals remain constructive for oil."
+    },
+    "macro_factors": {
+      "usd_impact": "NEUTRAL",
+      "rate_impact": "NEUTRAL",
+      "inflation_demand": "MODERATE",
+      "assessment": "USD at 98.87 provides neutral backdrop while elevated VIX suggests risk premium intact."
+    },
+    "geopolitical_risk": {
+      "premium_level": "HIGH",
+      "key_risks": [
+        "Middle East tensions",
+        "Russia sanctions",
+        "Strait of Hormuz risks"
+      ],
+      "assessment": "VIX at 29.49 reflects elevated risk environment supporting energy risk premiums."
+    },
+    "positioning": {
+      "crude_stance": "LONG",
+      "gas_stance": "NEUTRAL",
+      "spread_trades": "Long WTI/Brent calendar spreads to capture backwardation, avoid natural gas given contango",
+      "recommended_instruments": [
+        "USO",
+        "UCO",
+        "XLE",
+        "CL front month futures"
+      ]
+    },
+    "key_levels": {
+      "wti_resistance": 95.0,
+      "wti_support": 88.5,
+      "brent_key_level": 95.5,
+      "natgas_key_level": 3.5
+    },
+    "catalysts": {
+      "upcoming": [
+        "March 14 OPEC+ meeting",
+        "March 20 EIA inventory data",
+        "Q1 earnings season"
+      ],
+      "risks": [
+        "Demand destruction above $95 WTI",
+        "OPEC+ compliance breakdown",
+        "China growth slowdown"
+      ]
+    },
+    "bull_case": "WTI consolidating above $90 with backwardation intact suggests tight fundamentals. Geopolitical risk premium elevated with VIX at 29.49 supporting energy allocations through $95 target.",
+    "bear_case": "Elevated VIX signals broader risk-off sentiment that could pressure commodities. Natural gas in contango suggests oversupply concerns spreading to broader energy complex.",
+    "brief_for_cio": "Maintain LONG energy stance. WTI consolidating at $91 vs $95 target. Elevated VIX supports risk premiums. Reduce natural gas exposure given contango structure.",
+    "desk": "commodities",
+    "analyzed_at": "2026-03-06T21:37:27.954723",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "wti": 91.30000305175781,
+      "brent": 92.86000061035156,
+      "natgas": 3.1649999618530273,
+      "dollar_index": 98.87000274658203,
+      "vix": 29.489999771118164
+    }
   }
 ]

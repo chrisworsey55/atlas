@@ -8,6 +8,7 @@ from typing import Optional
 from datetime import datetime
 from pathlib import Path
 
+import yfinance as yf
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -133,12 +134,45 @@ def get_agent_instance(agent_name: str):
     return agent_map[agent_name]()
 
 
+def update_current_prices(positions: list) -> list:
+    """Fetch live prices from yfinance for portfolio positions."""
+    tickers = [p['ticker'] for p in positions if p.get('ticker') != 'BIL']
+    if not tickers:
+        return positions
+
+    try:
+        data = yf.download(tickers, period='1d', progress=False)
+
+        for pos in positions:
+            ticker = pos.get('ticker')
+            if ticker == 'BIL':
+                continue
+            try:
+                if len(tickers) == 1:
+                    price = float(data['Close'].iloc[-1])
+                else:
+                    price = float(data['Close'][ticker].iloc[-1])
+                pos['current_price'] = round(price, 2)
+            except Exception:
+                pass  # Keep existing price if fetch fails
+    except Exception as e:
+        logger.warning(f"Could not fetch live prices: {e}")
+
+    return positions
+
+
 def load_portfolio() -> dict:
-    """Load current portfolio state."""
+    """Load current portfolio state with live prices."""
     try:
         portfolio_path = Path(__file__).parent.parent / "data" / "state" / "positions.json"
         with open(portfolio_path) as f:
-            return json.load(f)
+            portfolio = json.load(f)
+
+        # Update with live prices
+        if portfolio.get('positions'):
+            portfolio['positions'] = update_current_prices(portfolio['positions'])
+
+        return portfolio
     except Exception as e:
         logger.warning(f"Could not load portfolio: {e}")
         return {}

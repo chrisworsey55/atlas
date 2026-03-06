@@ -88,5 +88,181 @@
       "fed_funds_rate": 3.64,
       "vix": 26.190000534057617
     }
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "signal": "BULLISH_USD",
+    "confidence": 0.8,
+    "dollar_index": {
+      "current_level": 98.87,
+      "trend": "STABILIZING",
+      "assessment": "DXY finding support near 98.50 after recent weakness, risk-off environment supporting USD baseline demand."
+    },
+    "rate_differentials": {
+      "us_vs_eu_2y": null,
+      "us_vs_jp_2y": null,
+      "direction": "UNKNOWN",
+      "assessment": "Rate differential data unavailable but USD/JPY at 157.86 suggests significant yield advantage remains."
+    },
+    "risk_sentiment": {
+      "regime": "RISK_OFF",
+      "vix_level": 29.49,
+      "assessment": "VIX at 29.49 signals elevated fear and flight-to-safety dynamics favoring USD and JPY."
+    },
+    "growth_differential": {
+      "us_vs_eu": "UNKNOWN",
+      "us_vs_jp": "UNKNOWN",
+      "assessment": "Growth data unavailable but market pricing suggests US fundamentals remain relatively strong."
+    },
+    "key_pairs": {
+      "eurusd": {
+        "current": 1.1616,
+        "signal": "BEARISH",
+        "target": 1.14,
+        "stop": 1.175
+      },
+      "usdjpy": {
+        "current": 157.86,
+        "signal": "BEARISH",
+        "target": 155.0,
+        "stop": 159.5
+      },
+      "gbpusd": {
+        "current": 1.3397,
+        "signal": "BEARISH",
+        "target": 1.32,
+        "stop": 1.355
+      },
+      "audusd": {
+        "current": 0.7028,
+        "signal": "BEARISH",
+        "target": 0.69,
+        "stop": 0.715
+      }
+    },
+    "positioning": {
+      "primary_trade": "Long USD/CHF and short AUD/USD on risk-off dynamics, avoid USD/JPY longs due to intervention risk",
+      "hedge_trade": "Small long EUR/USD position as hedge against coordinated intervention",
+      "carry_trades": "avoid given elevated volatility and intervention risks"
+    },
+    "key_levels": {
+      "dxy_resistance": 100.5,
+      "dxy_support": 98.2,
+      "eurusd_key_level": 1.15,
+      "usdjpy_intervention_risk": 158.0
+    },
+    "catalysts": {
+      "upcoming": [
+        "BOJ potential intervention above 158.00",
+        "US employment data",
+        "Fed speakers commentary"
+      ],
+      "risks": [
+        "Coordinated G7 FX intervention",
+        "Risk sentiment reversal",
+        "Unexpected dovish Fed pivot"
+      ]
+    },
+    "bull_case_usd": "Risk-off environment with VIX at 29.49 drives safe-haven demand. DXY stabilizing near 98.50 suggests recent USD weakness overdone. Flight-to-quality supporting dollar despite previous bearish positioning.",
+    "bear_case_usd": "USD/JPY intervention risk extreme above 157.50. Previous bearish momentum could resume if risk sentiment improves. Coordinated intervention remains possible given JPY weakness.",
+    "brief_for_cio": "Flip to USD bullish on risk-off surge (VIX 29.49). Previous bearish call partially worked but risk regime changed. Long USD/CHF, short AUD/USD. Avoid USD/JPY longs given intervention risk at 157.86.",
+    "desk": "currency",
+    "analyzed_at": "2026-03-06T21:34:31.008972",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "dxy": 98.87100219726562,
+      "eurusd": 1.1615750789642334,
+      "usdjpy": 157.85899353027344,
+      "fed_funds_rate": null,
+      "vix": 29.489999771118164
+    }
+  },
+  {
+    "analysis_date": "2026-03-06",
+    "signal": "BULLISH_USD",
+    "confidence": 0.85,
+    "dollar_index": {
+      "current_level": 98.87,
+      "trend": "STRENGTHENING",
+      "assessment": "DXY holding near 99 resistance in risk-off environment with elevated VIX supporting safe haven demand."
+    },
+    "rate_differentials": {
+      "us_vs_eu_2y": null,
+      "us_vs_jp_2y": null,
+      "direction": "STABLE",
+      "assessment": "Rate differential data unavailable but USD strength suggests maintaining favorable spreads versus G10."
+    },
+    "risk_sentiment": {
+      "regime": "RISK_OFF",
+      "vix_level": 29.49,
+      "assessment": "Clear risk-off regime with VIX near 30 driving safe haven flows into USD and away from risk currencies."
+    },
+    "growth_differential": {
+      "us_vs_eu": "SIMILAR",
+      "us_vs_jp": "SIMILAR",
+      "assessment": "Growth data unavailable but USD strength in risk-off suggests relative resilience versus peers."
+    },
+    "key_pairs": {
+      "eurusd": {
+        "current": 1.1616,
+        "signal": "BEARISH",
+        "target": 1.14,
+        "stop": 1.175
+      },
+      "usdjpy": {
+        "current": 157.83,
+        "signal": "NEUTRAL",
+        "target": null,
+        "stop": null
+      },
+      "gbpusd": {
+        "current": 1.3396,
+        "signal": "BEARISH",
+        "target": 1.32,
+        "stop": 1.355
+      },
+      "audusd": {
+        "current": 0.7028,
+        "signal": "BEARISH",
+        "target": 0.69,
+        "stop": 0.715
+      }
+    },
+    "positioning": {
+      "primary_trade": "Long USD/CHF at 0.7764 targeting 0.7900 as dual safe haven play",
+      "hedge_trade": "Short AUD/USD at 0.7028 targeting 0.6900 as risk-off proxy",
+      "carry_trades": "avoid - risk-off regime unfavorable for carry strategies"
+    },
+    "key_levels": {
+      "dxy_resistance": 99.5,
+      "dxy_support": 98.0,
+      "eurusd_key_level": 1.15,
+      "usdjpy_intervention_risk": 158.0
+    },
+    "catalysts": {
+      "upcoming": [
+        "March 15 Fed meeting",
+        "March 20 ECB decision",
+        "March jobs report"
+      ],
+      "risks": [
+        "BOJ intervention above 158",
+        "VIX spike above 35",
+        "Credit stress emergence"
+      ]
+    },
+    "bull_case_usd": "Risk-off regime with VIX near 30 drives safe haven demand for USD. Gold at $5175 confirms flight to safety. DXY approaching 99 breakout level with momentum favoring further strength.",
+    "bear_case_usd": "USD/JPY at 157.83 creates intervention risk that could spill over to broader USD weakness. Risk-off may be temporary with potential VIX normalization reducing safe haven premium.",
+    "brief_for_cio": "Maintain USD bullish stance. Risk-off surge validates previous flip. Long USD/CHF, short AUD/USD. Avoid USD/JPY longs above 157.80 intervention risk. Target DXY 99.50 breakout.",
+    "desk": "currency",
+    "analyzed_at": "2026-03-06T21:37:12.593298",
+    "model_used": "claude-sonnet-4-20250514",
+    "raw_data": {
+      "dxy": 98.87300109863281,
+      "eurusd": 1.1615750789642334,
+      "usdjpy": 157.82699584960938,
+      "fed_funds_rate": null,
+      "vix": 29.489999771118164
+    }
   }
 ]

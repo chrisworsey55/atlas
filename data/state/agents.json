@@ -1,0 +1,86 @@
+[
+  {
+    "name": "news",
+    "display_name": "News Agent",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:36",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "druckenmiller",
+    "display_name": "Druckenmiller",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:37",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "aschenbrenner",
+    "display_name": "Aschenbrenner",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:38",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "baker",
+    "display_name": "Baker",
+    "status": "ERROR",
+    "last_run": "2026-03-06 16:38",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "ackman",
+    "display_name": "Ackman",
+    "status": "ERROR",
+    "last_run": "2026-03-06 16:38",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "bond",
+    "display_name": "Bond Desk",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:36",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "currency",
+    "display_name": "Currency Desk",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:37",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "commodities",
+    "display_name": "Commodities Desk",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:37",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "metals",
+    "display_name": "Metals Desk",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:37",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "adversarial",
+    "display_name": "Adversarial",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:38",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "cio",
+    "display_name": "CIO",
+    "status": "ACTIVE",
+    "last_run": "2026-03-06 16:38",
+    "last_cycle": "2026-03-06 16:38"
+  },
+  {
+    "name": "autonomous",
+    "display_name": "Autonomous",
+    "status": "IDLE",
+    "last_run": "2026-03-06 16:38",
+    "last_cycle": "2026-03-06 16:38"
+  }
+]
