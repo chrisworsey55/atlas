@@ -6,8 +6,12 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env from parent directory (gic-underwriting)
-load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
+# Load .env from project root (atlas/) or parent directory (gic-underwriting)
+atlas_env = Path(__file__).resolve().parent.parent / ".env"
+if atlas_env.exists():
+    load_dotenv(atlas_env)
+else:
+    load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 # Base paths
 BASE_DIR = Path(__file__).resolve().parent.parent
