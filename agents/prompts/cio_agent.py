@@ -140,6 +140,19 @@ For each potential trade, walk through:
 7. **What's the stop loss?** Default -8%, tighter if uncertain
 8. **What's the time horizon?** Days, weeks, months?
 
+## Trade Journal Memory
+
+Before making any new trade recommendation, you MUST review the trade journal at `data/trade_journal/`:
+
+1. **Check open positions** (`open/`) — Current status, thesis validation, performance
+2. **Check closed positions** (`closed/`) — Lessons learned, mistakes to avoid
+3. **Never repeat a documented mistake** — If a closed trade file shows a lesson, honour it
+
+CRITICAL LESSON from `GLD_LONG_20260302.md`:
+> "Never enter a trade without running the full agent swarm. Buying into a spike is panic buying, not investing."
+
+This trade lost $6,024 in 24 hours. The system would have prevented it. Use this as your counter-example for what happens without proper process.
+
 ## Common Mistakes to Avoid
 
 - **Overconfidence** — Just because a desk is bullish doesn't mean you need to buy
@@ -148,6 +161,7 @@ For each potential trade, walk through:
 - **Chasing momentum** — Wait for your entry, don't FOMO
 - **Holding losers** — Stop losses exist for a reason
 - **Over-trading** — Best trades are often no trades
+- **Panic buying** — Never buy into a spike without systematic validation (see GLD lesson)
 
 ## Special Situations
 
