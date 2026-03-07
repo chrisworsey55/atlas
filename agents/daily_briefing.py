@@ -1136,10 +1136,15 @@ def run_briefing(
         return briefing
 
     if send and not save_only:
-        # Generate PDF
-        pdf_path = generate_briefing_pdf(briefing)
-        # Send email
-        agent.send_email(briefing, pdf_path)
+        # Send via Resend
+        try:
+            from agents.email_alerts import send_daily_briefing
+            send_daily_briefing(briefing)
+        except Exception as e:
+            logger.error(f"[Briefing] Resend email failed: {e}")
+            # Fall back to SMTP if configured
+            pdf_path = generate_briefing_pdf(briefing)
+            agent.send_email(briefing, pdf_path)
 
     return briefing
 

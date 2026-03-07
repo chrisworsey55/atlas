@@ -325,10 +325,25 @@ class ATLASExecutionLoop:
 
                 # Check for IMMEDIATE urgency items
                 immediate_count = 0
+                immediate_alerts = []
                 if alerts.get("top_stories"):
                     for story in alerts["top_stories"]:
                         if story.get("urgency") == "IMMEDIATE":
                             immediate_count += 1
+                            immediate_alerts.append(story)
+
+                # Send urgent email alerts for IMMEDIATE items
+                if immediate_alerts:
+                    try:
+                        from agents.email_alerts import send_urgent_alert
+                        for alert in immediate_alerts:
+                            send_urgent_alert(
+                                alert.get("headline", ""),
+                                alert.get("ticker")
+                            )
+                        logger.info(f"Sent {len(immediate_alerts)} urgent email alerts")
+                    except Exception as e:
+                        logger.error(f"Failed to send urgent alerts: {e}")
 
                 logger.info(f"News: {len(alerts.get('top_stories', []))} stories, {immediate_count} IMMEDIATE")
 
