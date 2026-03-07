@@ -7,11 +7,22 @@ import requests
 import json
 import argparse
 import time
+import os
 from pathlib import Path
 from datetime import datetime
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).parent.parent / ".env")
+
 STATE_DIR = Path(__file__).parent.parent / "data" / "state"
 ALERTS_FILE = STATE_DIR / "filing_alerts.json"
+
+# Email configuration via Resend
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "re_QBTmTBP8_2mfiYdx81HUuJuyTLL7jiHrJ")
+ALERT_TO = os.getenv("BRIEFING_TO", "chris@generalintelligencecapital.com")
+# Use Resend's default sender until domain is verified
+ALERT_FROM = "ATLAS Alerts <onboarding@resend.dev>"
 
 HEADERS = {'User-Agent': 'GIC Research research@generalintelligencecapital.com'}
 
@@ -28,6 +39,138 @@ TRACKED_FUNDS = {
 
 # Default tickers - will be overridden by positions.json
 PORTFOLIO_TICKERS = ['AVGO', 'BE', 'UNH', 'APO', 'ADBE', 'GOOG', 'CRM', 'STX']
+
+
+def send_alert_email(alerts: list, to_email: str = None) -> bool:
+    """Send email notification for new filing alerts via Resend API."""
+    if not alerts:
+        print("No alerts to email")
+        return False
+
+    to_email = to_email or ALERT_TO
+
+    if not RESEND_API_KEY:
+        print("RESEND_API_KEY not configured")
+        return False
+
+    # Count by type
+    high_count = len([a for a in alerts if a.get('urgency') == 'HIGH'])
+
+    if high_count > 0:
+        subject = f"[ATLAS ALERT] {high_count} 13F Filings Detected"
+    else:
+        subject = f"[ATLAS] {len(alerts)} SEC Filing Alerts"
+
+    # Group alerts by urgency
+    high_alerts = [a for a in alerts if a.get('urgency') == 'HIGH']
+    medium_alerts = [a for a in alerts if a.get('urgency') == 'MEDIUM']
+
+    # Plain text version
+    text_lines = [
+        "ATLAS SEC FILING MONITOR",
+        f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        "",
+        "=" * 50,
+        ""
+    ]
+
+    if high_alerts:
+        text_lines.append("HIGH PRIORITY - 13F QUARTERLY FILINGS")
+        text_lines.append("-" * 40)
+        for alert in high_alerts:
+            text_lines.append(f"  {alert['summary']}")
+            if alert.get('fund'):
+                text_lines.append(f"    Fund: {alert['fund']}")
+        text_lines.append("")
+
+    if medium_alerts:
+        text_lines.append("MEDIUM PRIORITY - FORM 4 INSIDER TRADES")
+        text_lines.append("-" * 40)
+        for alert in medium_alerts:
+            text_lines.append(f"  {alert['summary']}")
+        text_lines.append("")
+
+    text_lines.extend([
+        "---",
+        "View full details: https://meetvalis.com/atlas/agents",
+        "",
+        "ATLAS | General Intelligence Capital"
+    ])
+
+    text_body = "\n".join(text_lines)
+
+    # HTML version
+    html_body = f"""
+    <html>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0f; color: #e5e5e5; padding: 20px;">
+    <div style="max-width: 600px; margin: 0 auto; background: #12121a; padding: 20px; border-radius: 8px;">
+        <h1 style="color: #00d4ff; margin-bottom: 5px;">ATLAS SEC Filing Monitor</h1>
+        <p style="color: #888; margin-top: 0;">{datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+        <hr style="border-color: #333;">
+    """
+
+    if high_alerts:
+        html_body += '<h2 style="color: #ff6b6b;">HIGH PRIORITY - 13F Quarterly Filings</h2>'
+        html_body += '<ul style="list-style: none; padding: 0;">'
+        for alert in high_alerts:
+            html_body += f'''
+            <li style="background: #1a1a2e; padding: 12px; margin: 8px 0; border-left: 4px solid #ff6b6b; border-radius: 4px;">
+                <strong>{alert['summary']}</strong>
+                {f"<br><span style='color: #888;'>Fund: {alert['fund']}</span>" if alert.get('fund') else ""}
+            </li>'''
+        html_body += '</ul>'
+
+    if medium_alerts:
+        html_body += '<h2 style="color: #ffd93d;">MEDIUM PRIORITY - Form 4 Insider Trades</h2>'
+        html_body += '<ul style="list-style: none; padding: 0;">'
+        for alert in medium_alerts[:10]:
+            html_body += f'''
+            <li style="background: #1a1a2e; padding: 12px; margin: 8px 0; border-left: 4px solid #ffd93d; border-radius: 4px;">
+                {alert['summary']}
+            </li>'''
+        if len(medium_alerts) > 10:
+            html_body += f'<li style="color: #888; padding: 8px;">... and {len(medium_alerts) - 10} more</li>'
+        html_body += '</ul>'
+
+    html_body += """
+        <hr style="border-color: #333;">
+        <p><a href="https://meetvalis.com/atlas/agents" style="color: #00d4ff;">View full details on ATLAS Dashboard</a></p>
+        <p style="color: #666; font-size: 12px;">ATLAS | General Intelligence Capital</p>
+    </div>
+    </body>
+    </html>
+    """
+
+    # Send via Resend API
+    try:
+        print(f"Sending email via Resend to {to_email}...")
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "from": ALERT_FROM,
+                "to": [to_email],
+                "subject": subject,
+                "html": html_body,
+                "text": text_body
+            },
+            timeout=30
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            print(f"Email sent successfully! ID: {data.get('id')}")
+            return True
+        else:
+            print(f"Resend API error: {response.status_code} - {response.text}")
+            return False
+
+    except Exception as e:
+        print(f"Email failed: {e}")
+        return False
 
 
 def load_portfolio_tickers():
@@ -136,7 +279,7 @@ def check_form4_insider_trades():
     return alerts
 
 
-def run_monitor(filing_type='all'):
+def run_monitor(filing_type='all', send_email_flag=False):
     """Run the filing monitor"""
     print(f"\n{'='*60}")
     print(f"ATLAS SEC FILING MONITOR -- {datetime.now().strftime('%Y-%m-%d %H:%M')}")
@@ -181,6 +324,11 @@ def run_monitor(filing_type='all'):
         print(f"\n{len(new_alerts)} NEW ALERTS saved to {ALERTS_FILE}")
         for alert in new_alerts:
             print(f"  - [{alert['urgency']}] {alert['summary']}")
+
+        # Send email notification if enabled
+        if send_email_flag:
+            print("\nSending email notification...")
+            send_alert_email(new_alerts)
     else:
         print(f"\nNo new filings detected.")
 
@@ -190,9 +338,57 @@ def run_monitor(filing_type='all'):
     return new_alerts
 
 
+def send_test_email(to_email: str = None):
+    """Send a test email to verify SMTP configuration."""
+    test_alerts = [
+        {
+            'fund': 'TEST — Duquesne Family Office',
+            'agent': 'druckenmiller',
+            'type': '13F-HR',
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'summary': 'TEST ALERT — This is a test of the ATLAS filing monitor email system',
+            'urgency': 'HIGH',
+            'detected_at': datetime.now().isoformat()
+        },
+        {
+            'ticker': 'TEST',
+            'type': 'Form 4',
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'entity': 'Test Insider',
+            'summary': 'TEST — Insider trade in TEST by Test Insider',
+            'urgency': 'MEDIUM',
+            'detected_at': datetime.now().isoformat()
+        }
+    ]
+
+    print("\n" + "=" * 60)
+    print("ATLAS SEC FILING MONITOR — TEST EMAIL")
+    print("=" * 60)
+    print(f"Sending test email to: {to_email or ALERT_TO}")
+
+    success = send_alert_email(test_alerts, to_email)
+
+    if success:
+        print("\nTest email sent successfully! Check your inbox.")
+    else:
+        print("\nTest email FAILED. Check SMTP configuration.")
+
+    return success
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='ATLAS SEC Filing Monitor')
     parser.add_argument('--type', '-t', choices=['all', '13f', 'form4'], default='all',
                         help='Type of filings to check (default: all)')
+    parser.add_argument('--email', '-e', action='store_true',
+                        help='Send email notification for new alerts')
+    parser.add_argument('--test-email', action='store_true',
+                        help='Send a test email to verify SMTP configuration')
+    parser.add_argument('--to', type=str, default=None,
+                        help='Override recipient email address')
     args = parser.parse_args()
-    run_monitor(args.type)
+
+    if args.test_email:
+        send_test_email(args.to)
+    else:
+        run_monitor(args.type, send_email_flag=args.email)
