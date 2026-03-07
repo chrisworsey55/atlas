@@ -244,14 +244,14 @@
             </div>
             <div>
                 <p class="text-xs text-atlas-muted">Yield Curve (10Y-2Y)</p>
-                <p class="font-medium {% if briefing.macro_snapshot.yield_curve_10y_2y|default(0) < 0 %}text-atlas-danger{% endif %}">
-                    {{ briefing.macro_snapshot.yield_curve_10y_2y|default('N/A') }}
+                <p class="font-medium {% if (briefing.macro_snapshot.yield_curve_10y_2y or 0) < 0 %}text-atlas-danger{% endif %}">
+                    {{ briefing.macro_snapshot.yield_curve_10y_2y if briefing.macro_snapshot.yield_curve_10y_2y is not none else 'N/A' }}
                 </p>
             </div>
             <div>
                 <p class="text-xs text-atlas-muted">VIX</p>
-                <p class="font-medium {% if briefing.macro_snapshot.vix|default(0) > 25 %}text-atlas-danger{% endif %}">
-                    {{ "{:.1f}".format(briefing.macro_snapshot.vix|default(0)) }}
+                <p class="font-medium {% if (briefing.macro_snapshot.vix or 0) > 25 %}text-atlas-danger{% endif %}">
+                    {{ "{:.1f}".format(briefing.macro_snapshot.vix or 0) }}
                 </p>
             </div>
             <div>
