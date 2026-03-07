@@ -1450,6 +1450,10 @@ def dashboard_portfolio():
         "alpha": alpha,
     }
 
+    # Load CIO synthesis and news briefs for dashboard
+    cio_synthesis = load_state_file("cio_synthesis.json") or {}
+    news_briefs = load_state_file("news_briefs.json") or {}
+
     return render_template(
         'portfolio.html',
         active_page='portfolio',
@@ -1457,7 +1461,9 @@ def dashboard_portfolio():
         meta=meta,
         pnl_history=pnl_history,
         summary=summary,
-        hurdle=hurdle
+        hurdle=hurdle,
+        cio_synthesis=cio_synthesis,
+        news_briefs=news_briefs
     )
 
 

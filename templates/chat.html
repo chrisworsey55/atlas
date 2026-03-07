@@ -87,8 +87,12 @@
                 <span class="font-semibold">Druckenmiller</span>
                 <span class="text-atlas-muted ml-1">Macro</span>
             </button>
+            <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="aschenbrenner">
+                <span class="font-semibold">Aschenbrenner</span>
+                <span class="text-atlas-muted ml-1">AI Infra</span>
+            </button>
             <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="adversarial">
-                <span class="font-semibold">Adversarial</span>
+                <span class="font-semibold">CRO</span>
                 <span class="text-atlas-muted ml-1">Risk</span>
             </button>
             <button class="agent-chip px-4 py-2 text-sm rounded-lg border border-atlas-border bg-atlas-card" data-agent="fundamental">
@@ -233,17 +237,38 @@
 
             let metaHtml = '';
             if (metadata) {
+                // Agent consultation trail - show prominently
                 if (metadata.agents_consulted && metadata.agents_consulted.length > 0) {
-                    metaHtml += `<div class="text-xs text-atlas-muted mt-2">Consulted: ${metadata.agents_consulted.join(', ')}</div>`;
+                    metaHtml += `
+                        <div class="mt-3 p-3 bg-atlas-bg rounded-lg border border-atlas-border/50">
+                            <div class="text-xs text-atlas-muted mb-2 uppercase tracking-wide">Agents Consulted</div>
+                            <div class="flex flex-wrap gap-2">
+                                ${metadata.agents_consulted.map(agent => `
+                                    <span class="px-3 py-1 text-xs rounded-full bg-atlas-secondary/20 text-atlas-secondary font-medium">
+                                        ${agent}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
+                // Signal and confidence
                 if (metadata.signal) {
-                    const signalClass = metadata.signal === 'BULLISH' ? 'text-atlas-success' :
-                                       metadata.signal === 'BEARISH' ? 'text-atlas-danger' : 'text-atlas-warning';
-                    metaHtml += `<div class="mt-2"><span class="px-2 py-1 text-xs rounded ${signalClass} bg-opacity-20">${metadata.signal}</span>`;
-                    if (metadata.confidence) {
-                        metaHtml += ` <span class="text-xs text-atlas-muted">${Math.round(metadata.confidence * 100)}% confidence</span>`;
-                    }
-                    metaHtml += `</div>`;
+                    const signalClass = metadata.signal === 'BULLISH' ? 'bg-atlas-success/20 text-atlas-success' :
+                                       metadata.signal === 'BEARISH' ? 'bg-atlas-danger/20 text-atlas-danger' : 'bg-atlas-warning/20 text-atlas-warning';
+                    metaHtml += `
+                        <div class="mt-3 flex items-center space-x-3">
+                            <span class="px-3 py-1 text-sm font-semibold rounded-full ${signalClass}">${metadata.signal}</span>
+                            ${metadata.confidence ? `
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-20 h-2 bg-atlas-bg rounded-full overflow-hidden">
+                                        <div class="h-full bg-atlas-primary rounded-full" style="width: ${Math.round(metadata.confidence * 100)}%"></div>
+                                    </div>
+                                    <span class="text-xs text-atlas-muted">${Math.round(metadata.confidence * 100)}%</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
                 }
             }
 

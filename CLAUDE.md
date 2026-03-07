@@ -1,207 +1,125 @@
-# ATLAS — AI Trading, Logic & Analysis System
+# ATLAS AI Trading System — Control Center
 
-An AI-native hedge fund built on Claude. Sector desk agents analyze SEC filings, 13F tracking monitors hedge fund flows, and a CIO agent synthesizes it all into portfolio decisions.
+## What This Is
+ATLAS is an AI-native hedge fund with 20+ autonomous agents that source, analyse, debate, and execute trades. The system runs on Azure at meetvalis.com/atlas.
 
-## Quick Start
+## Quick Commands (Skills)
 
-```bash
-# Install dependencies
-pip install -r requirements.txt
+### Trading Operations
+- `/screen` — Run full universe fundamental screen (4000+ tickers)
+  `python3 -m agents.fundamental_batch --universe data/state/us_universe.json --resume`
+- `/screen-sp500` — Run S&P 500 only screen
+  `python3 -m agents.fundamental_batch --resume`
+- `/gauntlet TICKER` — Run a ticker through full CRO gauntlet (fundamental → sector desk → CRO → CIO)
+  `python3 -m agents.gauntlet --ticker TICKER`
+- `/cycle` — Run one full agent execution cycle (news → prices → desks → superinvestors → adversarial → CIO)
+  `python3 -m agents.execution_loop --once`
+- `/briefing` — Generate morning briefing
+  `python3 -m agents.daily_briefing --save`
+- `/pnl` — Update all prices and show current P&L
+  `python3 -m agents.update_prices`
 
-# Test biotech desk on Eli Lilly
-python3 -m agents.sector_desk --desk biotech --ticker LLY
+### Portfolio Management
+- `/positions` — Show current portfolio with live P&L
+- `/trade BUY/SELL TICKER SHARES PRICE` — Execute a paper trade (updates positions.json + decisions.json + trade journal)
+  `python3 -m agents.execute_trade BUY TICKER SHARES PRICE --agent manual --thesis "Reason"`
+- `/journal TICKER` — Show trade journal for a position
+- `/watchlist` — Show current watchlist with agent views
+- `/stress` — Run portfolio stress test scenarios
+  `python3 -m agents.stress_test`
 
-# Test semiconductor desk on NVIDIA
-python3 -m agents.sector_desk --desk semiconductor --ticker NVDA
+### System Operations
+- `/deploy` — Push to GitHub and deploy to Azure
+  `git add -A && git commit -m "update" && git push && ssh azureuser@51.104.239.35 "cd ~/atlas && git pull && sudo systemctl restart atlas && sudo systemctl restart atlas-loop"`
+- `/status` — Check all services on Azure
+  `ssh azureuser@51.104.239.35 "sudo systemctl status atlas && sudo systemctl status atlas-loop"`
+- `/logs` — Check execution loop logs
+  `ssh azureuser@51.104.239.35 "tail -50 /var/log/atlas_loop.log"`
+- `/test` — Run full system audit
+  `python3 -m tests.full_audit`
 
-# Pull Berkshire's 13F holdings
-python3 -c "from data.thirteenf_client import ThirteenFClient; print(ThirteenFClient().get_fund_holdings('Berkshire Hathaway (Buffett)').nlargest(10, 'value')[['ticker', 'name', 'value']])"
+## Investment Philosophy
+- Multi-agent swarm with structured debate
+- Every trade goes through: Fundamental → Sector Desk → CRO → CIO
+- Adversarial agent challenges every position
+- Autonomous execution only when: CIO confidence > 80% AND adversarial risk < 0.6
+- Position limits: 15% max single name, 50% min cash during first 6 months
+- Stop losses on every position
 
-# Run full test suite
-python3 test_phase2.py
-```
+## Agent Hierarchy
 
-## What's Built (Phase 1 + 2)
+### Active Traders (make trade recommendations)
+- Druckenmiller Macro — top-down macro, rates, currencies. Owns: TLT short
+- Aschenbrenner AI Infra — AI power/compute bottleneck thesis. Owns: BE
+- Baker Deep Tech — deep semiconductor/AI hardware knowledge
+- Ackman Quality Compounder — concentrated quality with macro hedges
+- Fundamental Valuation — DCF/comps screening. Owns: AVGO, ADBE, GOOG, APO, CRM, UNH, STX
 
-### Data Layer (`data/`)
-- **edgar_client.py** — SEC EDGAR API (filings, XBRL financials, no API key needed)
-- **price_client.py** — yfinance for prices and market data
-- **thirteenf_client.py** — 13F parsing via edgartools library
+### Sector Desks (generate signals, don't trade directly)
+- Bond Desk — rates, credit spreads, Fed policy
+- Currency Desk — G10 and EM FX
+- Commodities Desk — energy, agriculture
+- Metals Desk — precious and industrial metals
+- Semiconductor Desk — chip cycle, AI demand
+- Biotech Desk — FDA catalysts, pipeline
+- Microcap Desk — sub-$500M discovery
 
-### Agents (`agents/`)
-- **sector_desk.py** — Generic runner that pairs prompts with data and calls Claude
-- **SemiconductorDesk** — 6-lens framework: cycle, AI demand, pricing, capex, inventory, competitive
-- **BiotechDesk** — 6-lens framework: FDA catalysts, pipeline, patent cliff, cash runway, commercial, M&A
-- **institutional_flow_agent.py** — Analyzes 13F holdings for consensus/crowding signals
-
-### Prompts (`agents/prompts/`)
-- **semiconductor_desk.py** — System prompt + user prompt builder for semis
-- **biotech_desk.py** — System prompt + user prompt builder for pharma/biotech
-- **institutional_flow.py** — System prompt for hedge fund flow analysis
-
-### Database (`database/`)
-- **models.py** — SQLAlchemy models (7 tables, all prefixed `atlas_`)
-- **session.py** — Connection management
-- **Alembic migrations** in `alembic/versions/`
-
-### Config (`config/`)
-- **settings.py** — API keys, model selection, portfolio parameters
-- **universe.py** — 50 stocks, 16 tracked hedge funds
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         CIO AGENT                           │
-│              (synthesizes briefs → portfolio)               │
-└─────────────────────────────────────────────────────────────┘
-                              ▲
-           ┌──────────────────┼──────────────────┐
-           ▼                  ▼                  ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│  SEMICONDUCTOR  │ │     BIOTECH     │ │ INSTITUTIONAL   │
-│      DESK       │ │      DESK       │ │     FLOW        │
-└─────────────────┘ └─────────────────┘ └─────────────────┘
-           ▲                  ▲                  ▲
-           └──────────────────┼──────────────────┘
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      DATA LAYER                             │
-│         SEC EDGAR │ yfinance │ 13F Holdings                 │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Key Design Decisions
-
-1. **Same runner, different prompts** — `SectorDeskAgent` is generic; swap prompts to get specialist analysis
-2. **Structured JSON output** — All desks output identical schema for CIO consumption
-3. **No paid APIs for core data** — SEC EDGAR is free, yfinance is free
-4. **PostgreSQL for persistence** — Briefs, theses, trades all stored for backtesting
-
-## What Needs Building (Phase 3)
-
-### CIO Agent (`agents/cio_agent.py`)
-- Receives briefs from all desks
-- Synthesizes into portfolio-level view
-- Generates investment theses
-- Decides position sizing
-
-### Risk Manager (`agents/risk_manager.py`)
-- Validates CIO decisions against rules
-- Correlation checks
-- Sector concentration limits
-- Stop loss enforcement
-
-### Portfolio Engine (`portfolio/`)
-- Paper trading execution
-- P&L tracking
-- Daily snapshots
-- Performance analytics
-
-### Daily Scanner (`scanner.py`)
-- Overnight batch: scan universe for new filings
-- Run relevant desks on new data
-- Generate morning briefing
-
-## Environment Variables
-
-```bash
-# Required
-ANTHROPIC_API_KEY=sk-ant-...
-
-# Optional (for database persistence)
-ATLAS_DATABASE_URL=postgresql://user:pass@localhost:5432/atlas
-```
-
-## Universe
-
-**Tracked Stocks (50):** AAPL, MSFT, NVDA, GOOGL, META, AMZN, TSM, AVGO, AMD, LLY, PFE, ABBV, MRK, JPM, V, MA, etc.
-
-**Tracked Hedge Funds (16):**
-- Duquesne (Druckenmiller)
-- Berkshire (Buffett)
-- Pershing Square (Ackman)
-- Appaloosa (Tepper)
-- Soros Fund Management
-- Bridgewater Associates
-- Renaissance Technologies
-- Citadel Advisors
-- Point72 (Cohen)
-- Tiger Global
-- Coatue Management
-- Lone Pine Capital
-- Viking Global
-- Third Point (Loeb)
-- Baupost (Klarman)
-- Greenlight (Einhorn)
-
-## Output Examples
-
-### Semiconductor Brief (NVDA)
-```json
-{
-  "signal": "BULLISH",
-  "confidence": 0.85,
-  "cycle_position": {"phase": "MID", "assessment": "AI demand extending cycle"},
-  "brief_for_cio": "Strong AI datacenter demand offsetting China risk..."
-}
-```
-
-### Biotech Brief (LLY)
-```json
-{
-  "signal": "BULLISH", 
-  "confidence": 0.85,
-  "fda_catalysts": {"next_event": "Tirzepatide obesity label expansion"},
-  "brief_for_cio": "GLP-1 franchise driving exceptional growth..."
-}
-```
-
-### Institutional Flow
-```json
-{
-  "consensus_builds": [{"ticker": "AVGO", "funds": ["Druckenmiller", "Tepper"]}],
-  "crowding_warnings": [{"ticker": "NVDA", "funds_holding": 14}],
-  "contrarian_signals": [{"ticker": "PFE", "fund": "Baupost", "portfolio_pct": 8.2}]
-}
-```
+### Risk & Decision Layer
+- News Agent — RSS scanning, urgency scoring
+- Adversarial/CRO — attacks every thesis, historical analogues
+- CIO — synthesises all views, final decision maker
 
 ## File Structure
-
 ```
 atlas/
+├── CLAUDE.md              # This file — read first every session
+├── SYSTEM.md              # Detailed technical documentation
+├── api/atlas_api.py       # Flask app, all routes
 ├── agents/
-│   ├── prompts/
-│   │   ├── semiconductor_desk.py
-│   │   ├── biotech_desk.py
-│   │   └── institutional_flow.py
-│   ├── sector_desk.py
-│   └── institutional_flow_agent.py
-├── data/
-│   ├── edgar_client.py
-│   ├── price_client.py
-│   └── thirteenf_client.py
-├── database/
-│   ├── models.py
-│   └── session.py
-├── config/
-│   ├── settings.py
-│   └── universe.py
-├── alembic/
-│   └── versions/001_initial_schema.py
-├── requirements.txt
-└── test_phase2.py
+│   ├── execution_loop.py  # Autonomous 30-min cycle
+│   ├── daily_briefing.py  # Morning briefing generator
+│   ├── fundamental_batch.py # Universe screening
+│   ├── gauntlet.py        # CRO gauntlet runner
+│   ├── update_prices.py   # P&L update skill
+│   ├── execute_trade.py   # Trade execution skill
+│   ├── stress_test.py     # Scenario stress testing
+│   ├── chat_mixin.py      # Base class for agent chat
+│   ├── news_agent.py      # RSS/news scanning
+│   └── prompts/           # Agent system prompts
+├── data/state/
+│   ├── positions.json     # SOURCE OF TRUTH for portfolio
+│   ├── decisions.json     # Trade log
+│   ├── pnl_history.json   # Daily P&L snapshots
+│   ├── agents.json        # Agent statuses
+│   ├── desk_briefs.json   # Latest desk signals
+│   ├── cio_synthesis.json # Latest CIO stance
+│   ├── news_briefs.json   # Latest news alerts
+│   ├── risk_assessment.json # Latest adversarial review
+│   ├── agent_views.json   # Latest superinvestor views
+│   ├── activity_timeline.json # Agent activity feed
+│   ├── sp500_valuations.json  # S&P 500 screen results
+│   └── gauntlet/          # CRO gauntlet results per ticker
+├── data/trade_journal/
+│   ├── open/              # Active position journals
+│   └── closed/            # Closed position journals
+├── data/evidence/         # LP-facing documentation
+├── templates/             # Flask/Jinja2 HTML templates
+└── config/settings.py     # Environment and path config
 ```
 
-## Testing
+## Azure Deployment
+- Dashboard: meetvalis.com/atlas (user: chris, pass: GICdemo2026!)
+- VM: azureuser@51.104.239.35
+- Services: atlas.service (dashboard), atlas-loop.service (agent loop)
+- .env on Azure has API keys
 
-```bash
-# Full test suite
-python3 test_phase2.py
+## Current Portfolio (as of last update)
+BIL 52.5% | BE 15% | TLT SHORT 10% | AVGO 5% | UNH 3.5% | CRM 3% | ADBE 3% | GOOG 3% | APO 3% | STX SHORT 2%
 
-# Individual desk
-python3 -m agents.sector_desk --desk biotech --ticker MRK
-
-# 13F data
-python3 -m agents.institutional_flow_agent --test
-```
+## Rules
+1. ALWAYS read this file at the start of every session
+2. ALWAYS read SYSTEM.md before making code changes
+3. NEVER modify positions.json without also updating decisions.json and the trade journal
+4. NEVER deploy without testing locally first
+5. NEVER overwrite templates with a different design — the current dark theme is final
+6. API key is in .env — make sure dotenv loads it from the project root

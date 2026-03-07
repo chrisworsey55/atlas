@@ -3,6 +3,33 @@
 
 {% block content %}
 <div class="space-y-6">
+    <!-- ALERT BANNER - Critical News -->
+    {% if news_briefs and news_briefs.alert_level == 'CRITICAL' %}
+    <div class="card p-4 bg-gradient-to-r from-atlas-danger/20 to-atlas-warning/20 border-atlas-danger/50 animate-pulse-slow">
+        <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-atlas-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-semibold text-atlas-danger">CRITICAL ALERT</h3>
+                    <span class="text-xs text-atlas-muted">{{ news_briefs.last_scan[:16] | replace('T', ' ') if news_briefs.last_scan else 'Now' }}</span>
+                </div>
+                <p class="text-sm text-atlas-text mt-1">{{ news_briefs['24h_summary'][:200] if news_briefs.get('24h_summary') else 'Breaking news affecting portfolio' }}...</p>
+                {% if news_briefs.top_stories %}
+                <div class="mt-2 flex flex-wrap gap-2">
+                    {% for story in news_briefs.top_stories[:3] %}
+                    <span class="px-2 py-1 text-xs rounded bg-atlas-bg text-atlas-muted">{{ story.headline[:50] }}...</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Page header -->
     <div class="flex items-center justify-between">
         <div>
@@ -69,6 +96,90 @@
             </div>
         </div>
     </div>
+
+    <!-- CIO SYNTHESIS BOX -->
+    {% if cio_synthesis %}
+    <div class="card p-5 border-l-4 {% if cio_synthesis.risk_adjusted_view == 'RISK_OFF' %}border-l-atlas-danger{% elif cio_synthesis.risk_adjusted_view == 'RISK_ON' %}border-l-atlas-success{% else %}border-l-atlas-warning{% endif %}">
+        <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-atlas-gold to-yellow-600 flex items-center justify-center">
+                    <span class="text-white font-bold">CIO</span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-white">CIO Synthesis</h2>
+                    <p class="text-xs text-atlas-muted">{{ cio_synthesis.generated_at[:16] | replace('T', ' ') if cio_synthesis.generated_at else 'Latest' }}</p>
+                </div>
+            </div>
+            <!-- CONVICTION METER -->
+            <div class="text-right">
+                <div class="text-sm text-atlas-muted mb-1">Portfolio Conviction</div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-24 h-3 bg-atlas-bg rounded-full overflow-hidden">
+                        {% set conviction = cio_synthesis.portfolio_conviction or 50 %}
+                        <div class="h-full rounded-full {% if conviction >= 70 %}bg-atlas-success{% elif conviction >= 40 %}bg-atlas-warning{% else %}bg-atlas-danger{% endif %}" style="width: {{ conviction }}%"></div>
+                    </div>
+                    <span class="text-lg font-bold {% if conviction >= 70 %}text-atlas-success{% elif conviction >= 40 %}text-atlas-warning{% else %}text-atlas-danger{% endif %}">{{ conviction }}%</span>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full {% if cio_synthesis.risk_adjusted_view == 'RISK_OFF' %}bg-atlas-danger/20 text-atlas-danger{% elif cio_synthesis.risk_adjusted_view == 'RISK_ON' %}bg-atlas-success/20 text-atlas-success{% else %}bg-atlas-warning/20 text-atlas-warning{% endif %}">
+                    {{ cio_synthesis.risk_adjusted_view | replace('_', ' ') }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <p class="text-sm text-atlas-text mb-4">{{ cio_synthesis.summary }}</p>
+
+        <!-- What Changed -->
+        {% if cio_synthesis.what_changed %}
+        <div class="mb-4">
+            <h4 class="text-sm font-semibold text-atlas-muted mb-2">What Changed</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {% for change in cio_synthesis.what_changed[:4] %}
+                <div class="flex items-start space-x-2 text-sm">
+                    <span class="text-atlas-warning mt-0.5">*</span>
+                    <span class="text-atlas-text">{{ change[:80] }}{% if change|length > 80 %}...{% endif %}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions to Consider -->
+        {% if cio_synthesis.actions_to_consider %}
+        <div class="mb-4">
+            <h4 class="text-sm font-semibold text-atlas-muted mb-2">Actions to Consider</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {% for action in cio_synthesis.actions_to_consider %}
+                <div class="p-3 bg-atlas-bg rounded-lg {% if action.urgency == 'HIGH' %}border border-atlas-danger/50{% endif %}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-semibold text-white">{{ action.ticker }}</span>
+                        <span class="px-2 py-0.5 text-xs rounded {% if action.action == 'TRIM' %}bg-atlas-warning/20 text-atlas-warning{% elif action.action == 'ADD' %}bg-atlas-success/20 text-atlas-success{% elif action.action == 'EXIT' %}bg-atlas-danger/20 text-atlas-danger{% else %}bg-atlas-muted/20 text-atlas-muted{% endif %}">
+                            {{ action.action }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-atlas-muted">{{ action.rationale[:80] }}{% if action.rationale|length > 80 %}...{% endif %}</p>
+                    {% if action.urgency == 'HIGH' %}
+                    <span class="text-xs text-atlas-danger font-semibold">HIGH URGENCY</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- What to Watch -->
+        {% if cio_synthesis.what_to_watch %}
+        <div>
+            <h4 class="text-sm font-semibold text-atlas-muted mb-2">What to Watch</h4>
+            <div class="flex flex-wrap gap-2">
+                {% for watch in cio_synthesis.what_to_watch[:4] %}
+                <span class="px-3 py-1 text-xs bg-atlas-bg rounded-full text-atlas-text">{{ watch[:50] }}{% if watch|length > 50 %}...{% endif %}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,6 +1,6 @@
 {
   "portfolio_value": 1000000,
-  "last_updated": "2026-03-06 16:36",
+  "last_updated": "2026-03-07 10:04",
   "positions": [
     {
       "ticker": "BIL",
@@ -15,7 +15,8 @@
       "stop_loss": null,
       "target": null,
       "invalidation": null,
-      "date_opened": "2025-01-02"
+      "date_opened": "2025-01-02",
+      "unrealized_pnl": 0.0
     },
     {
       "ticker": "CRM",
