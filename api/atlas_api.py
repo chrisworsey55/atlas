@@ -1480,6 +1480,7 @@ def dashboard_agents():
     metals = load_state_file("metals_desk_briefs.json") or []
     microcap = load_state_file("microcap_briefs.json") or []
     valuations = load_state_file("fundamental_valuations.json") or []
+    filing_alerts = load_state_file("filing_alerts.json") or []
 
     def get_latest_date(data):
         if not data:
@@ -1657,12 +1658,23 @@ def dashboard_agents():
                 "analysis_date": latest.get('analysis_date')
             }
 
+    # Group filing alerts by agent
+    agent_alerts = {}
+    for alert in filing_alerts:
+        agent_key = alert.get('agent')
+        if agent_key:
+            if agent_key not in agent_alerts:
+                agent_alerts[agent_key] = []
+            agent_alerts[agent_key].append(alert)
+
     return render_template(
         'agents.html',
         active_page='agents',
         agents=agents,
         counts=counts,
-        desks=desks
+        desks=desks,
+        filing_alerts=filing_alerts,
+        agent_alerts=agent_alerts
     )
 
 

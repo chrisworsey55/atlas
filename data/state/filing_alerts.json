@@ -6201,5 +6201,191 @@
       "description": "8-K",
       "filing_url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000044/intc-20260227.htm"
     }
+  },
+  {
+    "ticker": "STX",
+    "type": "Form 4",
+    "date": "2026-03-03",
+    "entity": "Conyers Yolanda Lee  (CIK 0001906375)",
+    "summary": "Insider trade in STX by Conyers Yolanda Lee  (CIK 0001906375) on 2026-03-03",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:25.598453"
+  },
+  {
+    "ticker": "STX",
+    "type": "Form 4",
+    "date": "2026-03-03",
+    "entity": "MOSLEY WILLIAM D  (CIK 0001388390)",
+    "summary": "Insider trade in STX by MOSLEY WILLIAM D  (CIK 0001388390) on 2026-03-03",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:25.598484"
+  },
+  {
+    "ticker": "BE",
+    "type": "Form 4",
+    "date": "2026-03-05",
+    "entity": "Greben Randy J  (CIK 0001839017)",
+    "summary": "Insider trade in BE by Greben Randy J  (CIK 0001839017) on 2026-03-05",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:28.205415"
+  },
+  {
+    "ticker": "BE",
+    "type": "Form 4",
+    "date": "2026-03-05",
+    "entity": "Martin Joe T  (CIK 0002061832)",
+    "summary": "Insider trade in BE by Martin Joe T  (CIK 0002061832) on 2026-03-05",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:28.205596"
+  },
+  {
+    "ticker": "BE",
+    "type": "Form 4",
+    "date": "2026-03-05",
+    "entity": "Lowenkron Melissa B  (CIK 0001924023)",
+    "summary": "Insider trade in BE by Lowenkron Melissa B  (CIK 0001924023) on 2026-03-05",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:28.205605"
+  },
+  {
+    "ticker": "BE",
+    "type": "Form 4",
+    "date": "2026-03-04",
+    "entity": "Sage Road Capital, LLC  (CIK 0001903543)",
+    "summary": "Insider trade in BE by Sage Road Capital, LLC  (CIK 0001903543) on 2026-03-04",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:28.205608"
+  },
+  {
+    "ticker": "BE",
+    "type": "Form 4",
+    "date": "2026-03-05",
+    "entity": "Fogliato Franco  (CIK 0001591094)",
+    "summary": "Insider trade in BE by Fogliato Franco  (CIK 0001591094) on 2026-03-05",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:28.205611"
+  },
+  {
+    "ticker": "AVGO",
+    "type": "Form 4",
+    "date": "2026-03-04",
+    "entity": "Kawwas Charlie B  (CIK 0001608425)",
+    "summary": "Insider trade in AVGO by Kawwas Charlie B  (CIK 0001608425) on 2026-03-04",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:29.810895"
+  },
+  {
+    "ticker": "AVGO",
+    "type": "Form 4",
+    "date": "2026-03-04",
+    "entity": "Spears Kirsten M.  (CIK 0001670725)",
+    "summary": "Insider trade in AVGO by Spears Kirsten M.  (CIK 0001670725) on 2026-03-04",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:29.810917"
+  },
+  {
+    "ticker": "AVGO",
+    "type": "Form 4",
+    "date": "2026-03-04",
+    "entity": "Brazeal Mark David  (CIK 0001627720)",
+    "summary": "Insider trade in AVGO by Brazeal Mark David  (CIK 0001627720) on 2026-03-04",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:29.810920"
+  },
+  {
+    "ticker": "AVGO",
+    "type": "Form 4",
+    "date": "2026-03-04",
+    "entity": "Velaga S. Ram  (CIK 0002103553)",
+    "summary": "Insider trade in AVGO by Velaga S. Ram  (CIK 0002103553) on 2026-03-04",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:29.810922"
+  },
+  {
+    "ticker": "APO",
+    "type": "Form 4",
+    "date": "2026-03-04",
+    "entity": "Apollo Principal Holdings B GP, LLC  (CIK 0002011937)",
+    "summary": "Insider trade in APO by Apollo Principal Holdings B GP, LLC  (CIK 0002011937) on 2026-03-04",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:32.272883"
+  },
+  {
+    "ticker": "APO",
+    "type": "Form 4",
+    "date": "2026-03-04",
+    "entity": "Apollo Principal Holdings B GP, LLC  (CIK 0002011937)",
+    "summary": "Insider trade in APO by Apollo Principal Holdings B GP, LLC  (CIK 0002011937) on 2026-03-04",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:32.272909"
+  },
+  {
+    "ticker": "APO",
+    "type": "Form 4",
+    "date": "2026-03-04",
+    "entity": "Apollo Principal Holdings B GP, LLC  (CIK 0002011937)",
+    "summary": "Insider trade in APO by Apollo Principal Holdings B GP, LLC  (CIK 0002011937) on 2026-03-04",
+    "urgency": "MEDIUM",
+    "detected_at": "2026-03-07T15:10:32.272912"
+  },
+  {
+    "fund": "Duquesne Family Office",
+    "agent": "druckenmiller",
+    "type": "13F-HR",
+    "date": "2026-02-17",
+    "accession": "0001536411-26-000002",
+    "summary": "Duquesne Family Office filed 13F on 2026-02-17",
+    "urgency": "HIGH",
+    "detected_at": "2026-03-07T15:10:40.652923"
+  },
+  {
+    "fund": "Pershing Square",
+    "agent": "ackman",
+    "type": "13F-HR",
+    "date": "2026-02-17",
+    "accession": "0001172661-26-001091",
+    "summary": "Pershing Square filed 13F on 2026-02-17",
+    "urgency": "HIGH",
+    "detected_at": "2026-03-07T15:10:42.554067"
+  },
+  {
+    "fund": "Berkshire Hathaway",
+    "agent": "buffett",
+    "type": "13F-HR",
+    "date": "2026-02-17",
+    "accession": "0001193125-26-054580",
+    "summary": "Berkshire Hathaway filed 13F on 2026-02-17",
+    "urgency": "HIGH",
+    "detected_at": "2026-03-07T15:10:43.646569"
+  },
+  {
+    "fund": "Bridgewater Associates",
+    "agent": "dalio",
+    "type": "13F-HR",
+    "date": "2026-02-13",
+    "accession": "0001350694-26-000001",
+    "summary": "Bridgewater Associates filed 13F on 2026-02-13",
+    "urgency": "HIGH",
+    "detected_at": "2026-03-07T15:10:44.487929"
+  },
+  {
+    "fund": "Tiger Global",
+    "agent": "tiger",
+    "type": "13F-HR",
+    "date": "2026-02-17",
+    "accession": "0000919574-26-001143",
+    "summary": "Tiger Global filed 13F on 2026-02-17",
+    "urgency": "HIGH",
+    "detected_at": "2026-03-07T15:10:45.402487"
+  },
+  {
+    "fund": "Soros Fund Management",
+    "agent": "soros",
+    "type": "13F-HR",
+    "date": "2026-02-13",
+    "accession": "0000902664-26-000998",
+    "summary": "Soros Fund Management filed 13F on 2026-02-13",
+    "urgency": "HIGH",
+    "detected_at": "2026-03-07T15:10:46.402663"
   }
 ]
