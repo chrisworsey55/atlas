@@ -180,7 +180,7 @@
       "shares": 85,
       "entry": 352.8,
       "stop": 400.0,
-      "target": 100.0,
+      "target": 280.0,
       "value": 30000,
       "data_quality": "single_source",
       "source": "finnhub",

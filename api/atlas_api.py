@@ -70,16 +70,39 @@ def get_spy_data(start_date: str, end_date: str = None) -> list:
         return []
 
 def get_spy_current() -> dict:
-    """Get current SPY price and daily change."""
+    """Get current SPY price and daily change from Finnhub."""
+    import requests
+    from dotenv import load_dotenv
+    load_dotenv()
+
+    finnhub_key = os.getenv("FINNHUB_API_KEY")
+    if not finnhub_key:
+        print("Warning: FINNHUB_API_KEY not set, falling back to yfinance")
+        try:
+            spy = yf.Ticker("SPY")
+            info = spy.info
+            price = info.get('regularMarketPrice', info.get('previousClose', 0))
+            prev = info.get('previousClose', price)
+            change = ((price - prev) / prev * 100) if prev else 0
+            return {"price": round(price, 2), "change": round(change, 2)}
+        except Exception as e:
+            print(f"Error fetching SPY from yfinance: {e}")
+            return {"price": 0, "change": 0}
+
     try:
-        spy = yf.Ticker("SPY")
-        info = spy.info
-        price = info.get('regularMarketPrice', info.get('previousClose', 0))
-        prev = info.get('previousClose', price)
-        change = ((price - prev) / prev * 100) if prev else 0
-        return {"price": round(price, 2), "change": round(change, 2)}
+        url = f"https://finnhub.io/api/v1/quote?symbol=SPY&token={finnhub_key}"
+        resp = requests.get(url, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            price = data.get('c', 0)  # current price
+            prev = data.get('pc', price)  # previous close
+            change = ((price - prev) / prev * 100) if prev else 0
+            return {"price": round(price, 2), "change": round(change, 2)}
+        else:
+            print(f"Finnhub API error: {resp.status_code}")
+            return {"price": 0, "change": 0}
     except Exception as e:
-        print(f"Error fetching SPY current: {e}")
+        print(f"Error fetching SPY from Finnhub: {e}")
         return {"price": 0, "change": 0}
 
 def fetch_live_prices(tickers: list) -> dict:
@@ -1366,23 +1389,37 @@ def dashboard_portfolio():
     total_pnl = 0
     for p in raw_positions:
         ticker = p.get('ticker')
-        entry_price = p.get('entry_price', 0) or 0
-        # Use live price if available, otherwise fall back to stored price
-        current_price = live_prices.get(ticker) or p.get('current_price', entry_price) or entry_price
-        shares = p.get('shares', 0) or 0
         direction = p.get('direction', 'LONG')
 
-        # Calculate value and P&L
-        value = shares * current_price
-        if direction == 'SHORT':
-            unrealized_pnl = (entry_price - current_price) * shares
-        else:
-            unrealized_pnl = (current_price - entry_price) * shares
-        unrealized_pnl_pct = ((current_price - entry_price) / entry_price * 100) if entry_price > 0 else 0
-        if direction == 'SHORT':
-            unrealized_pnl_pct = -unrealized_pnl_pct
+        # Check if position is pending (entry_price is None or 0 with planned_entry)
+        is_pending = p.get('entry_price') is None or (p.get('entry_price') == 0 and p.get('planned_entry'))
 
-        total_pnl += unrealized_pnl
+        if is_pending:
+            # Use planned values for pending positions
+            entry_price = None
+            planned_entry = p.get('planned_entry', 0) or p.get('current_price', 0)
+            current_price = live_prices.get(ticker) or p.get('current_price', planned_entry) or planned_entry
+            shares = p.get('planned_shares', 0) or 0
+            value = p.get('planned_value', 0) or (shares * current_price if shares else p.get('allocation_pct', 0) * portfolio_value / 100)
+            unrealized_pnl = 0  # No P&L for pending positions
+            unrealized_pnl_pct = 0
+        else:
+            entry_price = p.get('entry_price', 0) or 0
+            # Use live price if available, otherwise fall back to stored price
+            current_price = live_prices.get(ticker) or p.get('current_price', entry_price) or entry_price
+            shares = p.get('shares', 0) or 0
+
+            # Calculate value and P&L
+            value = shares * current_price
+            if direction == 'SHORT':
+                unrealized_pnl = (entry_price - current_price) * shares
+            else:
+                unrealized_pnl = (current_price - entry_price) * shares
+            unrealized_pnl_pct = ((current_price - entry_price) / entry_price * 100) if entry_price > 0 else 0
+            if direction == 'SHORT':
+                unrealized_pnl_pct = -unrealized_pnl_pct
+
+            total_pnl += unrealized_pnl
 
         # Determine position type based on agent_source
         agent_source = p.get('agent_source', 'manual')
@@ -1415,6 +1452,8 @@ def dashboard_portfolio():
             'target': p.get('target'),
             'invalidation': p.get('invalidation'),
             'date_opened': p.get('date_opened'),
+            'is_pending': is_pending,
+            'planned_entry': p.get('planned_entry'),
         })
 
     # Get latest snapshot
@@ -1461,11 +1500,28 @@ def dashboard_portfolio():
     portfolio_status = positions_data.get("execution_status", "NORMAL")
     scenario = positions_data.get("scenario", None)
 
-    # Calculate category breakdowns
+    # Calculate category breakdowns and exposure
     categories = {}
-    for p in positions:
-        cat = raw_positions[positions.index(p)].get('category', 'OTHER') if positions.index(p) < len(raw_positions) else 'OTHER'
-        categories[cat] = categories.get(cat, 0) + p.get('allocation_pct', 0)
+    long_exposure = 0
+    short_exposure = 0
+    for i, p in enumerate(raw_positions):
+        cat = p.get('category', 'OTHER')
+        alloc = p.get('allocation_pct', 0) or 0
+        categories[cat] = categories.get(cat, 0) + alloc
+
+        # Calculate exposure (exclude CASH from long exposure)
+        if p.get('direction') == 'LONG' and cat != 'CASH':
+            long_exposure += alloc
+        elif p.get('direction') == 'SHORT':
+            short_exposure += alloc
+
+    net_exposure = long_exposure - short_exposure
+    exposure = {
+        'long': long_exposure,
+        'short': short_exposure,
+        'net': net_exposure,
+        'cash': categories.get('CASH', 0)
+    }
 
     return render_template(
         'portfolio.html',
@@ -1481,7 +1537,8 @@ def dashboard_portfolio():
         execution_plan=execution_plan,
         portfolio_status=portfolio_status,
         scenario=scenario,
-        categories=categories
+        categories=categories,
+        exposure=exposure
     )
 
 

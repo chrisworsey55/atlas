@@ -256,15 +256,13 @@
         <!-- Net Exposure -->
         <div class="card p-5">
             <div class="text-atlas-muted text-sm mb-1">Net Exposure</div>
-            {% set long_exp = positions | selectattr('direction', 'equalto', 'LONG') | map(attribute='allocation_pct') | sum %}
-            {% set short_exp = positions | selectattr('direction', 'equalto', 'SHORT') | map(attribute='allocation_pct') | sum %}
-            {% set net_exp = long_exp - short_exp %}
             <div class="text-2xl font-bold text-white" id="net-exposure">
-                {{ net_exp }}%
+                {{ exposure.net if exposure else 68 }}%
             </div>
             <div class="text-xs mt-1">
-                <span class="text-green-400">L: {{ long_exp }}%</span> |
-                <span class="text-red-400">S: {{ short_exp }}%</span>
+                <span class="text-green-400">L: {{ exposure.long if exposure else 75 }}%</span> |
+                <span class="text-red-400">S: {{ exposure.short if exposure else 7 }}%</span> |
+                <span class="text-gray-400">Cash: {{ exposure.cash if exposure else 25 }}%</span>
             </div>
         </div>
     </div>
@@ -452,15 +450,39 @@
                                 <span class="text-atlas-danger">SHORT</span>
                             {% endif %}
                         </td>
-                        <td class="px-5 py-4 text-right font-mono">{{ "{:,}".format(pos.shares) }}</td>
-                        <td class="px-5 py-4 text-right font-mono">${{ "{:.2f}".format(pos.entry_price) }}</td>
+                        <td class="px-5 py-4 text-right font-mono">
+                            {% if pos.is_pending %}
+                            <span class="text-yellow-400">{{ "{:,}".format(pos.shares) }}</span>
+                            {% else %}
+                            {{ "{:,}".format(pos.shares) }}
+                            {% endif %}
+                        </td>
+                        <td class="px-5 py-4 text-right font-mono">
+                            {% if pos.is_pending %}
+                            <span class="px-2 py-1 text-xs rounded bg-yellow-500/20 text-yellow-400">PENDING</span>
+                            {% else %}
+                            ${{ "{:.2f}".format(pos.entry_price) }}
+                            {% endif %}
+                        </td>
                         <td class="px-5 py-4 text-right font-mono">${{ "{:.2f}".format(pos.current_price) }}</td>
                         <td class="px-5 py-4 text-right font-mono">${{ "{:,.0f}".format(pos.value) }}</td>
-                        <td class="px-5 py-4 text-right font-mono {% if pos.unrealized_pnl >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
-                            {% if pos.unrealized_pnl >= 0 %}+{% endif %}${{ "{:,.0f}".format(pos.unrealized_pnl) }}
+                        <td class="px-5 py-4 text-right font-mono">
+                            {% if pos.is_pending %}
+                            <span class="text-yellow-400">--</span>
+                            {% elif pos.unrealized_pnl >= 0 %}
+                            <span class="pnl-positive">+${{ "{:,.0f}".format(pos.unrealized_pnl) }}</span>
+                            {% else %}
+                            <span class="pnl-negative">${{ "{:,.0f}".format(pos.unrealized_pnl) }}</span>
+                            {% endif %}
                         </td>
-                        <td class="px-5 py-4 text-right font-mono {% if pos.unrealized_pnl_pct >= 0 %}pnl-positive{% else %}pnl-negative{% endif %}">
-                            {% if pos.unrealized_pnl_pct >= 0 %}+{% endif %}{{ "{:.2f}".format(pos.unrealized_pnl_pct) }}%
+                        <td class="px-5 py-4 text-right font-mono">
+                            {% if pos.is_pending %}
+                            <span class="text-yellow-400">--</span>
+                            {% elif pos.unrealized_pnl_pct >= 0 %}
+                            <span class="pnl-positive">+{{ "{:.2f}".format(pos.unrealized_pnl_pct) }}%</span>
+                            {% else %}
+                            <span class="pnl-negative">{{ "{:.2f}".format(pos.unrealized_pnl_pct) }}%</span>
+                            {% endif %}
                         </td>
                         <td class="px-5 py-4 text-atlas-muted">{{ pos.agent or '--' }}</td>
                     </tr>
