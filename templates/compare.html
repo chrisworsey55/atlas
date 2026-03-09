@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block title %}Human vs Autonomous{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold gradient-text mb-2">Human + AI vs Fully Autonomous</h1>
+        <p class="text-atlas-muted max-w-2xl mx-auto">
+            Two portfolios. Same agents. Same data. One has a human PM. One is fully autonomous.
+            Started {{ start_date }}. Results compared {{ compare_date }}.
+        </p>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="grid grid-cols-2 gap-6">
+        <!-- Portfolio A -->
+        <div class="card p-6 border-l-4 border-l-blue-500">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-blue-400">Portfolio A</h2>
+                    <p class="text-sm text-atlas-muted">Human + AI (Chris decides)</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold {{ 'pnl-positive' if portfolio_a.total_return >= 0 else 'pnl-negative' }}">
+                        {{ '{:+.2f}'.format(portfolio_a.total_return) }}%
+                    </div>
+                    <div class="text-sm text-atlas-muted">${{ '{:,.0f}'.format(portfolio_a.total_value) }}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div>
+                    <div class="text-atlas-muted text-xs">Net Exposure</div>
+                    <div class="font-semibold">{{ '{:.0f}'.format(portfolio_a.net_exposure) }}%</div>
+                </div>
+                <div>
+                    <div class="text-atlas-muted text-xs">Positions</div>
+                    <div class="font-semibold">{{ portfolio_a.num_positions }}</div>
+                </div>
+                <div>
+                    <div class="text-atlas-muted text-xs">Cash</div>
+                    <div class="font-semibold">{{ '{:.0f}'.format(portfolio_a.cash_pct) }}%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portfolio B -->
+        <div class="card p-6 border-l-4 border-l-green-500">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-green-400">Portfolio B</h2>
+                    <p class="text-sm text-atlas-muted">Fully Autonomous (Agents decide)</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold {{ 'pnl-positive' if portfolio_b.total_return >= 0 else 'pnl-negative' }}">
+                        {{ '{:+.2f}'.format(portfolio_b.total_return) }}%
+                    </div>
+                    <div class="text-sm text-atlas-muted">${{ '{:,.0f}'.format(portfolio_b.total_value) }}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div>
+                    <div class="text-atlas-muted text-xs">Net Exposure</div>
+                    <div class="font-semibold">{{ '{:.0f}'.format(portfolio_b.net_exposure) }}%</div>
+                </div>
+                <div>
+                    <div class="text-atlas-muted text-xs">Positions</div>
+                    <div class="font-semibold">{{ portfolio_b.num_positions }}</div>
+                </div>
+                <div>
+                    <div class="text-atlas-muted text-xs">Cash</div>
+                    <div class="font-semibold">{{ '{:.0f}'.format(portfolio_b.cash_pct) }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equity Curve Comparison -->
+    <div class="card p-6">
+        <h3 class="text-lg font-semibold mb-4">Performance Comparison</h3>
+        <div class="chart-container" style="height: 350px;">
+            <canvas id="equityCompareChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Risk Metrics Comparison -->
+    <div class="card p-6">
+        <h3 class="text-lg font-semibold mb-4">Risk Metrics</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-atlas-border text-atlas-muted">
+                        <th class="text-left py-2">Metric</th>
+                        <th class="text-right py-2 text-blue-400">Portfolio A (Human)</th>
+                        <th class="text-right py-2 text-green-400">Portfolio B (Auto)</th>
+                        <th class="text-center py-2">Leader</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-atlas-border/50">
+                        <td class="py-2">Total Return</td>
+                        <td class="text-right py-2 {{ 'pnl-positive' if portfolio_a.total_return >= 0 else 'pnl-negative' }}">{{ '{:+.2f}'.format(portfolio_a.total_return) }}%</td>
+                        <td class="text-right py-2 {{ 'pnl-positive' if portfolio_b.total_return >= 0 else 'pnl-negative' }}">{{ '{:+.2f}'.format(portfolio_b.total_return) }}%</td>
+                        <td class="text-center py-2">
+                            {% if portfolio_a.total_return > portfolio_b.total_return %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400">A</span>
+                            {% elif portfolio_b.total_return > portfolio_a.total_return %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-400">B</span>
+                            {% else %}
+                            <span class="text-atlas-muted">Tie</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="border-b border-atlas-border/50">
+                        <td class="py-2">Net Exposure</td>
+                        <td class="text-right py-2">{{ '{:.0f}'.format(portfolio_a.net_exposure) }}%</td>
+                        <td class="text-right py-2">{{ '{:.0f}'.format(portfolio_b.net_exposure) }}%</td>
+                        <td class="text-center py-2">
+                            {% if portfolio_a.net_exposure < portfolio_b.net_exposure %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400">A (less risk)</span>
+                            {% elif portfolio_b.net_exposure < portfolio_a.net_exposure %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-400">B (less risk)</span>
+                            {% else %}
+                            <span class="text-atlas-muted">Tie</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="border-b border-atlas-border/50">
+                        <td class="py-2">Cash Position</td>
+                        <td class="text-right py-2">{{ '{:.0f}'.format(portfolio_a.cash_pct) }}%</td>
+                        <td class="text-right py-2">{{ '{:.0f}'.format(portfolio_b.cash_pct) }}%</td>
+                        <td class="text-center py-2">
+                            {% if portfolio_a.cash_pct > portfolio_b.cash_pct %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400">A (more dry powder)</span>
+                            {% elif portfolio_b.cash_pct > portfolio_a.cash_pct %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-400">B (more dry powder)</span>
+                            {% else %}
+                            <span class="text-atlas-muted">Tie</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="border-b border-atlas-border/50">
+                        <td class="py-2"># Positions</td>
+                        <td class="text-right py-2">{{ portfolio_a.num_positions }}</td>
+                        <td class="text-right py-2">{{ portfolio_b.num_positions }}</td>
+                        <td class="text-center py-2">
+                            {% if portfolio_a.num_positions > portfolio_b.num_positions %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400">A (more diverse)</span>
+                            {% elif portfolio_b.num_positions > portfolio_a.num_positions %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-400">B (more diverse)</span>
+                            {% else %}
+                            <span class="text-atlas-muted">Tie</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="border-b border-atlas-border/50">
+                        <td class="py-2">Short Exposure</td>
+                        <td class="text-right py-2">{{ '{:.0f}'.format(portfolio_a.short_exposure) }}%</td>
+                        <td class="text-right py-2">{{ '{:.0f}'.format(portfolio_b.short_exposure) }}%</td>
+                        <td class="text-center py-2">
+                            {% if portfolio_a.short_exposure > portfolio_b.short_exposure %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400">A (hedged)</span>
+                            {% elif portfolio_b.short_exposure > portfolio_a.short_exposure %}
+                            <span class="px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-400">B (hedged)</span>
+                            {% else %}
+                            <span class="text-atlas-muted">Tie</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Position Comparison -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Portfolio A Positions -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold mb-4 text-blue-400">Portfolio A Positions</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-atlas-border text-atlas-muted">
+                            <th class="text-left py-2">Ticker</th>
+                            <th class="text-left py-2">Dir</th>
+                            <th class="text-right py-2">Alloc</th>
+                            <th class="text-right py-2">P&L</th>
+                            <th class="text-left py-2">Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pos in positions_a %}
+                        <tr class="border-b border-atlas-border/50 hover:bg-atlas-card/50 {{ 'bg-yellow-500/10' if pos.ticker in overlap_tickers else '' }}">
+                            <td class="py-2 font-medium">{{ pos.ticker }}</td>
+                            <td class="py-2">
+                                <span class="px-2 py-0.5 rounded text-xs {{ 'bg-green-500/20 text-green-400' if pos.direction == 'LONG' else 'bg-red-500/20 text-red-400' }}">
+                                    {{ pos.direction[:1] }}
+                                </span>
+                            </td>
+                            <td class="text-right py-2">{{ '{:.0f}'.format(pos.allocation_pct) }}%</td>
+                            <td class="text-right py-2 {{ 'pnl-positive' if (pos.pnl_pct or 0) >= 0 else 'pnl-negative' }}">
+                                {{ '{:+.1f}'.format(pos.pnl_pct or 0) }}%
+                            </td>
+                            <td class="py-2 text-atlas-muted text-xs">{{ pos.category or 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Portfolio B Positions -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold mb-4 text-green-400">Portfolio B Positions</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-atlas-border text-atlas-muted">
+                            <th class="text-left py-2">Ticker</th>
+                            <th class="text-left py-2">Dir</th>
+                            <th class="text-right py-2">Alloc</th>
+                            <th class="text-right py-2">P&L</th>
+                            <th class="text-left py-2">Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pos in positions_b %}
+                        <tr class="border-b border-atlas-border/50 hover:bg-atlas-card/50 {{ 'bg-yellow-500/10' if pos.ticker in overlap_tickers else '' }}">
+                            <td class="py-2 font-medium">{{ pos.ticker }}</td>
+                            <td class="py-2">
+                                <span class="px-2 py-0.5 rounded text-xs {{ 'bg-green-500/20 text-green-400' if pos.direction == 'LONG' else 'bg-red-500/20 text-red-400' }}">
+                                    {{ pos.direction[:1] }}
+                                </span>
+                            </td>
+                            <td class="text-right py-2">{{ '{:.0f}'.format(pos.allocation_pct) }}%</td>
+                            <td class="text-right py-2 {{ 'pnl-positive' if (pos.pnl_pct or 0) >= 0 else 'pnl-negative' }}">
+                                {{ '{:+.1f}'.format(pos.pnl_pct or 0) }}%
+                            </td>
+                            <td class="py-2 text-atlas-muted text-xs">{{ pos.agent_source or 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlap/Divergence Analysis -->
+    <div class="card p-6">
+        <h3 class="text-lg font-semibold mb-4">Position Overlap Analysis</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- In A only -->
+            <div>
+                <h4 class="text-sm font-medium text-blue-400 mb-2">In A but NOT in B ({{ only_a|length }})</h4>
+                <div class="space-y-1">
+                    {% for ticker in only_a %}
+                    <span class="inline-block px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400 mr-1 mb-1">{{ ticker }}</span>
+                    {% else %}
+                    <span class="text-atlas-muted text-sm">None</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- In both -->
+            <div>
+                <h4 class="text-sm font-medium text-yellow-400 mb-2">In BOTH portfolios ({{ overlap_tickers|length }})</h4>
+                <div class="space-y-1">
+                    {% for ticker in overlap_tickers %}
+                    <span class="inline-block px-2 py-1 rounded text-xs bg-yellow-500/20 text-yellow-400 mr-1 mb-1">{{ ticker }}</span>
+                    {% else %}
+                    <span class="text-atlas-muted text-sm">None</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- In B only -->
+            <div>
+                <h4 class="text-sm font-medium text-green-400 mb-2">In B but NOT in A ({{ only_b|length }})</h4>
+                <div class="space-y-1">
+                    {% for ticker in only_b %}
+                    <span class="inline-block px-2 py-1 rounded text-xs bg-green-500/20 text-green-400 mr-1 mb-1">{{ ticker }}</span>
+                    {% else %}
+                    <span class="text-atlas-muted text-sm">None</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Allocation Pie Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold mb-4 text-blue-400">Portfolio A Allocation</h3>
+            <div class="chart-container" style="height: 250px;">
+                <canvas id="pieChartA"></canvas>
+            </div>
+        </div>
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold mb-4 text-green-400">Portfolio B Allocation</h3>
+            <div class="chart-container" style="height: 250px;">
+                <canvas id="pieChartB"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Equity curve comparison chart
+    const equityCtx = document.getElementById('equityCompareChart');
+    if (equityCtx) {
+        new Chart(equityCtx, {
+            type: 'line',
+            data: {
+                labels: {{ equity_dates | safe }},
+                datasets: [
+                    {
+                        label: 'Portfolio A (Human + AI)',
+                        data: {{ equity_a | safe }},
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Portfolio B (Autonomous)',
+                        data: {{ equity_b | safe }},
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'SPY Benchmark',
+                        data: {{ spy_values | safe }},
+                        borderColor: '#6b7280',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#9ca3af' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': $' + context.raw.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#6b7280' },
+                        grid: { color: '#1e2433' }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#6b7280',
+                            callback: value => '$' + value.toLocaleString()
+                        },
+                        grid: { color: '#1e2433' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Pie chart A
+    const pieCtxA = document.getElementById('pieChartA');
+    if (pieCtxA) {
+        new Chart(pieCtxA, {
+            type: 'doughnut',
+            data: {
+                labels: {{ pie_labels_a | safe }},
+                datasets: [{
+                    data: {{ pie_values_a | safe }},
+                    backgroundColor: [
+                        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                        '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
+                        '#06b6d4', '#d946ef', '#22c55e', '#eab308'
+                    ],
+                    borderColor: '#111217',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#9ca3af', font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    }
+
+    // Pie chart B
+    const pieCtxB = document.getElementById('pieChartB');
+    if (pieCtxB) {
+        new Chart(pieCtxB, {
+            type: 'doughnut',
+            data: {
+                labels: {{ pie_labels_b | safe }},
+                datasets: [{
+                    data: {{ pie_values_b | safe }},
+                    backgroundColor: [
+                        '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6',
+                        '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'
+                    ],
+                    borderColor: '#111217',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#9ca3af', font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    }
+
+    // Auto-refresh every 60 seconds during market hours
+    const now = new Date();
+    const hour = now.getHours();
+    const isMarketHours = hour >= 9 && hour < 17;
+    if (isMarketHours) {
+        setTimeout(() => location.reload(), 60000);
+    }
+</script>
+{% endblock %}

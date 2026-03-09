@@ -2238,6 +2238,213 @@ def dashboard_autonomous():
     )
 
 
+# ============== COMPARE DASHBOARD ROUTE ==============
+
+@app.route('/atlas/compare')
+def dashboard_compare():
+    """Compare Human + AI portfolio vs Fully Autonomous portfolio."""
+
+    # Load Portfolio A (Human + AI) from data/state/positions.json
+    portfolio_a_data = load_state_file("positions.json") or {}
+    positions_a_raw = portfolio_a_data.get("positions", []) if isinstance(portfolio_a_data, dict) else portfolio_a_data
+
+    # Load Portfolio B (Autonomous) from data/autonomous/positions.json
+    autonomous_dir = STATE_DIR.parent / "autonomous"
+    portfolio_b_file = autonomous_dir / "positions.json"
+    if portfolio_b_file.exists():
+        with open(portfolio_b_file, 'r') as f:
+            portfolio_b_data = json.load(f)
+    else:
+        portfolio_b_data = {"positions": [], "cash": 1000000}
+    positions_b_raw = portfolio_b_data.get("positions", [])
+
+    # Process Portfolio A
+    positions_a = []
+    total_pnl_a = 0
+    long_exp_a = 0
+    short_exp_a = 0
+    cash_pct_a = 0
+    tickers_a = set()
+
+    for p in positions_a_raw:
+        ticker = p.get("ticker")
+        tickers_a.add(ticker)
+        direction = p.get("direction", "LONG")
+        entry = p.get("entry_price", 0) or 0
+        current = p.get("current_price", entry) or entry
+        shares = p.get("shares", 0) or 0
+        alloc = p.get("allocation_pct", 0) or 0
+
+        if direction == "SHORT":
+            pnl = (entry - current) * shares if shares else 0
+        else:
+            pnl = (current - entry) * shares if shares else 0
+        pnl_pct = ((current - entry) / entry * 100) if entry > 0 else 0
+        if direction == "SHORT":
+            pnl_pct = -pnl_pct
+
+        total_pnl_a += pnl
+
+        if ticker == "BIL":
+            cash_pct_a = alloc
+        elif direction == "LONG":
+            long_exp_a += alloc
+        else:
+            short_exp_a += alloc
+
+        positions_a.append({
+            "ticker": ticker,
+            "direction": direction,
+            "allocation_pct": alloc,
+            "pnl_pct": pnl_pct,
+            "category": p.get("category", "N/A")
+        })
+
+    # Process Portfolio B
+    positions_b = []
+    total_pnl_b = 0
+    long_exp_b = 0
+    short_exp_b = 0
+    cash_pct_b = 0
+    tickers_b = set()
+    cash_b = portfolio_b_data.get("cash", 0)
+    starting_b = portfolio_b_data.get("starting_value", 1000000)
+
+    for p in positions_b_raw:
+        ticker = p.get("ticker")
+        tickers_b.add(ticker)
+        direction = p.get("direction", "LONG")
+        entry = p.get("entry_price", 0) or 0
+        current = p.get("current_price", entry) or entry
+        shares = p.get("shares", 0) or 0
+        alloc = p.get("allocation_pct", 0) or 0
+
+        if direction == "SHORT":
+            pnl = (entry - current) * shares if shares else 0
+        else:
+            pnl = (current - entry) * shares if shares else 0
+        pnl_pct = ((current - entry) / entry * 100) if entry > 0 else 0
+        if direction == "SHORT":
+            pnl_pct = -pnl_pct
+
+        total_pnl_b += pnl
+
+        if ticker == "BIL":
+            cash_pct_b = alloc + (cash_b / starting_b * 100)
+        elif direction == "LONG":
+            long_exp_b += alloc
+        else:
+            short_exp_b += alloc
+
+        positions_b.append({
+            "ticker": ticker,
+            "direction": direction,
+            "allocation_pct": alloc,
+            "pnl_pct": pnl_pct,
+            "agent_source": p.get("agent_source", "N/A")
+        })
+
+    # Add liquid cash to portfolio B cash %
+    if cash_b > 0 and "BIL" not in tickers_b:
+        cash_pct_b = cash_b / starting_b * 100
+
+    # Calculate portfolio summaries
+    starting_a = portfolio_a_data.get("portfolio_value", 1000000)
+    total_value_a = starting_a + total_pnl_a
+    total_return_a = (total_pnl_a / starting_a * 100) if starting_a else 0
+
+    total_value_b = starting_b + total_pnl_b
+    total_return_b = (total_pnl_b / starting_b * 100) if starting_b else 0
+
+    portfolio_a = {
+        "total_value": total_value_a,
+        "total_return": total_return_a,
+        "long_exposure": long_exp_a,
+        "short_exposure": short_exp_a,
+        "net_exposure": long_exp_a - short_exp_a,
+        "cash_pct": cash_pct_a,
+        "num_positions": len(positions_a)
+    }
+
+    portfolio_b = {
+        "total_value": total_value_b,
+        "total_return": total_return_b,
+        "long_exposure": long_exp_b,
+        "short_exposure": short_exp_b,
+        "net_exposure": long_exp_b - short_exp_b,
+        "cash_pct": cash_pct_b,
+        "num_positions": len(positions_b)
+    }
+
+    # Overlap analysis
+    overlap_tickers = list(tickers_a & tickers_b)
+    only_a = list(tickers_a - tickers_b)
+    only_b = list(tickers_b - tickers_a)
+
+    # Load P&L history for charts
+    pnl_history_a = load_state_file("pnl_history.json") or []
+
+    pnl_history_b_file = autonomous_dir / "pnl_history.json"
+    if pnl_history_b_file.exists():
+        with open(pnl_history_b_file, 'r') as f:
+            pnl_history_b = json.load(f)
+    else:
+        pnl_history_b = []
+
+    # Build equity curves
+    equity_dates = []
+    equity_a = []
+    equity_b = []
+
+    # Combine dates from both histories
+    all_dates = set()
+    for h in pnl_history_a[-30:]:
+        d = h.get("date", "")[:10]
+        if d:
+            all_dates.add(d)
+    for h in pnl_history_b[-30:]:
+        d = h.get("date", "")[:10]
+        if d:
+            all_dates.add(d)
+
+    # Create lookup dicts
+    a_by_date = {h.get("date", "")[:10]: h.get("portfolio_value", 1000000) for h in pnl_history_a}
+    b_by_date = {h.get("date", "")[:10]: h.get("portfolio_value", 1000000) for h in pnl_history_b}
+
+    for d in sorted(all_dates)[-30:]:
+        equity_dates.append(d)
+        equity_a.append(a_by_date.get(d, 1000000))
+        equity_b.append(b_by_date.get(d, 1000000))
+
+    # Pie chart data
+    pie_labels_a = [p["ticker"] for p in positions_a]
+    pie_values_a = [p["allocation_pct"] for p in positions_a]
+    pie_labels_b = [p["ticker"] for p in positions_b]
+    pie_values_b = [p["allocation_pct"] for p in positions_b]
+
+    return render_template(
+        'compare.html',
+        active_page='compare',
+        start_date="March 10, 2026",
+        compare_date="May 1, 2026",
+        portfolio_a=portfolio_a,
+        portfolio_b=portfolio_b,
+        positions_a=positions_a,
+        positions_b=positions_b,
+        overlap_tickers=overlap_tickers,
+        only_a=only_a,
+        only_b=only_b,
+        equity_dates=json.dumps(equity_dates),
+        equity_a=json.dumps(equity_a),
+        equity_b=json.dumps(equity_b),
+        spy_values=json.dumps([]),  # Would populate from SPY data
+        pie_labels_a=json.dumps(pie_labels_a),
+        pie_values_a=json.dumps(pie_values_a),
+        pie_labels_b=json.dumps(pie_labels_b),
+        pie_values_b=json.dumps(pie_values_b)
+    )
+
+
 # Redirect root to atlas dashboard
 @app.route('/')
 def root_redirect():
