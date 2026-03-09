@@ -1,0 +1,125 @@
+{
+  "AVGO": {
+    "ticker": "AVGO",
+    "price": 330.48,
+    "change": -2.29,
+    "change_pct": -0.6882,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 330.48,
+    "polygon_price": null
+  },
+  "GOOGL": {
+    "ticker": "GOOGL",
+    "price": 298.48,
+    "change": -2.4,
+    "change_pct": 0,
+    "data_quality": "verified",
+    "source": "fmp",
+    "fmp_price": 298.48,
+    "finnhub_price": 298.52,
+    "polygon_price": null,
+    "diff_pct": 0.01
+  },
+  "APO": {
+    "ticker": "APO",
+    "price": 108.7,
+    "change": -2.54,
+    "change_pct": -2.2834,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 108.7,
+    "polygon_price": null
+  },
+  "UNH": {
+    "ticker": "UNH",
+    "price": 286.48,
+    "change": -2.29,
+    "change_pct": 0,
+    "data_quality": "verified",
+    "source": "fmp",
+    "fmp_price": 286.48,
+    "finnhub_price": 286.48,
+    "polygon_price": null,
+    "diff_pct": 0.0
+  },
+  "BRBR": {
+    "ticker": "BRBR",
+    "price": 17.39,
+    "change": 0.41,
+    "change_pct": 2.4146,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 17.39,
+    "polygon_price": null
+  },
+  "TEAM": {
+    "ticker": "TEAM",
+    "price": 83.62,
+    "change": 1.11,
+    "change_pct": 1.3453,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 83.62,
+    "polygon_price": null
+  },
+  "SRAD": {
+    "ticker": "SRAD",
+    "price": 18.55,
+    "change": -0.7,
+    "change_pct": -3.6364,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 18.55,
+    "polygon_price": null
+  },
+  "HRMY": {
+    "ticker": "HRMY",
+    "price": 28.33,
+    "change": -0.18,
+    "change_pct": -0.6314,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 28.33,
+    "polygon_price": null
+  },
+  "GLD": {
+    "ticker": "GLD",
+    "price": 473.51,
+    "change": 7.38,
+    "change_pct": 1.5832,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 473.51,
+    "polygon_price": null
+  },
+  "TLT": {
+    "ticker": "TLT",
+    "price": 88.46,
+    "change": -0.33,
+    "change_pct": -0.3717,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 88.46,
+    "polygon_price": null
+  },
+  "STX": {
+    "ticker": "STX",
+    "price": 352.8,
+    "change": -14.54,
+    "change_pct": -3.9582,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 352.8,
+    "polygon_price": null
+  }
+}

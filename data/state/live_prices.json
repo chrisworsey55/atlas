@@ -1,0 +1,49 @@
+{
+  "GE": {
+    "ticker": "GE",
+    "price": 323.11,
+    "change": -3.88,
+    "change_pct": 0,
+    "data_quality": "verified",
+    "source": "fmp",
+    "fmp_price": 323.11,
+    "finnhub_price": 323.11,
+    "polygon_price": null,
+    "diff_pct": 0.0
+  },
+  "AVGO": {
+    "ticker": "AVGO",
+    "price": 330.48,
+    "change": -2.29,
+    "change_pct": -0.6882,
+    "data_quality": "single_source",
+    "source": "finnhub",
+    "fmp_price": null,
+    "finnhub_price": 330.48,
+    "polygon_price": null
+  },
+  "TSLA": {
+    "ticker": "TSLA",
+    "price": 396.73,
+    "change": -8.82,
+    "change_pct": 0,
+    "data_quality": "verified",
+    "source": "fmp",
+    "fmp_price": 396.73,
+    "finnhub_price": 396.73,
+    "polygon_price": null,
+    "diff_pct": 0.0
+  },
+  "GOOGL": {
+    "ticker": "GOOGL",
+    "price": 298.52,
+    "change": -2.36,
+    "change_pct": 0,
+    "data_quality": "verified",
+    "source": "fmp",
+    "fmp_price": 298.52,
+    "finnhub_price": 298.52,
+    "polygon_price": null,
+    "diff_pct": 0.0
+  }
+}

@@ -274,5 +274,67 @@
     "portfolio_value": 945387.39,
     "total_pnl": -20441.15,
     "pnl_pct": -2.04
+  },
+  {
+    "date": "2026-03-07T10:11:09.571332",
+    "portfolio_value": 945387.39,
+    "total_pnl": -20441.15,
+    "pnl_pct": -2.04
+  },
+  {
+    "date": "2026-03-07",
+    "total_pnl": -20441.15,
+    "positions": {
+      "BIL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 91.39
+      },
+      "CRM": {
+        "pnl": 165.39,
+        "pnl_pct": 0.55,
+        "current": 202.11
+      },
+      "UNH": {
+        "pnl": -304.92,
+        "pnl_pct": -0.87,
+        "current": 286.48
+      },
+      "STX": {
+        "pnl": 766.8,
+        "pnl_pct": 3.87,
+        "current": 352.8
+      },
+      "BE": {
+        "pnl": -22069.32,
+        "pnl_pct": -14.19,
+        "current": 135.19
+      },
+      "TLT": {
+        "pnl": 1283.4,
+        "pnl_pct": 1.28,
+        "current": 88.46
+      },
+      "AVGO": {
+        "pnl": 548.02,
+        "pnl_pct": 3.66,
+        "current": 330.48
+      },
+      "ADBE": {
+        "pnl": 190.8,
+        "pnl_pct": 0.64,
+        "current": 283.62
+      },
+      "GOOG": {
+        "pnl": -295.02,
+        "pnl_pct": -0.99,
+        "current": 298.3
+      },
+      "APO": {
+        "pnl": -726.3,
+        "pnl_pct": -2.42,
+        "current": 108.7
+      }
+    }
   }
 ]

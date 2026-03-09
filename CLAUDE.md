@@ -116,10 +116,31 @@ atlas/
 ## Current Portfolio (as of last update)
 BIL 52.5% | BE 15% | TLT SHORT 10% | AVGO 5% | UNH 3.5% | CRM 3% | ADBE 3% | GOOG 3% | APO 3% | STX SHORT 2%
 
+## Data Sources
+- **Primary:** Finnhub free tier, 60 req/min, real-time quotes. Key in .env as FINNHUB_API_KEY
+- **Secondary:** FMP (Financial Modeling Prep) free tier, 250 req/day, real-time quotes. Key in .env as FMP_API_KEY
+- **Tertiary:** Massive/Polygon.io free tier, 5 req/min, end-of-day data. Key in .env as POLYGON_API_KEY
+  - Note: Polygon.io rebranded to Massive.com — same API
+  - Use as third price validator and for previous day close, corporate actions, technical indicators
+- All market data functions in agents/market_data.py
+
+### Price Validation Rules
+- NEVER use yfinance — it returns stale/incorrect prices
+- Every price must be cross-validated from multiple sources
+- Three-source validation logic:
+  - FMP + Finnhub agree within 3% → "verified", use FMP price
+  - FMP + Finnhub disagree → fetch Polygon prev close as tiebreaker → use whichever is closest to Polygon
+  - Any source returns $0 or null → ignore it, use the others
+  - All three disagree → flag "unverified", log all three prices, use Finnhub
+- Data quality flags: "verified" (FMP/Finnhub agree), "tiebreaker" (Polygon resolved conflict), "unverified" (all disagree), "single_source"
+- DON'T use Polygon for batch quotes (5/min rate limit) — only for tiebreaker conflicts
+- Log warnings when conflicts occur
+
 ## Rules
 1. ALWAYS read this file at the start of every session
 2. ALWAYS read SYSTEM.md before making code changes
 3. NEVER modify positions.json without also updating decisions.json and the trade journal
 4. NEVER deploy without testing locally first
 5. NEVER overwrite templates with a different design — the current dark theme is final
-6. API key is in .env — make sure dotenv loads it from the project root
+6. API keys are in .env — make sure dotenv loads it from the project root
+7. NEVER use yfinance — use dual-source validation via agents/market_data.py

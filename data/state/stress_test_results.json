@@ -1,0 +1,113 @@
+{
+  "date": "2026-03-07T14:43:50.863396",
+  "portfolio_tested": [
+    "BIL",
+    "CRM",
+    "UNH",
+    "STX",
+    "BE",
+    "TLT",
+    "AVGO",
+    "ADBE",
+    "GOOG",
+    "APO"
+  ],
+  "scenarios": {
+    "recession": {
+      "scenario": "Sharp Recession",
+      "total_portfolio_impact_pct": -11.2,
+      "total_dollar_impact": -108672,
+      "position_impacts": [
+        {
+          "ticker": "BIL",
+          "direction": "LONG",
+          "estimated_move_pct": 1.5,
+          "dollar_impact": 7643,
+          "reasoning": "Short-term treasuries benefit from flight to safety and potential Fed cuts, slight price appreciation",
+          "action": "HOLD"
+        },
+        {
+          "ticker": "CRM",
+          "direction": "LONG",
+          "estimated_move_pct": -35.0,
+          "dollar_impact": -10485,
+          "reasoning": "Tech stocks hit hard in recession, enterprise spending cuts despite AI thesis, multiple compression",
+          "action": "TRIM"
+        },
+        {
+          "ticker": "UNH",
+          "direction": "LONG",
+          "estimated_move_pct": -15.0,
+          "dollar_impact": -5242,
+          "reasoning": "Healthcare relatively defensive but not immune, unemployment reduces employer coverage",
+          "action": "HOLD"
+        },
+        {
+          "ticker": "STX",
+          "direction": "SHORT",
+          "estimated_move_pct": -40.0,
+          "dollar_impact": 7927,
+          "reasoning": "Overvalued position benefits from market crash, tech hardware demand collapses in recession",
+          "action": "HOLD"
+        },
+        {
+          "ticker": "BE",
+          "direction": "LONG",
+          "estimated_move_pct": -45.0,
+          "dollar_impact": -69658,
+          "reasoning": "High-growth energy tech gets crushed, capex spending frozen, speculative premium evaporates",
+          "action": "EXIT"
+        },
+        {
+          "ticker": "TLT",
+          "direction": "SHORT",
+          "estimated_move_pct": 25.0,
+          "dollar_impact": -25000,
+          "reasoning": "Long bonds rally hard as 10Y drops to 2.5%, short position loses significantly",
+          "action": "EXIT"
+        },
+        {
+          "ticker": "AVGO",
+          "direction": "LONG",
+          "estimated_move_pct": -25.0,
+          "dollar_impact": -12191,
+          "reasoning": "Semiconductor demand collapses in recession despite valuation support, enterprise spending cuts",
+          "action": "HOLD"
+        },
+        {
+          "ticker": "ADBE",
+          "direction": "LONG",
+          "estimated_move_pct": -30.0,
+          "dollar_impact": -8975,
+          "reasoning": "Creative software faces subscription churn and enterprise budget cuts in recession",
+          "action": "TRIM"
+        },
+        {
+          "ticker": "GOOG",
+          "direction": "LONG",
+          "estimated_move_pct": -28.0,
+          "dollar_impact": -8356,
+          "reasoning": "Ad revenue plummets in recession, cloud growth slows, regulatory overhang persists",
+          "action": "TRIM"
+        },
+        {
+          "ticker": "APO",
+          "direction": "LONG",
+          "estimated_move_pct": -20.0,
+          "dollar_impact": -6025,
+          "reasoning": "Asset management faces AUM declines and reduced deal activity, but less cyclical than pure financials",
+          "action": "HOLD"
+        }
+      ],
+      "correlation_concerns": "Tech positions (CRM, AVGO, ADBE, GOOG) highly correlated in downturn. BE and TLT short create opposite exposures that both lose. Growth stocks across portfolio move together despite different sectors.",
+      "hedge_recommendations": [
+        "Add VIX calls or put spreads on QQQ",
+        "Increase defensive sectors like utilities",
+        "Consider gold or commodity exposure",
+        "Add more treasury duration to offset equity risk"
+      ],
+      "key_risk": "BE position represents 15% allocation in high-beta growth stock that could lose 45%+ in recession, creating outsized portfolio drag of -7.2% alone",
+      "silver_lining": "STX short position benefits from tech selloff, BIL provides stability and slight gains from flight to quality"
+    }
+  }
+}

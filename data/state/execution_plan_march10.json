@@ -1,0 +1,137 @@
+{
+  "plan_date": "2026-03-08",
+  "scenario": "Iran-Israel War Escalation",
+  "market_conditions": {
+    "oil_price": 108,
+    "sp_futures_change_pct": -1.5,
+    "vix": 29.49,
+    "catalyst": "Strait of Hormuz closure threat"
+  },
+  "cio_decisions": {
+    "add_energy": {
+      "decision": "YES",
+      "ticker": "XLE",
+      "allocation_pct": 5,
+      "rationale": "Diversified energy hedge; Hormuz closure could push oil to $130-150"
+    },
+    "remove_position": {
+      "decision": "TRIM APO",
+      "from_pct": 10,
+      "to_pct": 5,
+      "rationale": "Credit-sensitive, underperforms in risk-off; GOOGL retained for defensive quality"
+    },
+    "increase_cash": {
+      "decision": "YES",
+      "from_pct": 25,
+      "to_pct": 30,
+      "rationale": "Elevated VIX requires dry powder; Wednesday limit orders will deploy if filled"
+    },
+    "additional_short": {
+      "decision": "YES",
+      "ticker": "IWM",
+      "allocation_pct": 4,
+      "rationale": "Small-caps most vulnerable to rate uncertainty and liquidity crunch"
+    }
+  },
+  "phase_1_monday": {
+    "execution_date": "2026-03-10",
+    "execution_time": "market_open",
+    "trades": [
+      {
+        "action": "BUY",
+        "ticker": "XLE",
+        "direction": "LONG",
+        "value": 50000,
+        "allocation_pct": 5,
+        "order_type": "market",
+        "stop": 82,
+        "target": 115,
+        "thesis": "Energy hedge for Strait of Hormuz closure risk"
+      },
+      {
+        "action": "SELL",
+        "ticker": "APO",
+        "direction": "TRIM",
+        "value": 50000,
+        "from_pct": 10,
+        "to_pct": 5,
+        "order_type": "market",
+        "thesis": "Reduce credit-sensitive exposure during war escalation"
+      },
+      {
+        "action": "SHORT",
+        "ticker": "IWM",
+        "direction": "SHORT",
+        "value": 40000,
+        "allocation_pct": 4,
+        "order_type": "market",
+        "stop": 220,
+        "target": 170,
+        "thesis": "Small-cap vulnerability to war-driven rate and liquidity stress"
+      }
+    ]
+  },
+  "phase_2_wednesday": {
+    "execution_date": "2026-03-12",
+    "condition": "3-5% market decline from Monday open",
+    "order_type": "GTC limit orders placed Tuesday close",
+    "trades": [
+      {
+        "action": "BUY",
+        "ticker": "AVGO",
+        "direction": "ADD",
+        "value": 30000,
+        "limit_price": 310.00,
+        "decline_from_current_pct": -6.2,
+        "thesis": "Add to core quality on fear"
+      },
+      {
+        "action": "BUY",
+        "ticker": "GOOGL",
+        "direction": "ADD",
+        "value": 30000,
+        "limit_price": 280.00,
+        "decline_from_current_pct": -6.2,
+        "thesis": "Add to core quality on fear"
+      },
+      {
+        "action": "BUY",
+        "ticker": "UNH",
+        "direction": "ADD",
+        "value": 20000,
+        "limit_price": 270.00,
+        "decline_from_current_pct": -5.8,
+        "thesis": "Defensive healthcare compounder"
+      },
+      {
+        "action": "BUY",
+        "ticker": "BRBR",
+        "direction": "ADD",
+        "value": 20000,
+        "limit_price": 15.50,
+        "decline_from_current_pct": -10.9,
+        "thesis": "Recession-resistant protein nutrition; 91% DCF upside"
+      }
+    ],
+    "total_deployment_if_filled": 100000
+  },
+  "portfolio_after_monday": {
+    "long_exposure_pct": 82,
+    "short_exposure_pct": 7,
+    "net_exposure_pct": 75,
+    "cash_pct": 25
+  },
+  "portfolio_after_wednesday_if_filled": {
+    "long_exposure_pct": 92,
+    "short_exposure_pct": 7,
+    "net_exposure_pct": 85,
+    "cash_pct": 15
+  },
+  "risk_notes": [
+    "GLD target raised to $550 (war premium)",
+    "IWM short stop at $220 — cover if small-caps rally on de-escalation",
+    "XLE stop at $82 — exit if oil collapses on peace deal",
+    "Do NOT chase energy above $115 — wait for pullback"
+  ],
+  "timestamp": "2026-03-08T21:00:00.000000"
+}

@@ -1454,16 +1454,34 @@ def dashboard_portfolio():
     cio_synthesis = load_state_file("cio_synthesis.json") or {}
     news_briefs = load_state_file("news_briefs.json") or {}
 
+    # Load execution plan for war scenario dashboard
+    execution_plan = load_state_file("execution_plan_march10.json") or {}
+
+    # Get portfolio-level data for war dashboard
+    portfolio_status = positions_data.get("execution_status", "NORMAL")
+    scenario = positions_data.get("scenario", None)
+
+    # Calculate category breakdowns
+    categories = {}
+    for p in positions:
+        cat = raw_positions[positions.index(p)].get('category', 'OTHER') if positions.index(p) < len(raw_positions) else 'OTHER'
+        categories[cat] = categories.get(cat, 0) + p.get('allocation_pct', 0)
+
     return render_template(
         'portfolio.html',
         active_page='portfolio',
         positions=positions,
+        raw_positions=raw_positions,
         meta=meta,
         pnl_history=pnl_history,
         summary=summary,
         hurdle=hurdle,
         cio_synthesis=cio_synthesis,
-        news_briefs=news_briefs
+        news_briefs=news_briefs,
+        execution_plan=execution_plan,
+        portfolio_status=portfolio_status,
+        scenario=scenario,
+        categories=categories
     )
 
 

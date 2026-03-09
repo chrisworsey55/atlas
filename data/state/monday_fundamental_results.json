@@ -1,0 +1,503 @@
+{
+  "longs": [
+    {
+      "ticker": "APOS",
+      "name": "Apollo Global Management, Inc",
+      "sector": "Alternative Asset Management",
+      "price": 25.82,
+      "intrinsic": 190,
+      "upside": 635.8,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "APOS is SEVERELY UNDERVALUED at $26 vs $190 intrinsic value (636% upside). Trading at 12x EBITDA vs peers at 16-18x despite $735B AUM platform. DCF suggests $180, SOTP implies $234. Margin of safety: "
+    },
+    {
+      "ticker": "AFGB",
+      "name": "American Financial Group, Inc",
+      "sector": "Insurance",
+      "price": 22.015,
+      "intrinsic": 135,
+      "upside": 513.0,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "AFG is severely UNDERVALUED at $22 vs $135 intrinsic value (513% upside). All methods converge on significant undervaluation - DCF $135, comps $110-140, transactions $120-150, SOTP $161, book value $9"
+    },
+    {
+      "ticker": "ACGLN",
+      "name": "Arch Capital Group Ltd.",
+      "sector": "Financial Services - Insurance",
+      "price": 17.44,
+      "intrinsic": 90,
+      "upside": 416.1,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "ACGL is SEVERELY UNDERVALUED at $17.44 vs $90 intrinsic value (416% upside). Trading at 0.27x tangible book vs 1.0-1.5x peers despite superior 22% ROE and 17% revenue growth. Negative FCF is timing ar"
+    },
+    {
+      "ticker": "ACGLO",
+      "name": "Arch Capital Group Ltd.",
+      "sector": "Property & Casualty Insurance",
+      "price": 20.72,
+      "intrinsic": 100,
+      "upside": 382.7,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "ACGLO is SEVERELY UNDERVALUED at $21 vs $100 intrinsic value (383% upside). Trading at 0.32x book vs peers at 1.2x despite superior ROE. Extreme discount suggests reserve concerns, but balance sheet s"
+    },
+    {
+      "ticker": "NTRSO",
+      "name": "Northern Trust Corporation",
+      "sector": "Financial Services",
+      "price": 19.77,
+      "intrinsic": 85,
+      "upside": 330.0,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "NTRSO is SEVERELY UNDERVALUED at $19.77 vs $85 intrinsic value (330% upside). Trading at 0.3x tangible book despite quality wealth management franchise. DCF $85, comps $75-95, SOTP $163. Margin of saf"
+    },
+    {
+      "ticker": "OZKAP",
+      "name": "Bank OZK",
+      "sector": "Regional Banking",
+      "price": 16.6,
+      "intrinsic": 47,
+      "upside": 183.1,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "OZKAP is SEVERELY UNDERVALUED at $16.60 vs $47 intrinsic value (183% upside). Trading at 0.32x book, 3.8x P/E vs peers at 11x. Either facing hidden credit crisis or presenting generational value oppor"
+    },
+    {
+      "ticker": "REG",
+      "name": "Regency Centers Corporation",
+      "sector": "Real Estate Investment Trusts (REITs)",
+      "price": 22.3,
+      "intrinsic": 62.5,
+      "upside": 180.3,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "REG is SEVERELY UNDERVALUED at $22.30 vs $62.50 intrinsic value (180% upside). Trading at 0.61x book value and 9.2x EBITDA vs peers at 16.8x. Defensive grocery-anchored portfolio, 41.7% FCF margin, bu"
+    },
+    {
+      "ticker": "BTX",
+      "name": "BlackRock Innovation and Growth Term Trust",
+      "sector": "Closed-End Fund",
+      "price": 6.46,
+      "intrinsic": 15.26,
+      "upside": 136.2,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "BTX is SEVERELY UNDERVALUED at $6.46 vs $15.26 NAV (136% upside to liquidation value). Trading at 58% discount despite quality BlackRock management. Key risk: 965% yield is destroying NAV through forc"
+    },
+    {
+      "ticker": "MOMO",
+      "name": "Hello Group Inc.",
+      "sector": "Communication Services",
+      "price": 6.16,
+      "intrinsic": 13.65,
+      "upside": 121.6,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "MOMO is SEVERELY UNDERVALUED at $6.16 vs $13.65 intrinsic value (122% upside). Net cash position ($8.7B) alone worth $73/share vs $6.16 price. FCF yield of 496% unsustainable at current valuation. Chi"
+    },
+    {
+      "ticker": "BRBR",
+      "name": "BellRing Brands, Inc.",
+      "sector": "Consumer Defensive",
+      "price": 17.26,
+      "intrinsic": 33,
+      "upside": 91.2,
+      "confidence": 82,
+      "verdict": "UNDERVALUED",
+      "thesis": "BRBR is SEVERELY UNDERVALUED at $17 vs $33 intrinsic value (91% upside). Leading protein nutrition brand trading at 9x EBITDA vs peers at 20x+ despite superior growth. Key risk is 3.6x debt load. Key "
+    },
+    {
+      "ticker": "TEAM",
+      "name": "Atlassian Corporation",
+      "sector": "Technology - Software",
+      "price": 82.51,
+      "intrinsic": 150,
+      "upside": 81.8,
+      "confidence": 75,
+      "verdict": "UNDERVALUED",
+      "thesis": "TEAM is UNDERVALUED at $83 vs $150 intrinsic value (82% upside). Despite negative EBITDA, generates $1.5B FCF (26.5% margin) growing 20%+ with strong moats in developer collaboration. Trading at 3.7x "
+    },
+    {
+      "ticker": "BZ",
+      "name": "Kanzhun Limited",
+      "sector": "Communication Services",
+      "price": 15.54,
+      "intrinsic": 28,
+      "upside": 80.2,
+      "confidence": 82,
+      "verdict": "UNDERVALUED",
+      "thesis": "BZ is UNDERVALUED at $15.54 vs $28 intrinsic value (80% upside). Dominant Chinese job platform generating $2.8B FCF with $19B net cash. Trading at 0.94x revenue vs 2-4x for peers. China regulatory dis"
+    },
+    {
+      "ticker": "RZB",
+      "name": "Reinsurance Group of America, Incorporated",
+      "sector": "Life & Health Insurance",
+      "price": 24.97,
+      "intrinsic": 45,
+      "upside": 80.2,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "RZB is SEVERELY UNDERVALUED at $25 vs $45 intrinsic value (80% upside). 20.5% FCF yield, 0.12x P/B vs 1.0x+ for peers. Asset-based floor at $190/share provides massive margin of safety. Rising rates a"
+    },
+    {
+      "ticker": "JD",
+      "name": "JD.com, Inc.",
+      "sector": "Consumer Cyclical",
+      "price": 25.47,
+      "intrinsic": 45,
+      "upside": 76.7,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "JD is UNDERVALUED at $25 vs $45 intrinsic value (77% upside). Trading at 2.2x EV/EBITDA vs peers at 20x+. Negative FCF is peak capex cycle - logistics infrastructure complete. $198B cash provides mass"
+    },
+    {
+      "ticker": "SRAD",
+      "name": "Sportradar Group AG",
+      "sector": "Sports Technology/Data Analytics",
+      "price": 19.25,
+      "intrinsic": 33,
+      "upside": 71.4,
+      "confidence": 82,
+      "verdict": "UNDERVALUED",
+      "thesis": "SRAD is UNDERVALUED at $19.25 vs $33 intrinsic value (71% upside). Swiss sports data monopoly with 47% growth, 26% FCF margins, net cash balance. Trading 10.8x EBITDA vs SaaS peers at 25x despite simi"
+    },
+    {
+      "ticker": "DOCS",
+      "name": "Doximity, Inc.",
+      "sector": "Healthcare Technology",
+      "price": 26.07,
+      "intrinsic": 42,
+      "upside": 61.2,
+      "confidence": 75,
+      "verdict": "UNDERVALUED",
+      "thesis": "DOCS is UNDERVALUED at $26 vs $42 intrinsic value (61% upside). DCF shows $42, precedent transactions suggest $35-48. Trading at 29% discount to healthcare tech comps despite superior profitability. N"
+    },
+    {
+      "ticker": "HRMY",
+      "name": "Harmony Biosciences Holdings, Inc.",
+      "sector": "Healthcare",
+      "price": 27.56,
+      "intrinsic": 44,
+      "upside": 59.6,
+      "confidence": 82,
+      "verdict": "UNDERVALUED",
+      "thesis": "HRMY is UNDERVALUED at $28 vs $44 intrinsic value (60% upside). Specialty pharma with dominant narcolepsy drug trading at 4.5x EBITDA vs peers at 11x+. Strong FCF ($211M), net cash ($606M), patent run"
+    },
+    {
+      "ticker": "AVGO",
+      "name": "Broadcom Inc",
+      "sector": "Technology/Semiconductors",
+      "price": 313.84,
+      "intrinsic": 500,
+      "upside": 59.3,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "AVGO is severely UNDERVALUED at $314 vs $500 intrinsic value (59% upside). Massive FCF generation ($25B) trading at 4.6x EV/EBITDA vs peers at 20x+. VMware integration creating software-heavy mix with"
+    },
+    {
+      "ticker": "TBLA",
+      "name": "Taboola.com Ltd",
+      "sector": "Communication Services",
+      "price": 3.3,
+      "intrinsic": 5.2,
+      "upside": 57.6,
+      "confidence": 82,
+      "verdict": "UNDERVALUED",
+      "thesis": "TBLA is UNDERVALUED at $3.30 vs $5.20 intrinsic value (58% upside). Trading at 7.2x EV/EBITDA vs peers at 17.5x despite superior profitability and FCF generation. 16% FCF yield with aggressive buyback"
+    },
+    {
+      "ticker": "ESTC",
+      "name": "Elastic N.V.",
+      "sector": "Technology - Application Software",
+      "price": 53.02,
+      "intrinsic": 82,
+      "upside": 54.7,
+      "confidence": 75,
+      "verdict": "UNDERVALUED",
+      "thesis": "ESTC is UNDERVALUED at $53 vs $82 intrinsic value (55% upside). Strong FCF ($387M, 23% margin) with cloud transition driving growth. DCF $78, comps $70-85, SOTP $102. Margin of safety: 32%. Risk is co"
+    }
+  ],
+  "shorts": [
+    {
+      "ticker": "NVAWW",
+      "name": "Nova Minerals Limited",
+      "sector": "Mining/Exploration",
+      "price": 38.8,
+      "intrinsic": 0.18,
+      "upside": -99.5,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "NVAWW is MASSIVELY OVERVALUED at $38.8 vs $0.18 intrinsic value (-99.5% overvaluation). This is a pre-revenue gold exploration company trading at 17,500% of book value with negative $11M net income an"
+    },
+    {
+      "ticker": "BVC",
+      "name": "BitVentures Limited",
+      "sector": "Technology",
+      "price": 8.26,
+      "intrinsic": 0.085,
+      "upside": -98.97,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "BVC is SEVERELY OVERVALUED at $8.26 vs $0.085 intrinsic value (-99% overvalued). Company has no revenue, burns $6.5M/quarter, with only $9.9M cash. Market cap of $1.4B vs $2.6M book value defies funda"
+    },
+    {
+      "ticker": "BRAI",
+      "name": "Braiin Limited",
+      "sector": "Technology",
+      "price": 26.555,
+      "intrinsic": 0.8,
+      "upside": -97.0,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "BRAI is SEVERELY OVERVALUED at $26.56 vs $0.80 intrinsic value (97% downside). No revenue, negative FCF, negative equity, $3.6M net debt. Asset value ~$1.61/share max. This appears to be speculative t"
+    },
+    {
+      "ticker": "RGC",
+      "name": "Regencell Bioscience Holdings Limited",
+      "sector": "Healthcare",
+      "price": 24.21,
+      "intrinsic": 1.0,
+      "upside": -95.9,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "RGC is SEVERELY OVERVALUED at $24.21 vs $1.00 intrinsic value (96% downside). This is a pre-revenue biotech trading at 2400x book value with $4.9M cash and $3-4M annual burn. Asset-based valuation sho"
+    },
+    {
+      "ticker": "OCS",
+      "name": "Oculis Holding AG",
+      "sector": "Healthcare - Biotech",
+      "price": 27.11,
+      "intrinsic": 1.25,
+      "upside": -95.4,
+      "confidence": 85,
+      "verdict": "OVERVALUED",
+      "thesis": "OCS is SEVERELY OVERVALUED at $27 vs intrinsic value near $1-2 (liquidation value). Pre-revenue biotech burning $60M annually with 2-year cash runway. Current valuation assumes pipeline success with m"
+    },
+    {
+      "ticker": "STRC",
+      "name": "Strategy Inc",
+      "sector": "Technology",
+      "price": 100.01,
+      "intrinsic": 5,
+      "upside": -95.0,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "STRC is severely OVERVALUED at $100 vs $5 intrinsic value (95% overvalued). Company burning $3B+ annually with only $2.3B cash vs $8.25B debt. Bankruptcy likely within 12 months. All valuation methods"
+    },
+    {
+      "ticker": "CRML",
+      "name": "Critical Metals Corp",
+      "sector": "Basic Materials",
+      "price": 8.9439,
+      "intrinsic": 0.57,
+      "upside": -93.6,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "CRML is SEVERELY OVERVALUED at $8.94 vs $0.57 intrinsic value (94% downside). Pre-revenue exploration company burning $14.5M annually with only $7.3M cash. Current ratio 0.13 signals liquidity crisis."
+    },
+    {
+      "ticker": "HBNB",
+      "name": "Hotel101 Global Holdings Corp",
+      "sector": "Real Estate",
+      "price": 7.97,
+      "intrinsic": 0.6,
+      "upside": -92.5,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "HBNB is SEVERELY OVERVALUED at $7.97 vs $0.60 intrinsic value (-92% overvalued). Trading 112x revenue, 100x book value, burning $14M cash quarterly with only $8.7M remaining. Debt/equity 351x. This is"
+    },
+    {
+      "ticker": "OMER",
+      "name": "Omeros Corporation",
+      "sector": "Healthcare",
+      "price": 11.54,
+      "intrinsic": 1,
+      "upside": -91.3,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "OMER is SEVERELY OVERVALUED at $11.54 vs $1 liquidation value (91% downside). No revenue, $105M annual burn, $36M cash = 4 months runway. Negative $183M equity. Failed drug trials. Classic bankruptcy "
+    },
+    {
+      "ticker": "STRK",
+      "name": "Strategy Inc",
+      "sector": "Technology",
+      "price": 79.65,
+      "intrinsic": 7.5,
+      "upside": -90.6,
+      "confidence": 95,
+      "verdict": "OVERVALUED",
+      "thesis": "STRK is SEVERELY OVERVALUED at $80 vs $0-15 intrinsic value (90%+ downside risk). Company burning $3.4B annually with $6B net debt and negative EBITDA of $5.4B. Bankruptcy risk high. Book value meanin"
+    }
+  ],
+  "hidden_gems": [
+    {
+      "ticker": "APOS",
+      "name": "Apollo Global Management, Inc",
+      "sector": "Alternative Asset Management",
+      "price": 25.82,
+      "intrinsic": 190,
+      "upside": 635.8,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "APOS is SEVERELY UNDERVALUED at $26 vs $190 intrinsic value (636% upside). Trading at 12x EBITDA vs peers at 16-18x despite $735B AUM platform. DCF suggests $180, SOTP implies $234. Margin of safety: "
+    },
+    {
+      "ticker": "AFGB",
+      "name": "American Financial Group, Inc",
+      "sector": "Insurance",
+      "price": 22.015,
+      "intrinsic": 135,
+      "upside": 513.0,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "AFG is severely UNDERVALUED at $22 vs $135 intrinsic value (513% upside). All methods converge on significant undervaluation - DCF $135, comps $110-140, transactions $120-150, SOTP $161, book value $9"
+    },
+    {
+      "ticker": "ACGLN",
+      "name": "Arch Capital Group Ltd.",
+      "sector": "Financial Services - Insurance",
+      "price": 17.44,
+      "intrinsic": 90,
+      "upside": 416.1,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "ACGL is SEVERELY UNDERVALUED at $17.44 vs $90 intrinsic value (416% upside). Trading at 0.27x tangible book vs 1.0-1.5x peers despite superior 22% ROE and 17% revenue growth. Negative FCF is timing ar"
+    },
+    {
+      "ticker": "ACGLO",
+      "name": "Arch Capital Group Ltd.",
+      "sector": "Property & Casualty Insurance",
+      "price": 20.72,
+      "intrinsic": 100,
+      "upside": 382.7,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "ACGLO is SEVERELY UNDERVALUED at $21 vs $100 intrinsic value (383% upside). Trading at 0.32x book vs peers at 1.2x despite superior ROE. Extreme discount suggests reserve concerns, but balance sheet s"
+    },
+    {
+      "ticker": "NTRSO",
+      "name": "Northern Trust Corporation",
+      "sector": "Financial Services",
+      "price": 19.77,
+      "intrinsic": 85,
+      "upside": 330.0,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "NTRSO is SEVERELY UNDERVALUED at $19.77 vs $85 intrinsic value (330% upside). Trading at 0.3x tangible book despite quality wealth management franchise. DCF $85, comps $75-95, SOTP $163. Margin of saf"
+    },
+    {
+      "ticker": "OZKAP",
+      "name": "Bank OZK",
+      "sector": "Regional Banking",
+      "price": 16.6,
+      "intrinsic": 47,
+      "upside": 183.1,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "OZKAP is SEVERELY UNDERVALUED at $16.60 vs $47 intrinsic value (183% upside). Trading at 0.32x book, 3.8x P/E vs peers at 11x. Either facing hidden credit crisis or presenting generational value oppor"
+    },
+    {
+      "ticker": "REG",
+      "name": "Regency Centers Corporation",
+      "sector": "Real Estate Investment Trusts (REITs)",
+      "price": 22.3,
+      "intrinsic": 62.5,
+      "upside": 180.3,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "REG is SEVERELY UNDERVALUED at $22.30 vs $62.50 intrinsic value (180% upside). Trading at 0.61x book value and 9.2x EBITDA vs peers at 16.8x. Defensive grocery-anchored portfolio, 41.7% FCF margin, bu"
+    },
+    {
+      "ticker": "BTX",
+      "name": "BlackRock Innovation and Growth Term Trust",
+      "sector": "Closed-End Fund",
+      "price": 6.46,
+      "intrinsic": 15.26,
+      "upside": 136.2,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "BTX is SEVERELY UNDERVALUED at $6.46 vs $15.26 NAV (136% upside to liquidation value). Trading at 58% discount despite quality BlackRock management. Key risk: 965% yield is destroying NAV through forc"
+    },
+    {
+      "ticker": "MOMO",
+      "name": "Hello Group Inc.",
+      "sector": "Communication Services",
+      "price": 6.16,
+      "intrinsic": 13.65,
+      "upside": 121.6,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "MOMO is SEVERELY UNDERVALUED at $6.16 vs $13.65 intrinsic value (122% upside). Net cash position ($8.7B) alone worth $73/share vs $6.16 price. FCF yield of 496% unsustainable at current valuation. Chi"
+    },
+    {
+      "ticker": "BRBR",
+      "name": "BellRing Brands, Inc.",
+      "sector": "Consumer Defensive",
+      "price": 17.26,
+      "intrinsic": 33,
+      "upside": 91.2,
+      "confidence": 82,
+      "verdict": "UNDERVALUED",
+      "thesis": "BRBR is SEVERELY UNDERVALUED at $17 vs $33 intrinsic value (91% upside). Leading protein nutrition brand trading at 9x EBITDA vs peers at 20x+ despite superior growth. Key risk is 3.6x debt load. Key "
+    },
+    {
+      "ticker": "TEAM",
+      "name": "Atlassian Corporation",
+      "sector": "Technology - Software",
+      "price": 82.51,
+      "intrinsic": 150,
+      "upside": 81.8,
+      "confidence": 75,
+      "verdict": "UNDERVALUED",
+      "thesis": "TEAM is UNDERVALUED at $83 vs $150 intrinsic value (82% upside). Despite negative EBITDA, generates $1.5B FCF (26.5% margin) growing 20%+ with strong moats in developer collaboration. Trading at 3.7x "
+    },
+    {
+      "ticker": "BZ",
+      "name": "Kanzhun Limited",
+      "sector": "Communication Services",
+      "price": 15.54,
+      "intrinsic": 28,
+      "upside": 80.2,
+      "confidence": 82,
+      "verdict": "UNDERVALUED",
+      "thesis": "BZ is UNDERVALUED at $15.54 vs $28 intrinsic value (80% upside). Dominant Chinese job platform generating $2.8B FCF with $19B net cash. Trading at 0.94x revenue vs 2-4x for peers. China regulatory dis"
+    },
+    {
+      "ticker": "RZB",
+      "name": "Reinsurance Group of America, Incorporated",
+      "sector": "Life & Health Insurance",
+      "price": 24.97,
+      "intrinsic": 45,
+      "upside": 80.2,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "RZB is SEVERELY UNDERVALUED at $25 vs $45 intrinsic value (80% upside). 20.5% FCF yield, 0.12x P/B vs 1.0x+ for peers. Asset-based floor at $190/share provides massive margin of safety. Rising rates a"
+    },
+    {
+      "ticker": "JD",
+      "name": "JD.com, Inc.",
+      "sector": "Consumer Cyclical",
+      "price": 25.47,
+      "intrinsic": 45,
+      "upside": 76.7,
+      "confidence": 85,
+      "verdict": "UNDERVALUED",
+      "thesis": "JD is UNDERVALUED at $25 vs $45 intrinsic value (77% upside). Trading at 2.2x EV/EBITDA vs peers at 20x+. Negative FCF is peak capex cycle - logistics infrastructure complete. $198B cash provides mass"
+    },
+    {
+      "ticker": "SRAD",
+      "name": "Sportradar Group AG",
+      "sector": "Sports Technology/Data Analytics",
+      "price": 19.25,
+      "intrinsic": 33,
+      "upside": 71.4,
+      "confidence": 82,
+      "verdict": "UNDERVALUED",
+      "thesis": "SRAD is UNDERVALUED at $19.25 vs $33 intrinsic value (71% upside). Swiss sports data monopoly with 47% growth, 26% FCF margins, net cash balance. Trading 10.8x EBITDA vs SaaS peers at 25x despite simi"
+    }
+  ]
+}

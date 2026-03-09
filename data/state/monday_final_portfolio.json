@@ -1,0 +1,79 @@
+{
+  "date": "2026-03-09",
+  "fund_size": 1000000,
+  "positions": [
+    {
+      "ticker": "AVGO",
+      "direction": "LONG",
+      "allocation_pct": 15,
+      "shares": 453,
+      "entry_price": 330.48,
+      "stop_loss": 304.04,
+      "target": 499.02,
+      "position_value": 150000,
+      "agent": "CONSENSUS",
+      "thesis": "AI infrastructure monopoly - unanimous conviction across all agents"
+    },
+    {
+      "ticker": "STX",
+      "direction": "SHORT",
+      "allocation_pct": 7,
+      "shares": 198,
+      "entry_price": 352.8,
+      "stop_loss": 388.08,
+      "target": 119.95,
+      "position_value": 70000,
+      "agent": "TECH",
+      "thesis": "HDD obsolescence - technology disruption short"
+    },
+    {
+      "ticker": "XOM",
+      "direction": "LONG",
+      "allocation_pct": 12,
+      "shares": 793,
+      "entry_price": 151.21,
+      "stop_loss": 136.09,
+      "target": 199.6,
+      "position_value": 120000,
+      "agent": "MACRO",
+      "thesis": "Stagflation/Iran conflict hedge - energy supercycle"
+    },
+    {
+      "ticker": "ANET",
+      "direction": "LONG",
+      "allocation_pct": 10,
+      "shares": 752,
+      "entry_price": 132.89,
+      "stop_loss": 119.6,
+      "target": 184.72,
+      "position_value": 100000,
+      "agent": "TECH",
+      "thesis": "AI datacenter networking infrastructure play"
+    },
+    {
+      "ticker": "TLT",
+      "direction": "SHORT",
+      "allocation_pct": 2,
+      "shares": 226,
+      "entry_price": 88.46,
+      "stop_loss": 94.65,
+      "target": 75.19,
+      "position_value": 20000,
+      "agent": "MACRO",
+      "thesis": "Stagflation bond short - rates higher for longer"
+    }
+  ],
+  "total_long_pct": 37,
+  "total_short_pct": 9,
+  "net_exposure_pct": 28,
+  "cash_pct": 54,
+  "cash_value": 540000,
+  "prices_as_of": "2026-03-06 market close",
+  "catalyst_calendar": [
+    "March 10: CPI print",
+    "March 13: Consumer sentiment",
+    "March 17-18: FOMC meeting"
+  ],
+  "cro_approved": true,
+  "max_drawdown_estimate": "-8.2% with all stops"
+}
