@@ -1,0 +1,72 @@
+{
+  "name": "ATLAS Autoresearch",
+  "version": "1.0",
+  "created": "2026-03-09T11:09:36.436169",
+  "inspired_by": "Karpathy's autoresearch loop",
+  "concept": {
+    "training_run": "Agent makes recommendations",
+    "validation_loss": "Market gives us the result (P&L)",
+    "gradient_descent": "If agent underperforms, iterate on prompt",
+    "learning_rate": "Best agents get weight * 1.1, worst get weight * 0.9"
+  },
+  "components": {
+    "prompts_directory": "agents/prompts/*.md",
+    "scorecards": "data/state/agent_scorecards.json",
+    "weights": "data/state/agent_weights.json",
+    "iterations": "data/state/prompt_iterations/*.json"
+  },
+  "agents": {
+    "superinvestors": [
+      "druckenmiller",
+      "aschenbrenner",
+      "baker",
+      "ackman"
+    ],
+    "sector_desks": [
+      "bond",
+      "currency",
+      "commodities",
+      "metals",
+      "semiconductor",
+      "biotech",
+      "energy",
+      "consumer",
+      "industrials",
+      "microcap"
+    ],
+    "risk_decision": [
+      "cro",
+      "cio"
+    ]
+  },
+  "darwinian_selection": {
+    "starting_weight": 1.0,
+    "positive_sharpe_multiplier": 1.1,
+    "negative_sharpe_multiplier": 0.9,
+    "rewrite_threshold": 0.5,
+    "max_weight": 2.0,
+    "evaluation_period_days": 10
+  },
+  "scorecard_metrics": [
+    "total_recommendations",
+    "profitable_count",
+    "hit_rate_5d",
+    "hit_rate_10d",
+    "hit_rate_30d",
+    "avg_return",
+    "sharpe_ratio",
+    "best_call",
+    "worst_call"
+  ],
+  "iteration_workflow": [
+    "1. Run autoresearch --score after EOD cycle",
+    "2. Run autoresearch --adjust after 10 trading days",
+    "3. Run autoresearch --analyze for worst performer",
+    "4. Human reviews prompt suggestion in JSON file",
+    "5. Create git branch: agent-iteration/{agent}-v{N}",
+    "6. Edit prompt .md file with suggested changes",
+    "7. Run backtest cycle",
+    "8. If better, merge to main; if worse, delete branch"
+  ],
+  "goal": "Engineer agents that make the fastest alpha generation progress indefinitely"
+}

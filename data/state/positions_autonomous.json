@@ -1,0 +1,26 @@
+{
+  "portfolio_value": 1000000,
+  "starting_value": 1000000,
+  "last_updated": "2026-03-09 12:30",
+  "mode": "AUTONOMOUS",
+  "execution_status": "LIVE",
+  "positions": [
+    {
+      "ticker": "BIL",
+      "direction": "LONG",
+      "shares": 10941,
+      "entry_price": 91.39,
+      "current_price": 91.39,
+      "allocation_pct": 100,
+      "thesis": "Cash equivalent - dry powder for agent-identified opportunities",
+      "agent_source": "system",
+      "conviction": 100,
+      "stop_loss": null,
+      "target": null,
+      "invalidation": null,
+      "date_opened": "2026-03-09",
+      "status": "OPEN",
+      "category": "CASH"
+    }
+  ]
+}

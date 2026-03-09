@@ -6,3 +6,8 @@ node_modules/
 *.log
 /tmp/
 .vscode/
+
+# Local state files (not committed)
+data/state/autoresearch_results.tsv
+data/state/agent_scorecards.json
+logs/

@@ -144,3 +144,78 @@ BIL 52.5% | BE 15% | TLT SHORT 10% | AVGO 5% | UNH 3.5% | CRM 3% | ADBE 3% | GOO
 5. NEVER overwrite templates with a different design — the current dark theme is final
 6. API keys are in .env — make sure dotenv loads it from the project root
 7. NEVER use yfinance — use dual-source validation via agents/market_data.py
+
+## Autonomous Mode
+
+ATLAS runs fully autonomously. It trades, learns, and self-improves without human input. Adapted from Karpathy's autoresearch concept.
+
+### The Daily Loop (4:30pm ET weekdays)
+1. **MARKET DATA** — fetch from FMP + Finnhub + Polygon
+2. **DEBATE** — 20 agents argue, CIO synthesises (weighted by agent performance)
+3. **TRADE** — CIO decisions auto-executed if confidence >70%
+4. **LEARN** — scorecards updated, P&L attributed to agents, weights adjusted
+5. **IMPROVE** — worst agent's prompt modified, tested next cycle, kept or reverted
+6. **REPEAT** — sleep until tomorrow
+
+### Key Files
+- `agents/autonomous_loop.py` — master loop
+- `agents/autoresearch_program.md` — self-improvement rules (human-editable)
+- `agents/prompts/*.md` — agent prompts (auto-modified by the system)
+- `agents/scorecard.py` — tracks agent performance
+- `data/state/agent_weights.json` — Darwinian weights (winners louder, losers quieter)
+- `data/state/agent_scorecards.json` — per-agent performance data
+- `data/state/autoresearch_results.tsv` — experiment log (untracked)
+
+### Autonomous Rules
+- Portfolio starts as 100% cash. Agents earn their way into positions.
+- Only `agents/prompts/*.md` gets auto-modified. Everything else is fixed.
+- One prompt experiment per cycle. Improvements kept, failures reverted.
+- Position limits: 15% max single name, 15% min cash always
+- **NEVER STOPS. NEVER ASKS.** Runs until manually killed.
+
+### Autonomous Commands
+```bash
+# Start the loop (production)
+python3 -m agents.autonomous_loop
+
+# Test one cycle
+python3 -m agents.autonomous_loop --once
+
+# Check portfolio
+cat data/state/positions.json
+
+# Check agent weights
+cat data/state/agent_weights.json
+
+# Check agent scores
+cat data/state/agent_scorecards.json
+
+# Check experiments
+cat data/state/autoresearch_results.tsv
+
+# Stop the loop
+Ctrl+C or kill process
+```
+
+### Dashboards
+- Main: meetvalis.com/atlas
+- Autonomous: meetvalis.com/atlas/autonomous
+
+### Weight Evolution
+Agents are weighted by Sharpe ratio (10-day rolling):
+- Sharpe > 0 → weight × 1.1 (agent gets louder)
+- Sharpe ≤ 0 → weight × 0.9 (agent gets quieter)
+- Floor: 0.3 (triggers mandatory prompt rewrite)
+- Ceiling: 2.5 (prevents over-concentration)
+
+### Autoresearch Protocol
+1. After 5 trading days of data, identify worst agent by Sharpe
+2. Analyze that agent's losing recommendations
+3. Call Claude API to suggest ONE targeted prompt modification
+4. Apply the change, git commit
+5. On the NEXT cycle, check if Sharpe improved:
+   - YES → keep the commit (improvement survives)
+   - NO → git reset HEAD~1 (revert to previous)
+6. Log result to autoresearch_results.tsv
+
+After 3 failed attempts on one agent, move to next worst.

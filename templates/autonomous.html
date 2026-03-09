@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Autonomous Mode{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold gradient-text">ATLAS Autonomous Agent</h1>
+            <p class="text-atlas-muted">Self-improving AI hedge fund system</p>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div id="system-status" class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-atlas-card border border-atlas-border">
+                <div class="w-3 h-3 rounded-full {{ 'bg-atlas-success animate-pulse' if status == 'RUNNING' else 'bg-atlas-warning' if status == 'PAUSED' else 'bg-atlas-danger' }}"></div>
+                <span class="font-medium">{{ status or 'IDLE' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-4">
+            <div class="text-atlas-muted text-sm">Days Running</div>
+            <div class="text-2xl font-bold">{{ days_running or 0 }}</div>
+        </div>
+        <div class="card p-4">
+            <div class="text-atlas-muted text-sm">Cycles Completed</div>
+            <div class="text-2xl font-bold">{{ total_cycles or 0 }}</div>
+        </div>
+        <div class="card p-4">
+            <div class="text-atlas-muted text-sm">Experiments Run</div>
+            <div class="text-2xl font-bold">{{ total_experiments or 0 }}</div>
+        </div>
+        <div class="card p-4">
+            <div class="text-atlas-muted text-sm">Improvements Kept</div>
+            <div class="text-2xl font-bold text-atlas-success">{{ improvements_kept or 0 }}</div>
+        </div>
+    </div>
+
+    <!-- Portfolio Section -->
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Portfolio</h2>
+            <div class="text-sm text-atlas-muted">
+                Last updated: <span id="portfolio-updated">{{ portfolio.last_updated or 'Never' }}</span>
+            </div>
+        </div>
+
+        <!-- Portfolio Summary -->
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+            <div>
+                <div class="text-atlas-muted text-sm">Total Value</div>
+                <div class="text-xl font-bold">${{ '{:,.0f}'.format(portfolio.total_value or 1000000) }}</div>
+            </div>
+            <div>
+                <div class="text-atlas-muted text-sm">Total P&L</div>
+                <div class="text-xl font-bold {{ 'pnl-positive' if (portfolio.total_pnl or 0) >= 0 else 'pnl-negative' }}">
+                    ${{ '{:,.0f}'.format(portfolio.total_pnl or 0) }}
+                </div>
+            </div>
+            <div>
+                <div class="text-atlas-muted text-sm">Long Exposure</div>
+                <div class="text-xl font-bold">{{ '{:.1f}'.format(portfolio.long_exposure or 0) }}%</div>
+            </div>
+            <div>
+                <div class="text-atlas-muted text-sm">Short Exposure</div>
+                <div class="text-xl font-bold">{{ '{:.1f}'.format(portfolio.short_exposure or 0) }}%</div>
+            </div>
+            <div>
+                <div class="text-atlas-muted text-sm">Net Exposure</div>
+                <div class="text-xl font-bold">{{ '{:.1f}'.format(portfolio.net_exposure or 0) }}%</div>
+            </div>
+            <div>
+                <div class="text-atlas-muted text-sm">Cash</div>
+                <div class="text-xl font-bold">{{ '{:.1f}'.format(portfolio.cash_pct or 100) }}%</div>
+            </div>
+        </div>
+
+        <!-- Positions Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-atlas-border text-atlas-muted">
+                        <th class="text-left py-2">Ticker</th>
+                        <th class="text-left py-2">Direction</th>
+                        <th class="text-right py-2">Shares</th>
+                        <th class="text-right py-2">Entry</th>
+                        <th class="text-right py-2">Current</th>
+                        <th class="text-right py-2">P&L</th>
+                        <th class="text-right py-2">P&L %</th>
+                        <th class="text-left py-2">Source Agent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pos in positions %}
+                    <tr class="border-b border-atlas-border/50 hover:bg-atlas-card/50">
+                        <td class="py-2 font-medium">{{ pos.ticker }}</td>
+                        <td class="py-2">
+                            <span class="px-2 py-0.5 rounded text-xs {{ 'bg-green-500/20 text-green-400' if pos.direction == 'LONG' else 'bg-red-500/20 text-red-400' }}">
+                                {{ pos.direction }}
+                            </span>
+                        </td>
+                        <td class="text-right py-2">{{ '{:,.0f}'.format(pos.shares or 0) }}</td>
+                        <td class="text-right py-2">${{ '{:.2f}'.format(pos.entry_price or 0) }}</td>
+                        <td class="text-right py-2">${{ '{:.2f}'.format(pos.current_price or 0) }}</td>
+                        <td class="text-right py-2 {{ 'pnl-positive' if (pos.unrealized_pnl or 0) >= 0 else 'pnl-negative' }}">
+                            ${{ '{:,.0f}'.format(pos.unrealized_pnl or 0) }}
+                        </td>
+                        <td class="text-right py-2 {{ 'pnl-positive' if (pos.unrealized_pnl_pct or 0) >= 0 else 'pnl-negative' }}">
+                            {{ '{:+.2f}'.format(pos.unrealized_pnl_pct or 0) }}%
+                        </td>
+                        <td class="py-2 text-atlas-muted">{{ pos.agent_source or 'manual' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-atlas-muted">
+                            Portfolio starts as 100% cash. Agents must earn their way into positions.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Equity Curve Chart -->
+        <div class="mt-6">
+            <h3 class="text-sm font-medium text-atlas-muted mb-2">Equity Curve vs SPY</h3>
+            <div class="chart-container">
+                <canvas id="equityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Leaderboard -->
+    <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Agent Leaderboard</h2>
+            <div class="text-sm text-atlas-muted">Ranked by Sharpe Ratio (10d)</div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-atlas-border text-atlas-muted">
+                        <th class="text-left py-2">Rank</th>
+                        <th class="text-left py-2">Agent</th>
+                        <th class="text-right py-2">Weight</th>
+                        <th class="text-right py-2">Version</th>
+                        <th class="text-right py-2">Sharpe (10d)</th>
+                        <th class="text-right py-2">Hit Rate</th>
+                        <th class="text-right py-2">Avg Return</th>
+                        <th class="text-right py-2"># Recs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agent in leaderboard %}
+                    <tr class="border-b border-atlas-border/50 hover:bg-atlas-card/50 {{ 'bg-green-500/10' if loop.index == 1 else 'bg-red-500/10' if loop.last and leaderboard|length > 1 else '' }}">
+                        <td class="py-2 font-medium">{{ loop.index }}</td>
+                        <td class="py-2">{{ agent.agent }}</td>
+                        <td class="text-right py-2">{{ '{:.2f}'.format(agent.weight or 1.0) }}</td>
+                        <td class="text-right py-2 text-atlas-muted">v{{ agent.version or 1 }}</td>
+                        <td class="text-right py-2 {{ 'pnl-positive' if (agent.sharpe_10d or 0) > 0 else 'pnl-negative' if agent.sharpe_10d else 'text-atlas-muted' }}">
+                            {{ '{:.3f}'.format(agent.sharpe_10d) if agent.sharpe_10d else 'N/A' }}
+                        </td>
+                        <td class="text-right py-2">{{ '{:.0f}%'.format(agent.hit_rate_10d) if agent.hit_rate_10d else 'N/A' }}</td>
+                        <td class="text-right py-2 {{ 'pnl-positive' if (agent.avg_return_10d or 0) > 0 else 'pnl-negative' if agent.avg_return_10d else '' }}">
+                            {{ '{:+.2f}%'.format(agent.avg_return_10d) if agent.avg_return_10d else 'N/A' }}
+                        </td>
+                        <td class="text-right py-2">{{ agent.total_recommendations or 0 }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-atlas-muted">
+                            No agent data yet. Run a few trading cycles first.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Two Column Layout: Trade Log + Autoresearch Log -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Trade Log -->
+        <div class="card p-6">
+            <h2 class="text-lg font-semibold mb-4">Trade Log (Last 20)</h2>
+            <div class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin">
+                {% for trade in trades %}
+                <div class="p-3 bg-atlas-bg rounded-lg border border-atlas-border/50">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="font-medium">{{ trade.direction }} {{ trade.ticker }}</span>
+                            <span class="text-atlas-muted text-sm ml-2">{{ trade.shares }} @ ${{ '{:.2f}'.format(trade.price) }}</span>
+                        </div>
+                        <div class="text-sm text-atlas-muted">{{ trade.date }}</div>
+                    </div>
+                    <div class="text-sm text-atlas-muted mt-1">
+                        Agent: {{ trade.agent_source }} | Confidence: {{ trade.confidence }}%
+                    </div>
+                    {% if trade.thesis %}
+                    <div class="text-sm mt-1 text-atlas-text/70">{{ trade.thesis[:100] }}...</div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center text-atlas-muted py-8">
+                    No trades executed yet. The system will trade when conviction > 70%.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Autoresearch Log -->
+        <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold">Autoresearch Log</h2>
+                <div class="text-sm">
+                    <span class="text-atlas-success">{{ experiments_kept or 0 }} kept</span>
+                    <span class="text-atlas-muted mx-1">/</span>
+                    <span class="text-atlas-danger">{{ experiments_discarded or 0 }} discarded</span>
+                </div>
+            </div>
+            <div class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin">
+                {% for exp in experiments %}
+                <div class="p-3 bg-atlas-bg rounded-lg border border-atlas-border/50">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="font-medium">{{ exp.agent }}</span>
+                            <span class="text-atlas-muted text-sm ml-2">{{ exp.commit }}</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-xs {{ 'bg-green-500/20 text-green-400' if exp.status == 'keep' else 'bg-red-500/20 text-red-400' if exp.status == 'discard' else 'bg-yellow-500/20 text-yellow-400' }}">
+                            {{ exp.status }}
+                        </span>
+                    </div>
+                    <div class="text-sm text-atlas-muted mt-1">
+                        Sharpe: {{ '{:.3f}'.format(exp.sharpe_before) }} | {{ exp.date }}
+                    </div>
+                    {% if exp.description %}
+                    <div class="text-sm mt-1 text-atlas-text/70">{{ exp.description[:80] }}...</div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center text-atlas-muted py-8">
+                    No experiments yet. Autoresearch starts after 5 trading days of data.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Briefing -->
+    <div class="card p-6">
+        <h2 class="text-lg font-semibold mb-4">Latest CIO Synthesis</h2>
+        <div class="prose prose-invert max-w-none">
+            {% if cio_synthesis %}
+            <pre class="text-sm text-atlas-text/80 whitespace-pre-wrap bg-atlas-bg p-4 rounded-lg">{{ cio_synthesis }}</pre>
+            {% else %}
+            <div class="text-center text-atlas-muted py-8">
+                No briefing yet. Run a cycle to generate the first synthesis.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Auto-refresh script -->
+<script>
+    // Refresh every 60 seconds during market hours
+    const now = new Date();
+    const hour = now.getHours();
+    const isMarketHours = hour >= 9 && hour < 17;
+
+    if (isMarketHours) {
+        setTimeout(() => location.reload(), 60000);
+    }
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Equity curve chart
+    const ctx = document.getElementById('equityChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ equity_dates | safe if equity_dates else '[]' }},
+                datasets: [
+                    {
+                        label: 'Portfolio',
+                        data: {{ equity_values | safe if equity_values else '[]' }},
+                        borderColor: '#3db27f',
+                        backgroundColor: 'rgba(61, 178, 127, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'SPY Benchmark',
+                        data: {{ spy_values | safe if spy_values else '[]' }},
+                        borderColor: '#6b7280',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#9ca3af' }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#6b7280' },
+                        grid: { color: '#1e2433' }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#6b7280',
+                            callback: value => '$' + value.toLocaleString()
+                        },
+                        grid: { color: '#1e2433' }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

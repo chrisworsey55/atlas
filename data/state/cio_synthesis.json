@@ -1,47 +1,6 @@
 {
-  "date": "March 8, 2026",
-  "generated_at": "2026-03-08T21:00:00",
-  "summary": "War scenario portfolio built for Iran-Israel escalation with oil at $108. Phased execution: Monday at open (macro hedges + shorts), Wednesday limits (quality equity adds on 3-5% decline). Net exposure reduced to 68% with 7% short hedge via STX + IWM. Screen Alpha positions preserved for upside capture when volatility subsides.",
-  "portfolio_conviction": 78,
-  "risk_adjusted_view": "RISK_OFF",
-  "what_changed": [
-    "Added XLE 5% as energy hedge for Strait of Hormuz closure risk",
-    "Added IWM 4% short as small-cap vulnerability hedge",
-    "Trimmed APO from 10% to 5% due to credit spread sensitivity",
-    "Raised GLD target from $525 to $550 for war premium"
-  ],
-  "actions_to_consider": [
-    {
-      "ticker": "XLE",
-      "action": "BUY",
-      "rationale": "Execute at Monday open - energy hedge critical for Hormuz risk",
-      "urgency": "HIGH"
-    },
-    {
-      "ticker": "IWM",
-      "action": "SHORT",
-      "rationale": "Execute at Monday open - small-caps vulnerable to war scenario",
-      "urgency": "HIGH"
-    },
-    {
-      "ticker": "AVGO",
-      "action": "ADD",
-      "rationale": "Set Wednesday limit at $310 - add on 6% pullback",
-      "urgency": "MEDIUM"
-    },
-    {
-      "ticker": "GOOGL",
-      "action": "ADD",
-      "rationale": "Set Wednesday limit at $280 - quality compounder on sale",
-      "urgency": "MEDIUM"
-    }
-  ],
-  "what_to_watch": [
-    "Oil above $120 - consider adding more XLE",
-    "VIX above 35 - potential systemic deleveraging",
-    "Peace deal news - cover IWM short immediately",
-    "10Y Treasury above 5.5% - fiscal crisis scenario"
-  ],
-  "stance": "War Scenario Execution",
-  "timestamp": "2026-03-08 21:00"
+  "date": "2026-03-09",
+  "synthesis": "# EXECUTIVE SUMMARY\nThe portfolio delivered a -1.40% drawdown today as risk-off sentiment exposed our concentration in small-cap growth names. While the absolute loss is manageable, the pattern reveals dangerous correlation among our \"diversified\" positions during stress. Quality microcaps (BRBR -5.41%, SRAD -2.80%, HRMY -2.19%) and growth names moved in lockstep, validating the CRO's liquidity mismatch warnings. Our hedges (TLT flat, STX short +1.08%) performed as designed, but insufficient sizing left us overexposed to institutional deleveraging.\n\n# WHAT CHANGED TODAY\n\u2022 **Small-cap liquidation cascade**: IWM -2.8% triggered forced selling in illiquid names\n\u2022 **Dark pool GOOGL distribution**: $2.8B institutional selling despite only -1.09% decline\n\u2022 **Healthcare defense broken**: UNH -2.50% worse than market, signaling broad rotation\n\u2022 **Yield spike**: 10Y to 4.41% (+8bps) as Fed cut expectations collapsed to 15%\n\u2022 **Iran escalation premium**: Oil to $108.50 on Strait of Hormuz naval incidents\n\n# AGENT DISAGREEMENTS\n**Major Conflict**: Flow agent flagged massive GOOGL institutional selling while Ackman viewed the small decline as \"quality holding firm.\" **Side with Flow** \u2014 dark pool data reveals hidden weakness that price action hasn't fully reflected yet. This institutional distribution ahead of potential antitrust ruling creates asymmetric downside risk.\n\n**Risk Assessment Split**: Most agents focused on opportunities while CRO demanded immediate risk reduction. **Side with CRO** \u2014 today's correlation breakdown (defensive healthcare underperforming) signals liquidity stress, not normal rotation.\n\n# RECOMMENDED ACTIONS\n## IMMEDIATE EXECUTION (Tomorrow 9:30-10:00 AM)\n1. **REDUCE MICROCAP EXPOSURE 50%**\n   - Sell 2,300 BRBR shares at market (liquidity concerns)\n   - Sell 480 TEAM shares at market (SaaS multiple compression)\n   - Sell 880 HRMY shares at market (biotech momentum reversal)\n   - **Supporting agents**: CRO (highest priority), Microcap (acknowledges vulnerability)\n\n2. **EXECUTE IWM SHORT**\n   - Short 1,000 IWM shares at $245 or better\n   - Stop: $252 (3% above entry)\n   - Target: $225 (8% decline)\n   - **Supporting agents**: CIO thesis, Druckenmiller macro, CRO risk reduction\n\n3. **TRIM GOOGL 30%**\n   - Sell 72 shares at market\n   - Dark pool selling suggests more downside before antitrust clarity\n   - **Supporting agents**: Flow (distribution data), CRO (concentration risk)\n\n## POSITION SIZING POST-EXECUTION\n- **Cash allocation increases to 40%** (from 25%)\n- **Maximum single position**: 8% (down from current 12%)\n- **Total equity exposure**: 60% vs current 75%\n\n# WHAT TO WATCH\n\u2022 **Small-cap volume patterns**: If BRBR/SRAD/HRMY trade >2x average volume, institutional selling accelerating\n\u2022 **SPY 4,150 support**: Break triggers additional 25% risk reduction\n\u2022 **10Y yield 4.50%**: Fed forced to acknowledge inflation persistence\n\u2022 **Oil inventory data Wednesday**: Validates Iran premium sustainability\n\u2022 **Antitrust headlines**: Any GOOGL breakup news = immediate exit\n\n# RISK ASSESSMENT\n**Maximum drawdown scenario**: -7% portfolio decline if small-cap liquidity crisis deepens and growth multiple compression continues. **Probability**: 25% given current correlation patterns and institutional flow data.\n\n**Risk mitigation**: Proposed actions reduce portfolio beta from 1.3 to 0.8, increase cash buffer to 40%, and add direct small-cap hedge through IWM short.\n\n# CONVICTION LEVEL: 65%\n**Rationale**: High confidence in risk reduction necessity (CRO analysis compelling), moderate confidence in timing (forced selling may continue). Lower conviction reflects uncertainty whether this is rotation or beginning of broader deleveraging cycle.\n\n**Execution priority**: Preserve capital first, deploy reduced positions opportunistically on further weakness. The correlation breakdown today suggests institutional stress that hasn't fully played out.",
+  "stance": "See synthesis",
+  "timestamp": "2026-03-09 14:01"
 }

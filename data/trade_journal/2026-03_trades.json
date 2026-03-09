@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-03-09T13:04:07.255805",
+    "ticker": "GOOGL",
+    "direction": "SELL",
+    "shares": 160,
+    "price": 298.0,
+    "value": 47680.0,
+    "allocation_pct": 4.768,
+    "agent_source": "autonomous",
+    "cio_confidence": 45,
+    "executed": true
+  }
+]

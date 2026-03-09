@@ -336,5 +336,385 @@
         "current": 108.7
       }
     }
+  },
+  {
+    "date": "2026-03-09",
+    "total_pnl": 0.0,
+    "positions": {
+      "BIL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 91.39
+      },
+      "AVGO": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 330.48
+      },
+      "GOOGL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 298.48
+      },
+      "APO": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 108.7
+      },
+      "UNH": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 286.48
+      },
+      "XLE": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 56.57
+      },
+      "BRBR": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 17.39
+      },
+      "TEAM": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 83.62
+      },
+      "SRAD": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 18.55
+      },
+      "HRMY": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 28.33
+      },
+      "GLD": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 473.51
+      },
+      "TLT": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 88.46
+      },
+      "STX": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 352.8
+      },
+      "IWM": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 250.89
+      }
+    }
+  },
+  {
+    "date": "2026-03-09",
+    "total_pnl": 0.0,
+    "positions": {
+      "BIL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 91.39
+      },
+      "AVGO": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 330.48
+      },
+      "GOOGL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 298.48
+      },
+      "APO": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 108.7
+      },
+      "UNH": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 286.48
+      },
+      "XLE": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 56.57
+      },
+      "BRBR": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 17.39
+      },
+      "TEAM": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 83.62
+      },
+      "SRAD": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 18.55
+      },
+      "HRMY": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 28.33
+      },
+      "GLD": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 473.51
+      },
+      "TLT": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 88.46
+      },
+      "STX": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 352.8
+      },
+      "IWM": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 250.89
+      }
+    }
+  },
+  {
+    "date": "2026-03-09",
+    "total_pnl": 0.0,
+    "positions": {
+      "BIL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 91.39
+      },
+      "AVGO": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 330.48
+      },
+      "GOOGL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 298.48
+      },
+      "APO": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 108.7
+      },
+      "UNH": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 286.48
+      },
+      "XLE": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 56.57
+      },
+      "BRBR": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 17.39
+      },
+      "TEAM": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 83.62
+      },
+      "SRAD": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 18.55
+      },
+      "HRMY": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 28.33
+      },
+      "GLD": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 473.51
+      },
+      "TLT": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 88.46
+      },
+      "STX": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 352.8
+      },
+      "IWM": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 250.89
+      }
+    }
+  },
+  {
+    "date": "2026-03-09",
+    "total_pnl": 0.0,
+    "positions": {
+      "BIL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 91.39
+      },
+      "AVGO": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 330.48
+      },
+      "GOOGL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 298.48
+      },
+      "APO": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 108.7
+      },
+      "UNH": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 286.48
+      },
+      "XLE": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 56.57
+      },
+      "BRBR": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 17.39
+      },
+      "TEAM": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 83.62
+      },
+      "SRAD": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 18.55
+      },
+      "HRMY": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 28.33
+      },
+      "GLD": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 473.51
+      },
+      "TLT": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 88.46
+      },
+      "STX": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 352.8
+      },
+      "IWM": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 250.89
+      }
+    }
+  },
+  {
+    "date": "2026-03-09",
+    "total_pnl": -13983.78,
+    "positions": {
+      "BIL": {
+        "pnl": 0.0,
+        "pnl_pct": 0.0,
+        "current": 91.39
+      },
+      "AVGO": {
+        "pnl": -116.16,
+        "pnl_pct": -0.1,
+        "current": 330.16
+      },
+      "GOOGL": {
+        "pnl": -786.5,
+        "pnl_pct": -1.09,
+        "current": 295.23
+      },
+      "APO": {
+        "pnl": -1518.0,
+        "pnl_pct": -3.04,
+        "current": 105.4
+      },
+      "UNH": {
+        "pnl": -1997.64,
+        "pnl_pct": -2.5,
+        "current": 279.32
+      },
+      "XLE": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 56.76
+      },
+      "BRBR": {
+        "pnl": -4324.0,
+        "pnl_pct": -5.41,
+        "current": 16.45
+      },
+      "TEAM": {
+        "pnl": -1424.44,
+        "pnl_pct": -1.78,
+        "current": 82.13
+      },
+      "SRAD": {
+        "pnl": -1961.96,
+        "pnl_pct": -2.8,
+        "current": 18.03
+      },
+      "HRMY": {
+        "pnl": -1093.68,
+        "pnl_pct": -2.19,
+        "current": 27.71
+      },
+      "GLD": {
+        "pnl": -1073.1,
+        "pnl_pct": -1.54,
+        "current": 466.21
+      },
+      "TLT": {
+        "pnl": -11.3,
+        "pnl_pct": -0.02,
+        "current": 88.44
+      },
+      "STX": {
+        "pnl": 323.0,
+        "pnl_pct": 1.08,
+        "current": 349
+      },
+      "IWM": {
+        "pnl": 0,
+        "pnl_pct": 0,
+        "current": 245.24
+      }
+    }
   }
 ]

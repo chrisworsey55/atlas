@@ -6,7 +6,6 @@ Runs all 20 agents with live closing data. Full debate. Briefing. Email.
 import anthropic
 import json
 import os
-import yfinance as yf
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
@@ -14,7 +13,37 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 STATE_DIR = Path(__file__).parent.parent / "data" / "state"
+PROMPTS_DIR = Path(__file__).parent / "prompts"
 client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+
+
+def load_prompt(agent_name: str) -> str:
+    """Load an agent's system prompt from its .md file."""
+    # Try various filename patterns
+    patterns = [
+        f"{agent_name}.md",
+        f"{agent_name}_desk.md",
+        f"{agent_name}_agent.md",
+    ]
+
+    for pattern in patterns:
+        path = PROMPTS_DIR / pattern
+        if path.exists():
+            with open(path, 'r') as f:
+                return f.read()
+
+    # Fallback: return a basic prompt
+    return f"You are the {agent_name} agent. Provide your analysis based on the data provided."
+
+
+def load_agent_weights() -> dict:
+    """Load agent weights from JSON file."""
+    weights_file = STATE_DIR / "agent_weights.json"
+    if weights_file.exists():
+        with open(weights_file, 'r') as f:
+            return json.load(f)
+    # Default weights (all agents start at 1.0)
+    return {}
 
 
 def call_agent(system_prompt, user_message, max_tokens=1000):
@@ -28,31 +57,25 @@ def call_agent(system_prompt, user_message, max_tokens=1000):
 
 
 def update_prices():
-    """Fetch closing prices for all positions"""
+    """Fetch closing prices for all positions using validated quotes"""
     print("Updating closing prices...")
+    from agents.market_data import get_validated_quote
+
     with open(STATE_DIR / "positions.json") as f:
         data = json.load(f)
 
     positions = data.get("positions", [])
-    tickers = [p["ticker"] for p in positions if p["ticker"] != 'BIL']
-
-    if not tickers:
-        return positions
-
-    price_data = yf.download(tickers, period='1d', progress=False)
 
     for pos in positions:
         t = pos["ticker"]
         if t == 'BIL':
             continue
         try:
-            if len(tickers) == 1:
-                price = float(price_data['Close'].iloc[-1])
-            else:
-                price = float(price_data['Close'][t].iloc[-1])
-            pos['current_price'] = round(price, 2)
-        except Exception:
-            pass
+            quote = get_validated_quote(t)
+            if quote and quote.get("price"):
+                pos['current_price'] = round(quote["price"], 2)
+        except Exception as e:
+            print(f"  Warning: Could not fetch price for {t}: {e}")
 
     # Save updated positions
     data["positions"] = positions
@@ -69,10 +92,15 @@ def calculate_pnl(positions):
     position_pnl = {}
     for p in positions:
         t = p["ticker"]
-        entry = p.get('entry_price', 0)
-        current = p.get('current_price', entry)
-        shares = p.get('shares', 0)
+        entry = p.get('entry_price') or 0
+        current = p.get('current_price') or entry or 0
+        shares = p.get('shares') or 0
         direction = p.get('direction', 'LONG')
+
+        # Skip if we don't have valid prices
+        if not entry or not current:
+            position_pnl[t] = {'pnl': 0, 'pnl_pct': 0, 'current': current}
+            continue
 
         if direction == 'SHORT':
             pnl = (entry - current) * shares
@@ -153,7 +181,7 @@ def run_eod_cycle():
     # News Agent
     print("\n[1/20] News Sentiment Agent...")
     all_views['news'] = call_agent(
-        "You are a financial news analyst. Scan today's major market events, geopolitical developments, economic data releases, and sector-moving headlines. Score each by urgency: IMMEDIATE, TODAY, THIS_WEEK, BACKGROUND. Focus on events that affect our portfolio positions.",
+        load_prompt("news_sentiment"),
         f"What were the most important market events today? How do they affect our portfolio?\n\n{context}"
     )
     print(f"  Done: {all_views['news'][:100]}...")
@@ -161,7 +189,7 @@ def run_eod_cycle():
     # Institutional Flow Agent
     print("\n[2/20] Institutional Flow Agent...")
     all_views['flow'] = call_agent(
-        "You are an institutional flow analyst. You track 13F filings, dark pool activity, options flow, and unusual volume. Identify where smart money is moving and what it means for our positions.",
+        load_prompt("institutional_flow"),
         f"What institutional flow signals are relevant to our portfolio today?\n\n{context}"
     )
     print(f"  Done: {all_views['flow'][:100]}...")
@@ -176,7 +204,7 @@ def run_eod_cycle():
     # Bond Desk
     print("\n[3/20] Bond Desk...")
     all_views['bond'] = call_agent(
-        "You are a fixed income analyst covering rates, credit spreads, yield curve, and Fed policy. Provide your signal: BULLISH_DURATION, BEARISH_DURATION, or NEUTRAL with confidence percentage. Explain what changed today.",
+        load_prompt("bond"),
         f"What happened in rates and credit today? Signal and confidence for our TLT short.\n\n{context}"
     )
     print(f"  Done: {all_views['bond'][:100]}...")
@@ -184,7 +212,7 @@ def run_eod_cycle():
     # Currency Desk
     print("\n[4/20] Currency Desk...")
     all_views['currency'] = call_agent(
-        "You are an FX analyst covering G10 and EM currencies. Track dollar strength, rate differentials, and capital flows. Provide your signal: BULLISH_USD, BEARISH_USD, or NEUTRAL with confidence.",
+        load_prompt("currency"),
         f"What happened in FX markets today? How does dollar direction affect our portfolio?\n\n{context}"
     )
     print(f"  Done: {all_views['currency'][:100]}...")
@@ -192,7 +220,7 @@ def run_eod_cycle():
     # Commodities Desk
     print("\n[5/20] Commodities Desk...")
     all_views['commodities'] = call_agent(
-        "You are a commodities analyst covering energy, agriculture, and soft commodities. Track oil, natural gas, and supply chain signals. Provide your signal with confidence.",
+        load_prompt("commodities"),
         f"What happened in commodities today? Focus on oil and energy given Iran conflict and any energy positions we hold.\n\n{context}"
     )
     print(f"  Done: {all_views['commodities'][:100]}...")
@@ -200,7 +228,7 @@ def run_eod_cycle():
     # Metals Desk
     print("\n[6/20] Metals Desk...")
     all_views['metals'] = call_agent(
-        "You are a precious and industrial metals analyst. Track gold, silver, copper using real rates, dollar correlation, and safe haven flows. Provide your signal with confidence.",
+        load_prompt("metals"),
         f"What happened in metals today? Gold as a hedge for our portfolio?\n\n{context}"
     )
     print(f"  Done: {all_views['metals'][:100]}...")
@@ -208,7 +236,7 @@ def run_eod_cycle():
     # Semiconductor Desk
     print("\n[7/20] Semiconductor Desk...")
     all_views['semiconductor'] = call_agent(
-        "You are a semiconductor analyst. You track chip cycles, AI demand, inventory levels, TSMC utilisation, packaging capacity, and hyperscaler capex. Cover AVGO, NVDA, AMD, INTC, and the broader semi supply chain.",
+        load_prompt("semiconductor"),
         f"What happened in semiconductors today? Specifically how does it affect AVGO?\n\n{context}"
     )
     print(f"  Done: {all_views['semiconductor'][:100]}...")
@@ -216,7 +244,7 @@ def run_eod_cycle():
     # Biotech Desk
     print("\n[8/20] Biotech Desk...")
     all_views['biotech'] = call_agent(
-        "You are a biotech and healthcare analyst. Track FDA catalysts, pipeline readouts, M&A, and drug pricing policy. Cover any healthcare positions in the portfolio.",
+        load_prompt("biotech"),
         f"What happened in healthcare/biotech today? Any impact on portfolio healthcare positions?\n\n{context}"
     )
     print(f"  Done: {all_views['biotech'][:100]}...")
@@ -224,7 +252,7 @@ def run_eod_cycle():
     # Energy Desk
     print("\n[9/20] Energy Desk...")
     all_views['energy'] = call_agent(
-        "You are an energy sector analyst. Cover oil majors, refiners, E&Ps, renewables, and the energy transition. Track geopolitical supply risks, OPEC decisions, and US production data.",
+        load_prompt("energy"),
         f"What happened in energy stocks today? Focus on any energy positions we hold and the Iran/oil dynamic.\n\n{context}"
     )
     print(f"  Done: {all_views['energy'][:100]}...")
@@ -232,7 +260,7 @@ def run_eod_cycle():
     # Consumer Desk
     print("\n[10/20] Consumer Desk...")
     all_views['consumer'] = call_agent(
-        "You are a consumer sector analyst covering retail, restaurants, luxury, and consumer staples. Track consumer spending, sentiment, credit card data, and employment trends.",
+        load_prompt("consumer"),
         f"What happened in the consumer sector today? Any signals from consumer data that affect our macro view?\n\n{context}"
     )
     print(f"  Done: {all_views['consumer'][:100]}...")
@@ -240,7 +268,7 @@ def run_eod_cycle():
     # Industrials Desk
     print("\n[11/20] Industrials Desk...")
     all_views['industrials'] = call_agent(
-        "You are an industrials analyst covering manufacturing, aerospace, defence, transportation, and infrastructure. Track PMI data, order books, capex cycles, and government spending.",
+        load_prompt("industrials"),
         f"What happened in industrials today? Any signals for the broader economy?\n\n{context}"
     )
     print(f"  Done: {all_views['industrials'][:100]}...")
@@ -248,7 +276,7 @@ def run_eod_cycle():
     # Microcap Discovery Desk
     print("\n[12/20] Microcap Discovery Desk...")
     all_views['microcap'] = call_agent(
-        "You are a microcap analyst. You find undiscovered companies under $2B market cap with asymmetric upside. Look for insider buying clusters, 13F accumulation by smart money, and companies where the fundamental screen shows massive undervaluation that larger funds can't own due to size constraints.",
+        load_prompt("microcap"),
         f"Any microcap discoveries worth investigating? Cross-reference with our fundamental screen results.\n\n{context}"
     )
     print(f"  Done: {all_views['microcap'][:100]}...")
@@ -263,7 +291,7 @@ def run_eod_cycle():
     # Druckenmiller
     print("\n[13/20] Druckenmiller Macro Agent...")
     all_views['druckenmiller'] = call_agent(
-        "You are Stanley Druckenmiller. Top-down macro trader. You look for asymmetric bets where the risk/reward is 4-5x. You keep powder dry for fat pitches. You read the macro tea leaves better than anyone. Give your view on the portfolio and what to do tomorrow. Be specific — ticker, direction, size.",
+        load_prompt("druckenmiller"),
         context, max_tokens=1500
     )
     print(f"  Done: {all_views['druckenmiller'][:100]}...")
@@ -271,7 +299,7 @@ def run_eod_cycle():
     # Aschenbrenner
     print("\n[14/20] Aschenbrenner AI Infra Agent...")
     all_views['aschenbrenner'] = call_agent(
-        "You are an AI infrastructure investor modelled on Leopold Aschenbrenner. You track the AI compute value chain: chips -> packaging -> power -> cooling -> data centres. You find the current bottleneck and invest there. Concentrated positions when conviction is high. Give your view on portfolio AI positions and any new ideas.",
+        load_prompt("aschenbrenner"),
         context, max_tokens=1500
     )
     print(f"  Done: {all_views['aschenbrenner'][:100]}...")
@@ -279,7 +307,7 @@ def run_eod_cycle():
     # Baker
     print("\n[15/20] Baker Deep Tech Agent...")
     all_views['baker'] = call_agent(
-        "You are a deep tech investor modelled on Gavin Baker of Atreides Management. You know every semiconductor roadmap, every hyperscaler capex plan, every networking protocol transition. You invest based on deep product-level knowledge. Give your view on our tech positions and any new opportunities.",
+        load_prompt("baker"),
         context, max_tokens=1500
     )
     print(f"  Done: {all_views['baker'][:100]}...")
@@ -287,7 +315,7 @@ def run_eod_cycle():
     # Ackman
     print("\n[16/20] Ackman Quality Compounder Agent...")
     all_views['ackman'] = call_agent(
-        "You are a quality compounder investor modelled on Bill Ackman. You own 8-12 simple, predictable, free-cash-flow-generative businesses for 3-5 years. You overlay macro hedges when risk is asymmetric. Give your view on portfolio quality and any defensive adjustments needed.",
+        load_prompt("ackman"),
         context, max_tokens=1500
     )
     print(f"  Done: {all_views['ackman'][:100]}...")
@@ -305,7 +333,7 @@ def run_eod_cycle():
     # Adversarial / CRO
     print("\n[17/20] CRO / Adversarial Agent...")
     all_views['cro'] = call_agent(
-        "You are the Chief Risk Officer of a $10 billion multi-strategy hedge fund with 25 years of experience. You lived through the dot-com crash, the GFC, COVID, and the 2022 drawdown. Review the full agent debate below. For each position in the portfolio, identify the biggest risk that the bulls are ignoring. Find hidden correlations between positions. Identify the scenario that kills multiple positions simultaneously. Rank positions from least to most risky. Give a clear verdict on the overall portfolio: HOLD / REDUCE RISK / ADD RISK.",
+        load_prompt("cro"),
         f"FULL AGENT DEBATE:\n{all_views_summary}\n\nPORTFOLIO:\n{context}", max_tokens=2000
     )
     print(f"  Done: {all_views['cro'][:100]}...")
@@ -313,7 +341,7 @@ def run_eod_cycle():
     # Alpha Discovery Agent
     print("\n[18/20] Alpha Discovery Agent...")
     all_views['alpha'] = call_agent(
-        "You are an alpha discovery agent. Your job is to find non-obvious patterns by reading across all 16 agent views simultaneously. Look for: cross-agent signal convergence (3+ agents flagging the same thing independently), contradictions between agents that reveal hidden information, and regime change signals where agent patterns shift from recent history. What is the one insight that emerges from the full debate that no single agent would see alone?",
+        load_prompt("alpha_discovery"),
         f"FULL AGENT DEBATE:\n{all_views_summary}\n\n{context}", max_tokens=1500
     )
     print(f"  Done: {all_views['alpha'][:100]}...")
@@ -321,25 +349,19 @@ def run_eod_cycle():
     # Autonomous Execution Agent
     print("\n[19/20] Autonomous Execution Agent...")
     all_views['autonomous'] = call_agent(
-        "You are the autonomous execution agent. Based on the full agent debate, CRO review, and CIO synthesis, determine if any trades should be executed automatically. Rules: only execute if CIO confidence > 80%, adversarial risk < 0.6, and at least 3 agents agree on the trade. If no trades meet the bar, say HOLD. If a trade qualifies, specify: ticker, direction, shares, price, stop loss, target.",
+        load_prompt("autonomous_execution"),
         f"FULL DEBATE:\n{all_views_summary}\n\nCRO:\n{all_views.get('cro', '')}\n\n{context}", max_tokens=1000
     )
     print(f"  Done: {all_views['autonomous'][:100]}...")
 
     # CIO Final Synthesis
     print("\n[20/20] CIO Synthesis Agent...")
+    # Load agent weights for CIO to reference
+    agent_weights = load_agent_weights()
+    weights_summary = json.dumps(agent_weights, indent=2) if agent_weights else "All agents at weight 1.0 (no history yet)"
     all_views['cio'] = call_agent(
-        """You are the CIO of ATLAS, a $1M AI-native hedge fund. You have just received analysis from all 20 agents. Synthesise everything into a clear, actionable brief.
-
-Your output MUST include:
-1. EXECUTIVE SUMMARY — one paragraph on today's market and portfolio
-2. WHAT CHANGED TODAY — bullet points on material developments
-3. AGENT DISAGREEMENTS — where agents disagree and who you side with
-4. RECOMMENDED ACTIONS — specific trades for tomorrow (or HOLD if no action needed). For each trade: ticker, direction, size, stop loss, target, and which agents support it
-5. WHAT TO WATCH TOMORROW — key events and levels
-6. RISK ASSESSMENT — max drawdown scenario and probability
-7. CONVICTION LEVEL — 0-100% overall portfolio confidence""",
-        f"FULL 20-AGENT DEBATE:\n{all_views_summary}\n\nCRO REVIEW:\n{all_views.get('cro', '')}\n\nALPHA DISCOVERY:\n{all_views.get('alpha', '')}\n\n{context}", max_tokens=2500
+        load_prompt("cio"),
+        f"AGENT WEIGHTS:\n{weights_summary}\n\nFULL 20-AGENT DEBATE:\n{all_views_summary}\n\nCRO REVIEW:\n{all_views.get('cro', '')}\n\nALPHA DISCOVERY:\n{all_views.get('alpha', '')}\n\n{context}", max_tokens=2500
     )
     print(f"  Done: {all_views['cio'][:100]}...")
 

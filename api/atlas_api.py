@@ -2047,6 +2047,197 @@ def dashboard_briefing():
     )
 
 
+# ============== AUTONOMOUS DASHBOARD ROUTE ==============
+
+@app.route('/atlas/autonomous')
+def dashboard_autonomous():
+    """Autonomous mode dashboard - self-improving AI hedge fund."""
+    from datetime import datetime
+
+    # Load positions
+    positions_data = load_state_file("positions.json") or {}
+    raw_positions = positions_data.get("positions", []) if isinstance(positions_data, dict) else positions_data
+    portfolio_value = positions_data.get("portfolio_value", 1000000)
+
+    # Process positions for display
+    positions = []
+    total_pnl = 0
+    long_exposure = 0
+    short_exposure = 0
+    cash_pct = 0
+
+    for p in raw_positions:
+        ticker = p.get("ticker")
+        direction = p.get("direction", "LONG")
+        entry_price = p.get("entry_price", 0) or 0
+        current_price = p.get("current_price", entry_price) or entry_price
+        shares = p.get("shares", 0) or 0
+        alloc = p.get("allocation_pct", 0) or 0
+
+        # Calculate P&L
+        if direction == "SHORT":
+            unrealized_pnl = (entry_price - current_price) * shares
+        else:
+            unrealized_pnl = (current_price - entry_price) * shares
+        unrealized_pnl_pct = ((current_price - entry_price) / entry_price * 100) if entry_price > 0 else 0
+        if direction == "SHORT":
+            unrealized_pnl_pct = -unrealized_pnl_pct
+
+        total_pnl += unrealized_pnl
+
+        # Track exposure
+        if ticker == "BIL":
+            cash_pct = alloc
+        elif direction == "LONG":
+            long_exposure += alloc
+        else:
+            short_exposure += alloc
+
+        positions.append({
+            "ticker": ticker,
+            "direction": direction,
+            "shares": shares,
+            "entry_price": entry_price,
+            "current_price": current_price,
+            "unrealized_pnl": unrealized_pnl,
+            "unrealized_pnl_pct": unrealized_pnl_pct,
+            "agent_source": p.get("agent_source", "manual"),
+            "allocation_pct": alloc
+        })
+
+    portfolio = {
+        "total_value": portfolio_value,
+        "total_pnl": total_pnl,
+        "long_exposure": long_exposure,
+        "short_exposure": short_exposure,
+        "net_exposure": long_exposure - short_exposure,
+        "cash_pct": cash_pct,
+        "last_updated": positions_data.get("last_updated")
+    }
+
+    # Load agent scorecards and weights
+    scorecards = load_state_file("agent_scorecards.json") or {}
+    weights = load_state_file("agent_weights.json") or {}
+    agent_metrics = scorecards.get("agent_metrics", {})
+
+    # Build leaderboard
+    leaderboard = []
+    for agent, metrics in agent_metrics.items():
+        leaderboard.append({
+            "agent": agent,
+            "weight": weights.get(agent, 1.0),
+            "version": 1,  # Would track from autoresearch log
+            "sharpe_10d": metrics.get("sharpe_10d"),
+            "hit_rate_10d": metrics.get("hit_rate_10d"),
+            "avg_return_10d": metrics.get("avg_return_10d"),
+            "total_recommendations": metrics.get("total_recommendations", 0)
+        })
+
+    # Sort by Sharpe ratio (descending, None last)
+    leaderboard.sort(key=lambda x: (x["sharpe_10d"] is None, -(x["sharpe_10d"] or 0)))
+
+    # Load autoresearch experiments
+    experiments = []
+    experiments_kept = 0
+    experiments_discarded = 0
+    autoresearch_file = STATE_DIR / "autoresearch_results.tsv"
+    if autoresearch_file.exists():
+        with open(autoresearch_file, 'r') as f:
+            lines = f.readlines()[1:]  # Skip header
+            for line in reversed(lines[-20:]):  # Last 20
+                parts = line.strip().split('\t')
+                if len(parts) >= 6:
+                    status = parts[5]
+                    if status == "keep":
+                        experiments_kept += 1
+                    elif status == "discard":
+                        experiments_discarded += 1
+                    experiments.append({
+                        "date": parts[0],
+                        "agent": parts[1],
+                        "commit": parts[2],
+                        "sharpe_before": float(parts[3]) if parts[3] else 0,
+                        "status": status,
+                        "description": parts[6] if len(parts) > 6 else ""
+                    })
+
+    # Load trade log
+    trades = []
+    trade_journal_dir = _api_dir.parent / "data" / "trade_journal"
+    if trade_journal_dir.exists():
+        for journal_file in sorted(trade_journal_dir.glob("*.json"), reverse=True):
+            with open(journal_file, 'r') as f:
+                file_trades = json.load(f)
+                for t in file_trades:
+                    trades.append({
+                        "date": t.get("timestamp", "")[:10],
+                        "ticker": t.get("ticker"),
+                        "direction": t.get("direction"),
+                        "shares": t.get("shares"),
+                        "price": t.get("price"),
+                        "agent_source": t.get("agent_source", "manual"),
+                        "confidence": t.get("cio_confidence", 70),
+                        "thesis": t.get("thesis", "")
+                    })
+            if len(trades) >= 20:
+                break
+
+    # Load CIO synthesis
+    cio_data = load_state_file("cio_synthesis.json") or {}
+    cio_synthesis = cio_data.get("synthesis", "")
+
+    # Load P&L history for chart
+    pnl_history = load_state_file("pnl_history.json") or []
+    equity_dates = json.dumps([h.get("date") for h in pnl_history[-30:]])
+    equity_values = json.dumps([h.get("portfolio_value", 1000000) for h in pnl_history[-30:]])
+
+    # Calculate days running and cycles
+    days_running = len(set(h.get("date") for h in pnl_history if h.get("date")))
+    total_cycles = len(pnl_history)
+    total_experiments = experiments_kept + experiments_discarded
+
+    # System status
+    last_cycle_file = STATE_DIR / "last_cycle_result.json"
+    if last_cycle_file.exists():
+        with open(last_cycle_file, 'r') as f:
+            last_cycle = json.load(f)
+            last_cycle_time = last_cycle.get("end")
+            if last_cycle_time:
+                last_dt = datetime.fromisoformat(last_cycle_time.replace('Z', '+00:00'))
+                hours_since = (datetime.now() - last_dt.replace(tzinfo=None)).total_seconds() / 3600
+                if hours_since < 2:
+                    status = "RUNNING"
+                elif hours_since < 24:
+                    status = "PAUSED"
+                else:
+                    status = "IDLE"
+            else:
+                status = "IDLE"
+    else:
+        status = "IDLE"
+
+    return render_template(
+        'autonomous.html',
+        active_page='autonomous',
+        status=status,
+        days_running=days_running,
+        total_cycles=total_cycles,
+        total_experiments=total_experiments,
+        improvements_kept=experiments_kept,
+        portfolio=portfolio,
+        positions=positions,
+        leaderboard=leaderboard,
+        trades=trades[:20],
+        experiments=experiments[:20],
+        experiments_kept=experiments_kept,
+        experiments_discarded=experiments_discarded,
+        cio_synthesis=cio_synthesis,
+        equity_dates=equity_dates,
+        equity_values=equity_values,
+        spy_values=json.dumps([])  # Would populate from SPY data
+    )
+
+
 # Redirect root to atlas dashboard
 @app.route('/')
 def root_redirect():
