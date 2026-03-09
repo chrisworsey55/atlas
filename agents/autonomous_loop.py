@@ -27,8 +27,12 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 # Paths
 ATLAS_DIR = Path(__file__).parent.parent
 STATE_DIR = ATLAS_DIR / "data" / "state"
+AUTONOMOUS_DIR = ATLAS_DIR / "data" / "autonomous"
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 AUTORESEARCH_LOG = STATE_DIR / "autoresearch_results.tsv"
+
+# Ensure autonomous directory exists
+AUTONOMOUS_DIR.mkdir(parents=True, exist_ok=True)
 
 # API client
 client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
@@ -73,18 +77,20 @@ def wait_for_market_close():
 
 
 def load_positions() -> dict:
-    """Load current portfolio positions."""
-    pos_file = STATE_DIR / "positions.json"
+    """Load AUTONOMOUS portfolio positions (NOT Chris's portfolio)."""
+    pos_file = AUTONOMOUS_DIR / "positions.json"
     if pos_file.exists():
         with open(pos_file, 'r') as f:
             return json.load(f)
-    return {"portfolio_value": 1000000, "positions": []}
+    # Start fresh with $1M cash, ZERO positions
+    return {"portfolio_value": 1000000, "cash": 1000000, "positions": [], "mode": "AUTONOMOUS"}
 
 
 def save_positions(data: dict):
-    """Save portfolio positions."""
+    """Save AUTONOMOUS portfolio positions."""
     data["last_updated"] = datetime.now().strftime('%Y-%m-%d %H:%M')
-    with open(STATE_DIR / "positions.json", 'w') as f:
+    data["mode"] = "AUTONOMOUS"
+    with open(AUTONOMOUS_DIR / "positions.json", 'w') as f:
         json.dump(data, f, indent=2)
 
 
@@ -156,161 +162,323 @@ def fetch_market_data() -> dict:
 
 
 # ============================================================
-# PHASE B: AGENT DEBATE
+# PHASE B: AGENT DEBATE (AUTONOMOUS - uses own positions)
 # ============================================================
 
+def build_autonomous_context(positions: dict, market_data: dict) -> str:
+    """Build market context for autonomous portfolio (NOT Chris's portfolio)."""
+    today = datetime.now().strftime('%Y-%m-%d %H:%M')
+
+    portfolio_value = positions.get("portfolio_value", 1000000)
+    cash = positions.get("cash", portfolio_value)
+    pos_list = positions.get("positions", [])
+
+    # Calculate P&L
+    total_pnl = 0
+    position_lines = []
+
+    for p in pos_list:
+        ticker = p.get("ticker", "?")
+        entry = p.get("entry_price", 0) or 0
+        current = p.get("current_price", entry) or entry
+        shares = p.get("shares", 0) or 0
+        direction = p.get("direction", "LONG")
+
+        if entry and current and shares:
+            if direction == "SHORT":
+                pnl = (entry - current) * shares
+            else:
+                pnl = (current - entry) * shares
+            pnl_pct = (pnl / (entry * shares) * 100) if entry * shares > 0 else 0
+            total_pnl += pnl
+            position_lines.append(
+                f"  {ticker}: {direction} {shares} shares @ ${entry:.2f} -> ${current:.2f} | "
+                f"P&L: ${pnl:,.2f} ({pnl_pct:.2f}%) | Thesis: {p.get('thesis', '')[:60]}"
+            )
+
+    if not position_lines:
+        position_lines = ["  NO POSITIONS — 100% CASH — READY TO DEPLOY"]
+
+    # Market data summary
+    indices = market_data.get("indices", {})
+    spy_data = indices.get("SPY", {})
+    spy_price = spy_data.get("price", "N/A") if isinstance(spy_data, dict) else "N/A"
+
+    context = f"""
+=== AUTONOMOUS PORTFOLIO STATUS ===
+Date: {today}
+Mode: FULLY AUTONOMOUS — AI agents decide everything
+Starting Capital: $1,000,000
+Current Value: ${portfolio_value:,.2f}
+Cash Available: ${cash:,.2f}
+Total P&L: ${total_pnl:,.2f} ({total_pnl/10000:.2f}%)
+
+CURRENT POSITIONS:
+{chr(10).join(position_lines)}
+
+MARKET CONDITIONS:
+SPY: {spy_price}
+Oil: ~$108 (Iran war premium)
+VIX: 29+ (elevated fear)
+Futures: Down 1.5%+
+
+YOUR MISSION: You are an autonomous AI hedge fund. You have $1M to deploy.
+Analyze the market and recommend what to BUY, SELL, or SHORT.
+Be specific: ticker, direction, size, conviction, stop loss, target.
+"""
+    return context
+
+
+def call_agent(system_prompt: str, user_message: str, max_tokens: int = 1000) -> str:
+    """Call Claude with a system prompt and user message."""
+    response = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=max_tokens,
+        system=system_prompt,
+        messages=[{"role": "user", "content": user_message}]
+    )
+    return response.content[0].text
+
+
+def load_prompt(agent_name: str) -> str:
+    """Load an agent's system prompt from its .md file."""
+    patterns = [f"{agent_name}.md", f"{agent_name}_desk.md", f"{agent_name}_agent.md"]
+    for pattern in patterns:
+        path = PROMPTS_DIR / pattern
+        if path.exists():
+            with open(path, 'r') as f:
+                return f.read()
+    return f"You are the {agent_name} agent for an autonomous AI hedge fund. Provide your analysis."
+
+
 def run_agent_debate(market_data: dict) -> dict:
-    """Run the full 20-agent EOD debate."""
-    log("PHASE B: Running agent debate...")
+    """Run the full 20-agent debate using AUTONOMOUS positions."""
+    log("PHASE B: Running agent debate (AUTONOMOUS PORTFOLIO)...")
 
     try:
-        from agents.eod_cycle import run_eod_cycle
-        all_views = run_eod_cycle()
+        # Load AUTONOMOUS positions (not Chris's)
+        positions = load_positions()
+        context = build_autonomous_context(positions, market_data)
+
+        log(f"  Portfolio: ${positions.get('portfolio_value', 1000000):,.0f}, {len(positions.get('positions', []))} positions")
+
+        all_views = {}
+
+        # LAYER 1: DATA AGENTS
+        log("  Layer 1: Data Agents...")
+        all_views['news'] = call_agent(
+            load_prompt("news_sentiment"),
+            f"What market events should drive our trading decisions today?\n\n{context}"
+        )
+        all_views['flow'] = call_agent(
+            load_prompt("institutional_flow"),
+            f"What institutional flow signals should we act on?\n\n{context}"
+        )
+
+        # LAYER 2: SECTOR DESKS
+        log("  Layer 2: Sector Desks...")
+        all_views['bond'] = call_agent(load_prompt("bond"), f"Rates and credit analysis. What should we trade?\n\n{context}")
+        all_views['currency'] = call_agent(load_prompt("currency"), f"FX analysis. What should we trade?\n\n{context}")
+        all_views['commodities'] = call_agent(load_prompt("commodities"), f"Commodities analysis. Oil at $108. What should we trade?\n\n{context}")
+        all_views['metals'] = call_agent(load_prompt("metals"), f"Precious metals analysis. What should we trade?\n\n{context}")
+        all_views['semiconductor'] = call_agent(load_prompt("semiconductor"), f"Semiconductor analysis. What should we trade?\n\n{context}")
+        all_views['biotech'] = call_agent(load_prompt("biotech"), f"Healthcare/biotech analysis. What should we trade?\n\n{context}")
+        all_views['energy'] = call_agent(load_prompt("energy"), f"Energy sector analysis. Iran war. What should we trade?\n\n{context}")
+        all_views['consumer'] = call_agent(load_prompt("consumer"), f"Consumer sector analysis. What should we trade?\n\n{context}")
+        all_views['industrials'] = call_agent(load_prompt("industrials"), f"Industrials analysis. What should we trade?\n\n{context}")
+        all_views['microcap'] = call_agent(load_prompt("microcap"), f"Microcap opportunities. What should we trade?\n\n{context}")
+
+        # LAYER 3: SUPERINVESTORS
+        log("  Layer 3: Superinvestor Agents...")
+        all_views['druckenmiller'] = call_agent(load_prompt("druckenmiller"), f"Macro view. What's the big trade?\n\n{context}")
+        all_views['aschenbrenner'] = call_agent(load_prompt("aschenbrenner"), f"AI infrastructure thesis. What should we own?\n\n{context}")
+        all_views['baker'] = call_agent(load_prompt("baker"), f"Deep tech analysis. What should we trade?\n\n{context}")
+        all_views['ackman'] = call_agent(load_prompt("ackman"), f"Quality compounder view. What should we own?\n\n{context}")
+
+        # LAYER 4: RISK AND DECISION
+        log("  Layer 4: Risk and Decision...")
+
+        # CRO sees all views
+        views_summary = "\n\n".join([f"=== {k.upper()} ===\n{v[:500]}" for k, v in all_views.items()])
+        all_views['cro'] = call_agent(
+            load_prompt("cro"),
+            f"Review all agent views and identify risks:\n\n{views_summary}\n\n{context}"
+        )
+
+        # Alpha Discovery
+        all_views['alpha'] = call_agent(
+            load_prompt("alpha_discovery"),
+            f"Find alpha opportunities from agent convergence:\n\n{views_summary}\n\n{context}"
+        )
+
+        # Autonomous Execution Agent
+        all_views['autonomous'] = call_agent(
+            load_prompt("autonomous_execution"),
+            f"Based on all views, what trades should we EXECUTE right now?\n\n{views_summary}\n\nCRO RISK VIEW:\n{all_views['cro']}\n\n{context}",
+            max_tokens=1500
+        )
+
+        # CIO Final Synthesis
+        all_views['cio'] = call_agent(
+            load_prompt("cio"),
+            f"FINAL DECISION. You have $1M. What do we buy/sell/short? Be specific.\n\n{views_summary}\n\nAUTONOMOUS EXECUTION:\n{all_views['autonomous']}\n\nCRO RISKS:\n{all_views['cro']}\n\n{context}",
+            max_tokens=2000
+        )
+
+        # Save views
+        with open(STATE_DIR / "autonomous_agent_views.json", 'w') as f:
+            json.dump(all_views, f, indent=2)
+
         log(f"  Debate complete: {len(all_views)} agent views")
         return all_views
+
     except Exception as e:
         log(f"Agent debate failed: {e}", "ERROR")
+        import traceback
+        traceback.print_exc()
         return {"error": str(e)}
 
 
 # ============================================================
-# PHASE C: TRADE
+# PHASE C: TRADE (FULLY AUTONOMOUS - NO HUMAN GATES)
 # ============================================================
 
 def execute_trades(all_views: dict, market_data: dict) -> list:
-    """Execute trades based on CIO decisions."""
-    log("PHASE C: Processing trade decisions...")
+    """
+    Execute trades based on CIO decisions.
+    RULE: NO HUMAN APPROVAL GATES. The CIO decides, the system executes.
+    """
+    log("PHASE C: Executing CIO decisions (FULLY AUTONOMOUS)...")
+    import re
+    from agents.market_data import get_validated_quote
 
     trades_executed = []
     positions = load_positions()
-
-    # Parse CIO recommendation
     cio_view = all_views.get("cio", "")
-    autonomous_view = all_views.get("autonomous", "")
+    portfolio_value = positions.get("portfolio_value", 1000000)
 
-    # Look for EXECUTE signal in autonomous view
-    if "EXECUTE" not in autonomous_view.upper() and "DECISION: EXECUTE" not in autonomous_view.upper():
-        log("  No trades: Autonomous agent recommends HOLD")
+    # Parse trade recommendations from CIO view
+    recommendations = []
+
+    # Find BUY/LONG recommendations
+    for match in re.finditer(r'(?:BUY|LONG|ADD)\s+([A-Z]{1,5})', cio_view, re.IGNORECASE):
+        ticker = match.group(1).upper()
+        if len(ticker) >= 2 and ticker not in ['THE', 'AND', 'FOR', 'ALL', 'ARE', 'NOT', 'WITH', 'THIS']:
+            alloc_match = re.search(rf'{ticker}.*?(\d+)%', cio_view[match.start():match.start()+200])
+            allocation = int(alloc_match.group(1)) if alloc_match else 5
+            recommendations.append((ticker, 'LONG', allocation))
+
+    # Find SELL/SHORT recommendations
+    for match in re.finditer(r'(?:SELL|SHORT|TRIM|EXIT)\s+([A-Z]{1,5})', cio_view, re.IGNORECASE):
+        ticker = match.group(1).upper()
+        if len(ticker) >= 2 and ticker not in ['THE', 'AND', 'FOR', 'ALL', 'ARE', 'NOT', 'WITH', 'THIS']:
+            alloc_match = re.search(rf'{ticker}.*?(\d+)%', cio_view[match.start():match.start()+200])
+            allocation = int(alloc_match.group(1)) if alloc_match else 3
+            recommendations.append((ticker, 'SHORT', allocation))
+
+    # Deduplicate
+    seen = set()
+    unique_recs = []
+    for ticker, direction, alloc in recommendations:
+        if ticker not in seen:
+            seen.add(ticker)
+            unique_recs.append((ticker, direction, alloc))
+
+    if not unique_recs:
+        log("  CIO decided: HOLD current positions (no new trades)")
         return trades_executed
 
-    # Parse trade details from autonomous view
-    # Look for patterns like: Ticker: AVGO, Direction: BUY, etc.
-    import re
+    log(f"  CIO recommendations: {len(unique_recs)} trades")
 
-    # Simple parsing - could be more sophisticated
-    ticker_match = re.search(r'Ticker:\s*([A-Z]{1,5})', autonomous_view)
-    direction_match = re.search(r'Direction:\s*(BUY|SELL|LONG|SHORT)', autonomous_view, re.IGNORECASE)
-    shares_match = re.search(r'Shares:\s*(\d+)', autonomous_view)
-    price_match = re.search(r'Price:\s*\$?([\d.]+)', autonomous_view)
-
-    if not all([ticker_match, direction_match]):
-        log("  No valid trade found in autonomous recommendation")
-        return trades_executed
-
-    ticker = ticker_match.group(1)
-    direction = direction_match.group(1).upper()
-    shares = int(shares_match.group(1)) if shares_match else None
-    price = float(price_match.group(1)) if price_match else None
-
-    # Get current price if not specified
-    if not price:
-        price = market_data.get("portfolio_prices", {}).get(ticker)
-        if not price:
-            from agents.market_data import get_validated_quote
+    # Execute each trade
+    for ticker, direction, allocation in unique_recs[:10]:
+        try:
             quote = get_validated_quote(ticker)
             price = quote.get("price") if quote else None
 
-    if not price:
-        log(f"  Cannot execute: No price for {ticker}")
-        return trades_executed
+            if not price or price <= 0:
+                log(f"    Skip {ticker}: No valid price")
+                continue
 
-    # Calculate position size if shares not specified
-    if not shares:
-        portfolio_value = positions.get("portfolio_value", 1000000)
-        # Default to 5% position
-        target_value = portfolio_value * 0.05
-        shares = int(target_value / price)
+            # Calculate shares (cap at 15% per position)
+            allocation = min(allocation, 15)
+            target_value = portfolio_value * (allocation / 100)
+            shares = int(target_value / price)
 
-    # Validate position limits
-    portfolio_value = positions.get("portfolio_value", 1000000)
-    position_value = shares * price
-    position_pct = (position_value / portfolio_value) * 100
+            if shares <= 0:
+                continue
 
-    if position_pct > 15:
-        log(f"  Position too large: {position_pct:.1f}% > 15% limit")
-        shares = int((portfolio_value * 0.15) / price)
-        position_value = shares * price
-        position_pct = (position_value / portfolio_value) * 100
-        log(f"  Reduced to {shares} shares ({position_pct:.1f}%)")
+            position_value = shares * price
+            position_pct = (position_value / portfolio_value) * 100
 
-    # Calculate cash after trade
-    current_cash = sum(p.get("allocation_pct", 0) for p in positions.get("positions", []) if p.get("ticker") == "BIL")
-    if direction in ["BUY", "LONG"]:
-        new_cash_pct = current_cash - position_pct
-        if new_cash_pct < 15:
-            log(f"  Trade would reduce cash below 15%: {new_cash_pct:.1f}%")
-            return trades_executed
-
-    # Execute the trade
-    trade = {
-        "timestamp": datetime.now().isoformat(),
-        "ticker": ticker,
-        "direction": direction,
-        "shares": shares,
-        "price": price,
-        "value": position_value,
-        "allocation_pct": position_pct,
-        "agent_source": "autonomous",
-        "cio_confidence": _extract_confidence(cio_view),
-        "executed": True
-    }
-
-    # Update positions
-    existing_pos = None
-    for i, pos in enumerate(positions.get("positions", [])):
-        if pos.get("ticker") == ticker:
-            existing_pos = i
-            break
-
-    if direction in ["BUY", "LONG"]:
-        if existing_pos is not None:
-            # Add to existing position
-            positions["positions"][existing_pos]["shares"] += shares
-            positions["positions"][existing_pos]["allocation_pct"] += position_pct
-        else:
-            # New position
-            positions["positions"].append({
+            # Create trade record
+            trade = {
+                "timestamp": datetime.now().isoformat(),
                 "ticker": ticker,
-                "direction": "LONG",
+                "direction": direction,
                 "shares": shares,
-                "entry_price": price,
-                "current_price": price,
+                "price": price,
+                "value": position_value,
                 "allocation_pct": position_pct,
-                "thesis": "Autonomous execution",
-                "agent_source": "autonomous",
-                "date_opened": datetime.now().strftime('%Y-%m-%d'),
-                "status": "OPEN"
-            })
-    elif direction in ["SELL", "SHORT"]:
-        if existing_pos is not None:
-            # Reduce or close position
-            positions["positions"][existing_pos]["shares"] -= shares
-            if positions["positions"][existing_pos]["shares"] <= 0:
-                positions["positions"].pop(existing_pos)
+                "agent_source": "cio",
+                "executed": True
+            }
 
-    # Reduce BIL allocation
-    for pos in positions.get("positions", []):
-        if pos.get("ticker") == "BIL":
-            pos["allocation_pct"] -= position_pct
-            break
+            # Update positions
+            existing_pos = None
+            for i, pos in enumerate(positions.get("positions", [])):
+                if pos.get("ticker") == ticker:
+                    existing_pos = i
+                    break
 
-    save_positions(positions)
-    trades_executed.append(trade)
+            if direction == "LONG":
+                if existing_pos is not None:
+                    positions["positions"][existing_pos]["shares"] += shares
+                    positions["positions"][existing_pos]["allocation_pct"] += position_pct
+                else:
+                    positions["positions"].append({
+                        "ticker": ticker,
+                        "direction": "LONG",
+                        "shares": shares,
+                        "entry_price": price,
+                        "current_price": price,
+                        "allocation_pct": position_pct,
+                        "thesis": "CIO autonomous execution",
+                        "agent_source": "cio",
+                        "date_opened": datetime.now().strftime('%Y-%m-%d'),
+                        "status": "OPEN"
+                    })
+            elif direction == "SHORT":
+                if existing_pos is not None:
+                    positions["positions"][existing_pos]["shares"] -= shares
+                    if positions["positions"][existing_pos]["shares"] <= 0:
+                        positions["positions"].pop(existing_pos)
+                else:
+                    positions["positions"].append({
+                        "ticker": ticker,
+                        "direction": "SHORT",
+                        "shares": shares,
+                        "entry_price": price,
+                        "current_price": price,
+                        "allocation_pct": position_pct,
+                        "thesis": "CIO autonomous execution - SHORT",
+                        "agent_source": "cio",
+                        "date_opened": datetime.now().strftime('%Y-%m-%d'),
+                        "status": "OPEN"
+                    })
 
-    # Log trade to journal
-    _log_trade(trade)
+            trades_executed.append(trade)
+            _log_trade(trade)
+            log(f"    EXECUTED: {direction} {shares} {ticker} @ ${price:.2f} ({position_pct:.1f}%)")
 
-    log(f"  EXECUTED: {direction} {shares} {ticker} @ ${price:.2f}")
+        except Exception as e:
+            log(f"    Error executing {ticker}: {e}")
+            continue
+
+    # Save updated positions
+    if trades_executed:
+        save_positions(positions)
+
     return trades_executed
 
 
@@ -327,9 +495,9 @@ def _extract_confidence(text: str) -> int:
 
 
 def _log_trade(trade: dict):
-    """Log trade to journal file."""
-    journal_dir = ATLAS_DIR / "data" / "trade_journal"
-    journal_dir.mkdir(exist_ok=True)
+    """Log trade to autonomous journal file."""
+    journal_dir = AUTONOMOUS_DIR / "trade_journal"
+    journal_dir.mkdir(parents=True, exist_ok=True)
 
     journal_file = journal_dir / f"{datetime.now().strftime('%Y-%m')}_trades.json"
     trades = []

@@ -1,0 +1,101 @@
+{
+  "portfolio_value": 1000000,
+  "starting_value": 1000000,
+  "cash": 180909.3,
+  "last_updated": "2026-03-09 15:05",
+  "mode": "AUTONOMOUS",
+  "execution_status": "LIVE",
+  "positions": [
+    {
+      "ticker": "XLE",
+      "direction": "LONG",
+      "shares": 1404,
+      "entry_price": 56.98,
+      "current_price": 56.98,
+      "allocation_pct": 8,
+      "thesis": "Energy ETF - Iran war premium, oil at $108",
+      "agent_source": "commodities,energy,druckenmiller",
+      "conviction": 80,
+      "date_opened": "2026-03-09",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "MSFT",
+      "direction": "LONG",
+      "shares": 196,
+      "entry_price": 407.42,
+      "current_price": 407.42,
+      "allocation_pct": 8,
+      "thesis": "Quality tech compounder - AI infrastructure",
+      "agent_source": "ackman,baker",
+      "conviction": 80,
+      "date_opened": "2026-03-09",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "UNH",
+      "direction": "LONG",
+      "shares": 282,
+      "entry_price": 282.82,
+      "current_price": 282.82,
+      "allocation_pct": 8,
+      "thesis": "Defensive healthcare - demographic tailwinds",
+      "agent_source": "biotech,ackman",
+      "conviction": 80,
+      "date_opened": "2026-03-09",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "TLT",
+      "direction": "LONG",
+      "shares": 2255,
+      "entry_price": 88.69,
+      "current_price": 88.69,
+      "allocation_pct": 20,
+      "thesis": "Flight to safety - Fed cuts if recession",
+      "agent_source": "bond,cio",
+      "conviction": 80,
+      "date_opened": "2026-03-09",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "GLD",
+      "direction": "LONG",
+      "shares": 213,
+      "entry_price": 467.33,
+      "current_price": 467.33,
+      "allocation_pct": 10,
+      "thesis": "Gold hedge - geopolitical risk",
+      "agent_source": "metals,currency",
+      "conviction": 80,
+      "date_opened": "2026-03-09",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "VXX",
+      "direction": "LONG",
+      "shares": 847,
+      "entry_price": 35.4,
+      "current_price": 35.4,
+      "allocation_pct": 3,
+      "thesis": "Volatility hedge - VIX 29+ tail protection",
+      "agent_source": "cro,cio",
+      "conviction": 80,
+      "date_opened": "2026-03-09",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "BIL",
+      "direction": "LONG",
+      "shares": 2733,
+      "entry_price": 91.46,
+      "current_price": 91.46,
+      "allocation_pct": 25,
+      "thesis": "T-bills - capital preservation",
+      "agent_source": "cio",
+      "conviction": 80,
+      "date_opened": "2026-03-09",
+      "status": "OPEN"
+    }
+  ]
+}
