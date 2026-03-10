@@ -1461,10 +1461,32 @@ class TradeExecutor:
 class AgentScorer:
     """Tracks and scores agent recommendations."""
 
+    RECS_FILE = BACKTEST_DIR / "recommendations.json"
+
     def __init__(self, snapshot_builder: MarketSnapshot):
         self.snapshot = snapshot_builder
         self.recommendations: List[AgentRecommendation] = []
         self.agent_metrics: Dict[str, dict] = {}
+        self._load_recommendations()
+
+    def _load_recommendations(self):
+        """Load recommendations from disk."""
+        if self.RECS_FILE.exists():
+            try:
+                with open(self.RECS_FILE, 'r') as f:
+                    data = json.load(f)
+                for rec_dict in data:
+                    rec = AgentRecommendation(**rec_dict)
+                    self.recommendations.append(rec)
+                log(f"  Loaded {len(self.recommendations)} recommendations from disk")
+            except Exception as e:
+                log(f"  Could not load recommendations: {e}", "WARN")
+
+    def _save_recommendations(self):
+        """Save recommendations to disk."""
+        data = [asdict(r) for r in self.recommendations]
+        with open(self.RECS_FILE, 'w') as f:
+            json.dump(data, f)
 
     def record_recommendation(self, agent: str, date: str, ticker: str,
                               direction: str, conviction: int, price: float, reasoning: str = ""):
@@ -1479,20 +1501,23 @@ class AgentScorer:
             reasoning=reasoning
         )
         self.recommendations.append(rec)
+        self._save_recommendations()  # Persist after each new rec
 
     def extract_and_record(self, date: str, all_views: dict):
         """Extract recommendations from agent views and record them."""
         import re
+        count = 0
 
         for agent, view in all_views.items():
-            if not view:
+            if not view or agent in ["cro", "autonomous_execution"]:  # Skip non-trading agents
                 continue
 
             # Handle structured dict format
             if isinstance(view, dict):
+                # Check top_longs
                 for rec in view.get("top_longs", []):
                     ticker = rec.get("ticker")
-                    if ticker:
+                    if ticker and len(ticker) <= 5:
                         price = self.snapshot.get_price(ticker, date)
                         if price:
                             self.record_recommendation(
@@ -1500,10 +1525,12 @@ class AgentScorer:
                                 rec.get("conviction", 50), price,
                                 rec.get("reasoning", "")
                             )
+                            count += 1
 
+                # Check top_shorts
                 for rec in view.get("top_shorts", []):
                     ticker = rec.get("ticker")
-                    if ticker:
+                    if ticker and len(ticker) <= 5:
                         price = self.snapshot.get_price(ticker, date)
                         if price:
                             self.record_recommendation(
@@ -1511,12 +1538,48 @@ class AgentScorer:
                                 rec.get("conviction", 50), price,
                                 rec.get("reasoning", "")
                             )
+                            count += 1
+
+                # Check recommendations array
+                for rec in view.get("recommendations", []):
+                    ticker = rec.get("ticker") or rec.get("symbol")
+                    direction = (rec.get("direction") or rec.get("action") or "").upper()
+                    if ticker and len(ticker) <= 5 and direction in ["LONG", "BUY", "SHORT", "SELL"]:
+                        price = self.snapshot.get_price(ticker, date)
+                        if price:
+                            dir_norm = "LONG" if direction in ["LONG", "BUY"] else "SHORT"
+                            self.record_recommendation(
+                                agent, date, ticker, dir_norm,
+                                rec.get("conviction", 50), price,
+                                rec.get("reasoning", "")
+                            )
+                            count += 1
+
+                # Extract from signal field
+                signal = view.get("signal", "").upper()
+                regime = view.get("regime", "").upper()
+
+                # Map signals to ETF recommendations
+                if signal == "BULLISH" or regime == "RISK_ON":
+                    price = self.snapshot.get_price("SPY", date)
+                    if price:
+                        self.record_recommendation(agent, date, "SPY", "LONG", 60, price, f"Signal: {signal}")
+                        count += 1
+                elif signal == "BEARISH" or regime == "RISK_OFF":
+                    price = self.snapshot.get_price("SPY", date)
+                    if price:
+                        self.record_recommendation(agent, date, "SPY", "SHORT", 60, price, f"Signal: {signal}")
+                        count += 1
+
+        if count > 0:
+            log(f"  Recorded {count} recommendations from {len(all_views)} agents")
 
     def update_returns(self, current_date: str):
         """Update forward returns for all recommendations."""
+        updated = 0
         for rec in self.recommendations:
-            if rec.return_10d is not None:
-                continue  # Already complete
+            if rec.return_5d is not None:
+                continue  # Already complete (using 5d now for faster iteration)
 
             rec_date = datetime.strptime(rec.date, "%Y-%m-%d")
             curr_date = datetime.strptime(current_date, "%Y-%m-%d")
@@ -1534,13 +1597,18 @@ class AgentScorer:
 
             if days_since >= 1 and rec.return_1d is None:
                 rec.return_1d = ret
+                updated += 1
             if days_since >= 5 and rec.return_5d is None:
                 rec.return_5d = ret
+                updated += 1
             if days_since >= 10 and rec.return_10d is None:
                 rec.return_10d = ret
 
+        if updated > 0:
+            self._save_recommendations()
+
     def calculate_metrics(self) -> dict:
-        """Calculate metrics for all agents."""
+        """Calculate metrics for all agents using 5-day returns."""
         from collections import defaultdict
 
         agent_recs = defaultdict(list)
@@ -1550,17 +1618,18 @@ class AgentScorer:
         self.agent_metrics = {}
 
         for agent, recs in agent_recs.items():
-            recs_10d = [r for r in recs if r.return_10d is not None]
+            # Use 5-day returns for faster autoresearch iteration
+            scored_recs = [r for r in recs if r.return_5d is not None]
 
-            if not recs_10d:
+            if not scored_recs:
                 self.agent_metrics[agent] = {
                     "total": len(recs),
                     "scored": 0,
-                    "sharpe_10d": None
+                    "sharpe": None
                 }
                 continue
 
-            returns = [r.return_10d for r in recs_10d]
+            returns = [r.return_5d for r in scored_recs]
             hits = sum(1 for r in returns if r > 0)
 
             mean_ret = sum(returns) / len(returns)
@@ -1570,23 +1639,24 @@ class AgentScorer:
 
             self.agent_metrics[agent] = {
                 "total": len(recs),
-                "scored": len(recs_10d),
-                "hit_rate": (hits / len(recs_10d)) * 100,
+                "scored": len(scored_recs),
+                "hit_rate": (hits / len(scored_recs)) * 100,
                 "avg_return": mean_ret,
-                "sharpe_10d": sharpe
+                "sharpe": sharpe
             }
 
         return self.agent_metrics
 
     def get_worst_agent(self) -> Optional[Tuple[str, float]]:
-        """Get worst performing agent by Sharpe."""
+        """Get worst performing agent by Sharpe (using 5-day returns)."""
         if not self.agent_metrics:
             self.calculate_metrics()
 
+        # Get agents with at least 3 scored recommendations
         agents_with_sharpe = [
-            (agent, m["sharpe_10d"])
+            (agent, m["sharpe"])
             for agent, m in self.agent_metrics.items()
-            if m.get("sharpe_10d") is not None
+            if m.get("sharpe") is not None and m.get("scored", 0) >= 3
         ]
 
         if not agents_with_sharpe:
@@ -1603,7 +1673,7 @@ class AgentScorer:
         new_weights = dict(current_weights)
 
         for agent, metrics in self.agent_metrics.items():
-            sharpe = metrics.get("sharpe_10d")
+            sharpe = metrics.get("sharpe")
             if sharpe is None:
                 if agent not in new_weights:
                     new_weights[agent] = 1.0
@@ -1636,13 +1706,23 @@ class Autoresearch:
 
     def run(self, day: int, date: str, agent_weights: dict) -> Optional[AutoresearchModification]:
         """Run autoresearch for worst agent."""
+        # Log current metrics status
+        metrics = self.scorer.agent_metrics
+        scored_agents = [(a, m.get("sharpe"), m.get("scored", 0))
+                         for a, m in metrics.items() if m.get("sharpe") is not None]
+        if scored_agents:
+            log(f"  Agent metrics: {len(scored_agents)} agents with Sharpe data")
+
         worst = self.scorer.get_worst_agent()
 
         if not worst:
-            log("  Autoresearch: No agent with sufficient data")
+            total_recs = len(self.scorer.recommendations)
+            scored_recs = len([r for r in self.scorer.recommendations if r.return_5d is not None])
+            log(f"  Autoresearch: No agent with sufficient data (total recs: {total_recs}, scored: {scored_recs})")
             return None
 
         agent_name, sharpe = worst
+        log(f"  Autoresearch: Worst agent is {agent_name} (Sharpe: {sharpe:.3f})")
 
         # Load current prompt
         prompt_file = None
@@ -1659,9 +1739,9 @@ class Autoresearch:
         with open(prompt_file, 'r') as f:
             current_prompt = f.read()
 
-        # Get recent losing recommendations
+        # Get recent losing recommendations (using 5-day returns)
         agent_recs = [r for r in self.scorer.recommendations
-                      if r.agent == agent_name and r.return_10d is not None and r.return_10d < 0]
+                      if r.agent == agent_name and r.return_5d is not None and r.return_5d < 0]
 
         if not agent_recs:
             log(f"  Autoresearch: No losing recommendations for {agent_name}")
@@ -1779,7 +1859,7 @@ Output format (JSON only):
             return None
 
         agent = self.pending_experiment.agent
-        current_sharpe = current_metrics.get(agent, {}).get("sharpe_10d")
+        current_sharpe = current_metrics.get(agent, {}).get("sharpe")
 
         if current_sharpe is None:
             return None
