@@ -11,3 +11,6 @@ node_modules/
 data/state/autoresearch_results.tsv
 data/state/agent_scorecards.json
 logs/
+
+# Backtest cache (large binary files)
+data/backtest/cache/prices/SPY.json
