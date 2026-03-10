@@ -14,3 +14,4 @@ logs/
 
 # Backtest cache (large binary files)
 data/backtest/cache/prices/SPY.json
+data/backtest/cache/prices/SPY.json
