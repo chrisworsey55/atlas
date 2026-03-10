@@ -1241,11 +1241,20 @@ Respond with JSON containing each agent's analysis.
             json_match = re.search(r'\{[\s\S]*\}', response_text)
             if json_match:
                 parsed = json.loads(json_match.group())
+                # Normalize keys to lowercase for matching
+                parsed_lower = {k.lower(): v for k, v in parsed.items()}
                 for agent in agents:
-                    if agent in parsed:
+                    agent_lower = agent.lower()
+                    agent_no_underscore = agent_lower.replace("_", "")
+                    # Try various key formats
+                    if agent_lower in parsed_lower:
+                        views[agent] = parsed_lower[agent_lower]
+                    elif agent_no_underscore in parsed_lower:
+                        views[agent] = parsed_lower[agent_no_underscore]
+                    elif agent in parsed:  # Original case
                         views[agent] = parsed[agent]
-                    elif agent.replace("_", "") in parsed:
-                        views[agent] = parsed[agent.replace("_", "")]
+                    elif agent.upper() in parsed:
+                        views[agent] = parsed[agent.upper()]
         except json.JSONDecodeError:
             # Fallback: assign raw text to first agent
             if agents:
@@ -1307,6 +1316,7 @@ class TradeExecutor:
 
     def execute(self, date: str, portfolio: Portfolio, cio_view: dict, sector_map: dict) -> List[dict]:
         """Execute trades from CIO recommendations."""
+        import re
         trades = []
 
         if not cio_view:
@@ -1335,6 +1345,26 @@ class TradeExecutor:
                     recommendations.append((ticker, "LONG", 70))
                 elif action in ["SELL", "SHORT"] and ticker:
                     recommendations.append((ticker, "SHORT", 70))
+
+            # Check for recommendations array
+            for rec in cio_view.get("recommendations", []):
+                ticker = rec.get("ticker") or rec.get("symbol")
+                action = (rec.get("action") or rec.get("direction") or "").upper()
+                conviction = rec.get("conviction", rec.get("confidence", 70))
+                if ticker and action in ["BUY", "LONG"]:
+                    recommendations.append((ticker, "LONG", conviction))
+                elif ticker and action in ["SELL", "SHORT"]:
+                    recommendations.append((ticker, "SHORT", conviction))
+
+            # Parse text-based raw output for BUY/SELL patterns
+            raw_text = cio_view.get("raw", "") or str(cio_view)
+            # Match patterns like "BUY AAPL" or "LONG NVDA" or "SHORT TLT"
+            trade_patterns = re.findall(r'\b(BUY|LONG|SELL|SHORT)\s+([A-Z]{1,5})\b', raw_text.upper())
+            for action, ticker in trade_patterns:
+                if action in ["BUY", "LONG"]:
+                    recommendations.append((ticker, "LONG", 60))
+                else:
+                    recommendations.append((ticker, "SHORT", 60))
 
         if not recommendations:
             return trades
