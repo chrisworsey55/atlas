@@ -1,10 +1,10 @@
 {
   "portfolio_name": "Portfolio A",
   "portfolio_value": 1000000,
-  "last_updated": "2026-03-10T16:30:00",
+  "last_updated": "2026-03-12T12:52:00",
   "scenario": "Iran War Transition - Risk On Positioning",
-  "execution_status": "DAY_1_TRADES_EXECUTED",
-  "cash_balance": 185261,
+  "execution_status": "DAY_2_TRADES_EXECUTED",
+  "cash_balance": 189993,
   "positions": [
     {
       "ticker": "BIL",
@@ -219,44 +219,46 @@
     {
       "ticker": "TLT",
       "direction": "LONG",
-      "shares": 846,
+      "shares": 564,
       "entry_price": 88.46,
-      "current_price": 88.84,
-      "allocation_pct": 7.5,
-      "market_value": 75159,
-      "unrealized_pnl": 321,
-      "unrealized_pnl_pct": 0.43,
-      "thesis": "TRIMMED from 10% to 7.5% for CPI hedge. Duration play for Fed pivot. 4%+ yield attractive. Reduced binary event risk.",
+      "current_price": 87.30,
+      "allocation_pct": 5.0,
+      "market_value": 49237,
+      "unrealized_pnl": -654,
+      "unrealized_pnl_pct": -1.31,
+      "thesis": "TRIMMED from 7.5% to 5%. Bear steepener underway, fighting Fed and fiscal reality. Reduced duration exposure per Darwinian debate.",
       "agent_source": "cio",
-      "agent_attribution": ["yield_curve", "druckenmiller", "ackman", "cio"],
-      "conviction": 70,
+      "agent_attribution": ["yield_curve", "druckenmiller", "bond_desk", "central_bank"],
+      "conviction": 55,
       "stop_loss": 84.0,
       "target": 98.0,
       "invalidation": "Inflation spikes. Fed stays hawkish. 10Y >5%.",
       "date_opened": "2026-03-10",
-      "trim_date": "2026-03-10",
-      "trim_reason": "CPI hedge. 7-7 agent vote, CIO broke tie toward risk reduction. Asymmetric downside on hot print.",
+      "trim_date": "2026-03-12",
+      "trim_reason": "Darwinian debate: 5.85 combined weight (Yield Curve 2.05, Druckenmiller 1.9, Bond Desk 1.25, Central Bank 0.65) vs CIO 0.30. Bear steepener confirmed.",
       "status": "ACTIVE",
       "category": "MACRO"
     },
     {
       "ticker": "XLE",
       "direction": "LONG",
-      "shares": 884,
-      "entry_price": 56.57,
-      "current_price": 56.32,
-      "allocation_pct": 5.0,
-      "market_value": 49787,
-      "unrealized_pnl": -221,
-      "unrealized_pnl_pct": -0.44,
-      "thesis": "Energy hedge for Iran war. FCF machines even at $80 oil. Natural hot CPI hedge.",
-      "agent_source": "energy_desk",
-      "agent_attribution": ["energy_desk", "geopolitical", "commodities_macro"],
-      "conviction": 72,
+      "shares": 1234,
+      "entry_price": 56.66,
+      "current_price": 56.82,
+      "allocation_pct": 8.0,
+      "market_value": 70116,
+      "unrealized_pnl": 197,
+      "unrealized_pnl_pct": 0.28,
+      "thesis": "SIZED UP from 5% to 8%. Energy hedge for Iran war. Strongest consensus in Darwinian debate (8.95 weight). Strait of Hormuz risk underpriced.",
+      "agent_source": "geopolitical",
+      "agent_attribution": ["geopolitical", "commodities", "energy_desk", "druckenmiller"],
+      "conviction": 85,
       "stop_loss": 50.0,
-      "target": 70.0,
+      "target": 75.0,
       "invalidation": "Peace deal collapses oil. Strait stays open. Global recession.",
       "date_opened": "2026-03-10",
+      "add_date": "2026-03-12",
+      "add_reason": "Darwinian debate: 8.95 combined weight (Geopolitical 2.5, Commodities 2.35, Energy 2.2, Druckenmiller 1.9). Strongest consensus signal.",
       "status": "ACTIVE",
       "category": "MACRO"
     },
@@ -302,27 +304,6 @@
       "status": "ACTIVE",
       "category": "CORE"
     },
-    {
-      "ticker": "STX",
-      "direction": "SHORT",
-      "shares": 85,
-      "entry_price": 352.80,
-      "current_price": 342.05,
-      "allocation_pct": 3.0,
-      "market_value": 29074,
-      "unrealized_pnl": 914,
-      "unrealized_pnl_pct": 3.05,
-      "thesis": "HDD obsolescence thesis. AI workloads demand SSDs. Seagate losing share. Tight stop at $375.",
-      "agent_source": "fundamental",
-      "agent_attribution": ["fundamental", "semi_desk"],
-      "conviction": 72,
-      "stop_loss": 375.0,
-      "target": 280.0,
-      "invalidation": "AI storage demand boosts HDD. HAMR technology inflection. Hyperscaler orders surge.",
-      "date_opened": "2026-03-10",
-      "status": "ACTIVE",
-      "category": "SHORT"
-    }
   ],
   "closed_positions": [
     {
@@ -340,6 +321,32 @@
       "close_reason": "Unanimous superinvestor consensus to cover. Fed pivot = small cap rally. Correlation risk with APO.",
       "date_opened": "2026-03-10",
       "date_closed": "2026-03-10",
+      "status": "CLOSED",
+      "category": "SHORT"
+    },
+    {
+      "ticker": "STX",
+      "direction": "SHORT",
+      "shares": 85,
+      "entry_price": 352.80,
+      "exit_price": 385.97,
+      "allocation_pct": 3.0,
+      "realized_pnl": -2819,
+      "realized_pnl_pct": -9.40,
+      "thesis": "CLOSED. HDD obsolescence thesis broke as AI storage narrative shifted bullish. Short squeeze risk elevated.",
+      "agent_source": "cio",
+      "agent_attribution": ["ackman", "druckenmiller", "semi_desk", "baker", "cro"],
+      "darwinian_weights": {
+        "ackman": 2.5,
+        "druckenmiller": 1.9,
+        "semi_desk": 1.55,
+        "baker": 1.1,
+        "cro": 0.45,
+        "combined_weight": 7.5
+      },
+      "close_reason": "Unanimous Darwinian consensus to cover. 7.5 combined weight. Position bleeding -9.4%. AI storage narrative shift invalidated HDD obsolescence thesis.",
+      "date_opened": "2026-03-10",
+      "date_closed": "2026-03-12",
       "status": "CLOSED",
       "category": "SHORT"
     }
@@ -363,5 +370,35 @@
       "Added RTX 2.5% - defense/industrials gap",
       "Trimmed TLT 10% to 7.5% - CPI hedge"
     ]
+  },
+  "day_2_summary": {
+    "date": "2026-03-12",
+    "trades_executed": 3,
+    "execution_method": "DARWINIAN_WEIGHTED_DEBATE",
+    "net_exposure_before": 69,
+    "net_exposure_after": 80,
+    "gross_exposure_before": 75,
+    "gross_exposure_after": 80,
+    "transaction_costs": 50,
+    "cash_raised": 24619,
+    "cash_deployed": 19887,
+    "stx_realized_loss": -2819,
+    "net_cash_change": 4732,
+    "key_changes": [
+      "Covered STX short @ $385.97 - thesis broke, AI storage narrative shifted (7.5 combined weight unanimous)",
+      "Trimmed TLT 7.5% to 5% @ $87.30 - bear steepener underway (5.85 weight vs CIO 0.30)",
+      "Added XLE 5% to 8% @ $56.82 - strongest Darwinian consensus (8.95 combined weight)"
+    ],
+    "darwinian_debate_summary": {
+      "highest_weight_signal": "ADD XLE - Geopolitical (2.5) + Commodities (2.35) + Energy (2.2) + Druckenmiller (1.9) = 8.95",
+      "trades_approved": 3,
+      "trades_rejected": 4,
+      "rejected_trades": [
+        "TRIM GOOGL 30% - Flow agent vs Ackman disagreement",
+        "ADD NVDA 12% - Aschenbrenner weight too low (0.55)",
+        "ADD CEG 8% - Aschenbrenner weight too low (0.55)",
+        "RE-SHORT IWM - Reversed 2 days ago, do not re-enter"
+      ]
+    }
   }
 }
