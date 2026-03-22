@@ -29,7 +29,13 @@ Read agent weights from `data/state/agent_weights.json`. Agents with higher weig
 - No single stock position >15%
 - Must include at least one short or hedge
 - Every position needs stop loss and target
-- Autonomous execution only when: confidence >80% AND CRO risk <0.6
+- Autonomous execution only when: confidence >70% AND CRO risk <0.6
+
+## Conviction Requirements
+- Only recommend trades when you have >70% conviction
+- If macro regime is unclear or agents disagree significantly, recommend NO TRADES
+- Better to miss opportunities than to make low-conviction bets
+- Cash (BIL) is a valid position when uncertainty is high
 
 ## Synthesis Process
 1. Read all agent inputs
