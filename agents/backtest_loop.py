@@ -131,6 +131,8 @@ class Position:
     sector: str = ""
     agent_source: str = ""
     thesis: str = ""
+    stop_loss: float = 0.0  # Stop loss price (0 = not set)
+    target: float = 0.0  # Take profit price (0 = not set)
 
     @property
     def market_value(self) -> float:
@@ -154,12 +156,19 @@ class Position:
 class Portfolio:
     cash: float = STARTING_CAPITAL
     positions: List[Position] = field(default_factory=list)
+    short_proceeds: float = 0.0  # Track cash received from short sales
 
     @property
     def total_value(self) -> float:
+        """
+        Calculate total portfolio value correctly:
+        - Cash (including proceeds from short sales)
+        - Plus long position market values
+        - Minus short position obligations (what we owe to cover)
+        """
         long_value = sum(p.market_value for p in self.positions if p.direction == "LONG")
-        short_value = sum(p.market_value for p in self.positions if p.direction == "SHORT")
-        return self.cash + long_value - short_value
+        short_obligation = sum(p.market_value for p in self.positions if p.direction == "SHORT")
+        return self.cash + long_value - short_obligation
 
     @property
     def gross_exposure(self) -> float:
@@ -178,6 +187,46 @@ class Portfolio:
         long_value = sum(p.market_value for p in self.positions if p.direction == "LONG")
         short_value = sum(p.market_value for p in self.positions if p.direction == "SHORT")
         return (long_value - short_value) / total
+
+    def close_position(self, ticker: str, exit_price: float) -> Optional[dict]:
+        """
+        Close a position and return P&L details.
+        Returns dict with pnl, direction, shares or None if position not found.
+        """
+        for i, pos in enumerate(self.positions):
+            if pos.ticker == ticker:
+                # Calculate P&L
+                if pos.direction == "LONG":
+                    pnl = (exit_price - pos.entry_price) * pos.shares
+                    # Return cash from selling
+                    self.cash += pos.shares * exit_price
+                else:  # SHORT
+                    pnl = (pos.entry_price - exit_price) * pos.shares
+                    # Pay to cover the short (buy back shares)
+                    self.cash -= pos.shares * exit_price
+
+                result = {
+                    "ticker": ticker,
+                    "direction": pos.direction,
+                    "shares": pos.shares,
+                    "entry_price": pos.entry_price,
+                    "exit_price": exit_price,
+                    "pnl": pnl,
+                    "pnl_pct": (pnl / pos.cost_basis) * 100 if pos.cost_basis > 0 else 0
+                }
+
+                # Remove position
+                self.positions.pop(i)
+                return result
+
+        return None
+
+    def get_position(self, ticker: str) -> Optional[Position]:
+        """Get position by ticker, or None if not found."""
+        for pos in self.positions:
+            if pos.ticker == ticker:
+                return pos
+        return None
 
 
 @dataclass
@@ -1311,8 +1360,83 @@ Respond with JSON containing each agent's analysis.
 class TradeExecutor:
     """Executes trades based on CIO decisions."""
 
+    # Default stop-loss percentage (15% from entry)
+    DEFAULT_STOP_LOSS_PCT = 15.0
+    # Default take-profit percentage (30% from entry)
+    DEFAULT_TAKE_PROFIT_PCT = 30.0
+
     def __init__(self, snapshot_builder: MarketSnapshot):
         self.snapshot = snapshot_builder
+
+    def check_stop_losses(self, date: str, portfolio: Portfolio) -> List[dict]:
+        """
+        Check all positions for stop-loss or take-profit triggers.
+        Returns list of trades executed.
+        """
+        trades = []
+        positions_to_close = []
+
+        for pos in portfolio.positions:
+            price = self.snapshot.get_price(pos.ticker, date)
+            if not price or price <= 0:
+                continue
+
+            pos.current_price = price
+            should_close = False
+            close_reason = ""
+
+            if pos.direction == "LONG":
+                # Check stop-loss (price dropped too much)
+                stop_price = pos.stop_loss if pos.stop_loss > 0 else pos.entry_price * (1 - self.DEFAULT_STOP_LOSS_PCT / 100)
+                if price <= stop_price:
+                    should_close = True
+                    close_reason = "STOP_LOSS"
+
+                # Check take-profit
+                target_price = pos.target if pos.target > 0 else pos.entry_price * (1 + self.DEFAULT_TAKE_PROFIT_PCT / 100)
+                if price >= target_price:
+                    should_close = True
+                    close_reason = "TAKE_PROFIT"
+
+            else:  # SHORT
+                # Check stop-loss (price rose too much - losing money on short)
+                stop_price = pos.stop_loss if pos.stop_loss > 0 else pos.entry_price * (1 + self.DEFAULT_STOP_LOSS_PCT / 100)
+                if price >= stop_price:
+                    should_close = True
+                    close_reason = "STOP_LOSS"
+
+                # Check take-profit (price dropped - making money on short)
+                target_price = pos.target if pos.target > 0 else pos.entry_price * (1 - self.DEFAULT_TAKE_PROFIT_PCT / 100)
+                if price <= target_price:
+                    should_close = True
+                    close_reason = "TAKE_PROFIT"
+
+            if should_close:
+                positions_to_close.append((pos.ticker, price, close_reason))
+
+        # Close positions outside the loop to avoid modifying list while iterating
+        for ticker, price, reason in positions_to_close:
+            result = portfolio.close_position(ticker, price)
+            if result:
+                transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
+                portfolio.cash -= transaction_cost
+
+                action = "SELL" if result["direction"] == "LONG" else "COVER"
+                trade = {
+                    "date": date,
+                    "ticker": ticker,
+                    "action": action,
+                    "shares": result["shares"],
+                    "price": price,
+                    "value": result["shares"] * price,
+                    "cost": transaction_cost,
+                    "pnl": result["pnl"],
+                    "reason": reason
+                }
+                trades.append(trade)
+                log(f"    {reason}: {action} {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
+
+        return trades
 
     def execute(self, date: str, portfolio: Portfolio, cio_view: dict, sector_map: dict) -> List[dict]:
         """Execute trades from CIO recommendations."""
@@ -1345,6 +1469,10 @@ class TradeExecutor:
                     recommendations.append((ticker, "LONG", 70))
                 elif action in ["SELL", "SHORT"] and ticker:
                     recommendations.append((ticker, "SHORT", 70))
+                elif action == "COVER" and ticker:
+                    recommendations.append((ticker, "COVER", 70))
+                elif action == "SELL" and ticker:
+                    recommendations.append((ticker, "SELL", 70))
 
             # Check for recommendations array
             for rec in cio_view.get("recommendations", []):
@@ -1353,35 +1481,110 @@ class TradeExecutor:
                 conviction = rec.get("conviction", rec.get("confidence", 70))
                 if ticker and action in ["BUY", "LONG"]:
                     recommendations.append((ticker, "LONG", conviction))
-                elif ticker and action in ["SELL", "SHORT"]:
+                elif ticker and action in ["SELL"]:
+                    recommendations.append((ticker, "SELL", conviction))
+                elif ticker and action in ["SHORT"]:
                     recommendations.append((ticker, "SHORT", conviction))
+                elif ticker and action in ["COVER"]:
+                    recommendations.append((ticker, "COVER", conviction))
 
-            # Parse text-based raw output for BUY/SELL patterns
+            # Parse text-based raw output for BUY/SELL/COVER patterns
             raw_text = cio_view.get("raw", "") or str(cio_view)
-            # Match patterns like "BUY AAPL" or "LONG NVDA" or "SHORT TLT"
-            trade_patterns = re.findall(r'\b(BUY|LONG|SELL|SHORT)\s+([A-Z]{1,5})\b', raw_text.upper())
+            # Match patterns like "BUY AAPL" or "LONG NVDA" or "SHORT TLT" or "SELL AAPL" or "COVER TLT"
+            trade_patterns = re.findall(r'\b(BUY|LONG|SELL|SHORT|COVER)\s+([A-Z]{1,5})\b', raw_text.upper())
             for action, ticker in trade_patterns:
                 if action in ["BUY", "LONG"]:
                     recommendations.append((ticker, "LONG", 60))
-                else:
+                elif action == "SELL":
+                    recommendations.append((ticker, "SELL", 60))
+                elif action == "COVER":
+                    recommendations.append((ticker, "COVER", 60))
+                else:  # SHORT
                     recommendations.append((ticker, "SHORT", 60))
 
         if not recommendations:
             return trades
 
         # Execute each recommendation
-        for ticker, direction, conviction in recommendations[:5]:  # Limit to top 5
+        for ticker, direction, conviction in recommendations[:10]:  # Limit to top 10
             price = self.snapshot.get_price(ticker, date)
             if not price or price <= 0:
                 continue
 
-            # Check position limits
-            if len(portfolio.positions) >= MAX_POSITIONS:
+            # Handle explicit SELL/COVER actions
+            if direction == "SELL":
+                existing = portfolio.get_position(ticker)
+                if existing and existing.direction == "LONG":
+                    result = portfolio.close_position(ticker, price)
+                    if result:
+                        transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
+                        portfolio.cash -= transaction_cost
+                        trade = {
+                            "date": date,
+                            "ticker": ticker,
+                            "action": "SELL",
+                            "shares": result["shares"],
+                            "price": price,
+                            "value": result["shares"] * price,
+                            "cost": transaction_cost,
+                            "pnl": result["pnl"],
+                            "reason": "CIO_RECOMMENDATION"
+                        }
+                        trades.append(trade)
+                        log(f"    EXECUTED: SELL {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
                 continue
 
-            # Check if already have position
-            existing = [p for p in portfolio.positions if p.ticker == ticker]
+            if direction == "COVER":
+                existing = portfolio.get_position(ticker)
+                if existing and existing.direction == "SHORT":
+                    result = portfolio.close_position(ticker, price)
+                    if result:
+                        transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
+                        portfolio.cash -= transaction_cost
+                        trade = {
+                            "date": date,
+                            "ticker": ticker,
+                            "action": "COVER",
+                            "shares": result["shares"],
+                            "price": price,
+                            "value": result["shares"] * price,
+                            "cost": transaction_cost,
+                            "pnl": result["pnl"],
+                            "reason": "CIO_RECOMMENDATION"
+                        }
+                        trades.append(trade)
+                        log(f"    EXECUTED: COVER {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
+                continue
+
+            # Check if already have position in opposite direction - close it first
+            existing = portfolio.get_position(ticker)
             if existing:
+                if existing.direction != direction:
+                    # Opposite direction recommended - close existing position
+                    result = portfolio.close_position(ticker, price)
+                    if result:
+                        transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
+                        portfolio.cash -= transaction_cost
+                        action = "SELL" if result["direction"] == "LONG" else "COVER"
+                        trade = {
+                            "date": date,
+                            "ticker": ticker,
+                            "action": action,
+                            "shares": result["shares"],
+                            "price": price,
+                            "value": result["shares"] * price,
+                            "cost": transaction_cost,
+                            "pnl": result["pnl"],
+                            "reason": "DIRECTION_REVERSAL"
+                        }
+                        trades.append(trade)
+                        log(f"    REVERSED: {action} {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
+                else:
+                    # Same direction - skip (already have position)
+                    continue
+
+            # Check position limits
+            if len(portfolio.positions) >= MAX_POSITIONS:
                 continue
 
             # Calculate position size based on conviction
@@ -1395,7 +1598,7 @@ class TradeExecutor:
             target_pct = min(target_pct, MAX_SINGLE_POSITION_PCT)
             target_value = portfolio.total_value * (target_pct / 100)
 
-            # Check cash availability
+            # Check cash availability for LONG positions
             if direction == "LONG":
                 if target_value > portfolio.cash * 0.9:  # Keep some buffer
                     target_value = portfolio.cash * 0.5
@@ -1416,11 +1619,22 @@ class TradeExecutor:
             if (sector_exposure + actual_value) / portfolio.total_value > MAX_SECTOR_PCT / 100:
                 continue
 
-            # Execute trade
+            # Execute trade - FIXED: Proper cash handling for both LONG and SHORT
             if direction == "LONG":
+                # LONG: Pay cash to buy shares
                 portfolio.cash -= (actual_value + transaction_cost)
             else:
-                portfolio.cash -= transaction_cost  # Short margin handled separately
+                # SHORT: Receive cash from selling borrowed shares (minus transaction cost)
+                # This is the critical fix - shorts credit cash!
+                portfolio.cash += (actual_value - transaction_cost)
+
+            # Calculate stop-loss and target prices
+            if direction == "LONG":
+                stop_loss = price * (1 - self.DEFAULT_STOP_LOSS_PCT / 100)
+                target = price * (1 + self.DEFAULT_TAKE_PROFIT_PCT / 100)
+            else:
+                stop_loss = price * (1 + self.DEFAULT_STOP_LOSS_PCT / 100)
+                target = price * (1 - self.DEFAULT_TAKE_PROFIT_PCT / 100)
 
             position = Position(
                 ticker=ticker,
@@ -1432,7 +1646,9 @@ class TradeExecutor:
                 current_price=price,
                 sector=sector,
                 agent_source="cio",
-                thesis=f"CIO recommendation (conviction: {conviction}%)"
+                thesis=f"CIO recommendation (conviction: {conviction}%)",
+                stop_loss=stop_loss,
+                target=target
             )
             portfolio.positions.append(position)
 
@@ -1445,7 +1661,9 @@ class TradeExecutor:
                 "value": actual_value,
                 "cost": transaction_cost,
                 "conviction": conviction,
-                "sector": sector
+                "sector": sector,
+                "stop_loss": stop_loss,
+                "target": target
             }
             trades.append(trade)
 
@@ -1967,6 +2185,11 @@ class BacktestEngine:
 
         prev_value = self.portfolio.total_value
 
+        # Phase A: Check stop-losses and take-profits FIRST
+        stop_trades = self.executor.check_stop_losses(date, self.portfolio)
+        if stop_trades:
+            self.trade_journal.extend(stop_trades)
+
         # Phase B: Agent Debate
         log(f"  Running agent debate...")
         all_views = self.debate.run_debate(date, self.portfolio, self.agent_weights)
@@ -1974,12 +2197,15 @@ class BacktestEngine:
         # Extract and record recommendations
         self.scorer.extract_and_record(date, all_views)
 
-        # Phase C: Trade Execution
+        # Phase C: Trade Execution (CIO recommendations)
         cio_view = all_views.get("cio", {})
         sector_map = self.cache.sector_map or {}
-        trades = self.executor.execute(date, self.portfolio, cio_view, sector_map)
+        new_trades = self.executor.execute(date, self.portfolio, cio_view, sector_map)
+
+        # Combine stop trades and new trades
+        trades = stop_trades + new_trades
         day_result["trades"] = trades
-        self.trade_journal.extend(trades)
+        self.trade_journal.extend(new_trades)
 
         # Phase D: Update Scorecards
         self.scorer.update_returns(date)
@@ -2059,6 +2285,7 @@ class BacktestEngine:
             "date": date,
             "portfolio": {
                 "cash": self.portfolio.cash,
+                "short_proceeds": self.portfolio.short_proceeds,
                 "positions": [asdict(p) if hasattr(p, '__dict__') else {
                     "ticker": p.ticker,
                     "direction": p.direction,
@@ -2069,7 +2296,9 @@ class BacktestEngine:
                     "current_price": p.current_price,
                     "sector": p.sector,
                     "agent_source": p.agent_source,
-                    "thesis": p.thesis
+                    "thesis": p.thesis,
+                    "stop_loss": getattr(p, 'stop_loss', 0.0),
+                    "target": getattr(p, 'target', 0.0)
                 } for p in self.portfolio.positions]
             },
             "agent_weights": self.agent_weights,
@@ -2096,6 +2325,7 @@ class BacktestEngine:
 
         # Restore state
         self.portfolio.cash = checkpoint["portfolio"]["cash"]
+        self.portfolio.short_proceeds = checkpoint["portfolio"].get("short_proceeds", 0.0)
         self.portfolio.positions = []
 
         for p in checkpoint["portfolio"]["positions"]:
@@ -2109,7 +2339,9 @@ class BacktestEngine:
                 current_price=p.get("current_price", p["entry_price"]),
                 sector=p.get("sector", ""),
                 agent_source=p.get("agent_source", ""),
-                thesis=p.get("thesis", "")
+                thesis=p.get("thesis", ""),
+                stop_loss=p.get("stop_loss", 0.0),
+                target=p.get("target", 0.0)
             )
             self.portfolio.positions.append(pos)
 

@@ -1,0 +1,14 @@
+{
+  "sharpe_30d": 0.0,
+  "hit_rate": 0.0,
+  "avg_return_5d": 0.0,
+  "max_drawdown_pct": 0.0,
+  "total_return": 0.0,
+  "volatility": 0.0,
+  "total_positions": 0,
+  "recommendations": [],
+  "worst_agent": "industrials",
+  "best_agent": null,
+  "session_id": "20260321_211025",
+  "timestamp": "2026-03-21T21:14:45.070846"
+}

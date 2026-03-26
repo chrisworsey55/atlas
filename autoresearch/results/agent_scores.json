@@ -1,0 +1,342 @@
+{
+  "agents": {
+    "news": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "flow": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "bond": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "currency": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "commodities": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "metals": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "semiconductor": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "biotech": {
+      "recommendations": [
+        {
+          "ticker": "TRADE",
+          "direction": "LONG",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "UNH",
+          "direction": "LONG",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "LLY",
+          "direction": "LONG",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "TRADI",
+          "direction": "SHORT",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "TRADE",
+          "direction": "LONG",
+          "date": "2026-03-21T21:16:29.252434",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "UNH",
+          "direction": "LONG",
+          "date": "2026-03-21T21:16:29.252434",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "LLY",
+          "direction": "LONG",
+          "date": "2026-03-21T21:16:29.252434",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "TRADI",
+          "direction": "SHORT",
+          "date": "2026-03-21T21:16:29.252434",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        }
+      ],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 8,
+      "cio_adoption_rate": 0.0,
+      "last_updated": "2026-03-21T21:16:29.252434"
+    },
+    "energy": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "consumer": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "industrials": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "microcap": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "druckenmiller": {
+      "recommendations": [
+        {
+          "ticker": "SQUEE",
+          "direction": "SHORT",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "SQUEE",
+          "direction": "SHORT",
+          "date": "2026-03-21T21:16:29.252434",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        }
+      ],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 2,
+      "cio_adoption_rate": 0.0,
+      "last_updated": "2026-03-21T21:16:29.252434"
+    },
+    "aschenbrenner": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "baker": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "ackman": {
+      "recommendations": [
+        {
+          "ticker": "QUALI",
+          "direction": "LONG",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "QUALI",
+          "direction": "LONG",
+          "date": "2026-03-21T21:16:29.252434",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        }
+      ],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 2,
+      "cio_adoption_rate": 0.0,
+      "last_updated": "2026-03-21T21:16:29.252434"
+    },
+    "cro": {
+      "recommendations": [
+        {
+          "ticker": "DOLLA",
+          "direction": "SHORT",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "QQQ",
+          "direction": "SHORT",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": true,
+          "scored": false
+        },
+        {
+          "ticker": "TLT",
+          "direction": "LONG",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": true,
+          "scored": false
+        },
+        {
+          "ticker": "QQQ",
+          "direction": "LONG",
+          "date": "2026-03-21T21:16:29.252434",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        },
+        {
+          "ticker": "SMH",
+          "direction": "SHORT",
+          "date": "2026-03-21T21:16:29.252434",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": false,
+          "scored": false
+        }
+      ],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 5,
+      "cio_adoption_rate": 0.0,
+      "last_updated": "2026-03-21T21:16:29.252434"
+    },
+    "alpha": {
+      "recommendations": [
+        {
+          "ticker": "CEG",
+          "direction": "LONG",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": true,
+          "scored": false
+        },
+        {
+          "ticker": "OIL",
+          "direction": "LONG",
+          "date": "2026-03-21T21:14:43.681539",
+          "entry_price": null,
+          "return_5d": null,
+          "cio_included": true,
+          "scored": false
+        }
+      ],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 2,
+      "cio_adoption_rate": 0.0,
+      "last_updated": "2026-03-21T21:14:43.681539"
+    },
+    "autonomous": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    },
+    "cio": {
+      "recommendations": [],
+      "rolling_hit_rate": 0.0,
+      "rolling_sharpe": 0.0,
+      "total_recommendations": 0,
+      "cio_adoption_rate": 0.0,
+      "last_updated": null
+    }
+  },
+  "created": "2026-03-21T21:14:43.687388",
+  "last_updated": "2026-03-21T21:16:29.269857"
+}

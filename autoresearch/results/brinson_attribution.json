@@ -1,0 +1,230 @@
+{
+  "period": {
+    "start_date": "2026-03-03",
+    "end_date": "2026-03-23",
+    "generated_at": "2026-03-23T07:32:51.312314"
+  },
+  "summary": {
+    "portfolio_return": 0.53,
+    "benchmark_return": 5.45,
+    "active_return": -4.92,
+    "total_pnl": 3583.61
+  },
+  "brinson_fachler": {
+    "allocation_effect": -1.2,
+    "selection_effect": -4.4,
+    "interaction_effect": 1.03,
+    "sector_decomposition": {
+      "Fixed Income": {
+        "portfolio_weight": 6.0122578641880455,
+        "benchmark_weight": 0.0,
+        "weight_diff": 6.0122578641880455,
+        "portfolio_return": -1.3113271535157096,
+        "benchmark_return": -2.0,
+        "allocation_effect": -0.4479733334606513,
+        "selection_effect": 0.0,
+        "interaction_effect": 0.041404787371279415,
+        "total_effect": -0.40656854608937193
+      },
+      "Real Estate": {
+        "portfolio_weight": 0,
+        "benchmark_weight": 3.0,
+        "weight_diff": -3.0,
+        "portfolio_return": 0,
+        "benchmark_return": 2.0,
+        "allocation_effect": 0.10353000000000001,
+        "selection_effect": -0.06,
+        "interaction_effect": 0.06,
+        "total_effect": 0.10353000000000001
+      },
+      "Small Cap": {
+        "portfolio_weight": 0,
+        "benchmark_weight": 0.0,
+        "weight_diff": 0.0,
+        "portfolio_return": 0.0,
+        "benchmark_return": 5.0,
+        "allocation_effect": -0.0,
+        "selection_effect": -0.0,
+        "interaction_effect": -0.0,
+        "total_effect": -0.0
+      },
+      "Commodities": {
+        "portfolio_weight": 6.116557665502395,
+        "benchmark_weight": 0.0,
+        "weight_diff": 6.116557665502395,
+        "portfolio_return": -0.2006293425693203,
+        "benchmark_return": 4.5,
+        "allocation_effect": -0.05816846339892781,
+        "selection_effect": -0.0,
+        "interaction_effect": -0.2875167043797786,
+        "total_effect": -0.3456851677787064
+      },
+      "Cash": {
+        "portfolio_weight": 24.416406919466855,
+        "benchmark_weight": 0.0,
+        "weight_diff": 24.416406919466855,
+        "portfolio_return": 0.0,
+        "benchmark_return": 0.5,
+        "allocation_effect": -1.2088563065828042,
+        "selection_effect": -0.0,
+        "interaction_effect": -0.12208203459733427,
+        "total_effect": -1.3309383411801385
+      },
+      "Financials": {
+        "portfolio_weight": 5.203072321257064,
+        "benchmark_weight": 13.0,
+        "weight_diff": -7.796927678742936,
+        "portfolio_return": 0.0,
+        "benchmark_return": 5.1,
+        "allocation_effect": 0.027367216152387772,
+        "selection_effect": -0.6629999999999999,
+        "interaction_effect": 0.3976433116158897,
+        "total_effect": -0.2379894722317224
+      },
+      "Utilities": {
+        "portfolio_weight": 0,
+        "benchmark_weight": 3.0,
+        "weight_diff": -3.0,
+        "portfolio_return": 0,
+        "benchmark_return": 1.5,
+        "allocation_effect": 0.11853000000000001,
+        "selection_effect": -0.045,
+        "interaction_effect": 0.045,
+        "total_effect": 0.11853000000000001
+      },
+      "Consumer Discretionary": {
+        "portfolio_weight": 0,
+        "benchmark_weight": 10.0,
+        "weight_diff": -10.0,
+        "portfolio_return": 0,
+        "benchmark_return": 4.8,
+        "allocation_effect": 0.06510000000000007,
+        "selection_effect": -0.48,
+        "interaction_effect": 0.48,
+        "total_effect": 0.06510000000000005
+      },
+      "Consumer Staples": {
+        "portfolio_weight": 6.591699576716151,
+        "benchmark_weight": 7.000000000000001,
+        "weight_diff": -0.40830042328384997,
+        "portfolio_return": 7.935595169637717,
+        "benchmark_return": 2.1,
+        "allocation_effect": 0.013682147184241815,
+        "selection_effect": 0.4084916618746402,
+        "interaction_effect": -0.0238267597787627,
+        "total_effect": 0.3983470492801193
+      },
+      "Healthcare": {
+        "portfolio_weight": 7.972726827920994,
+        "benchmark_weight": 13.0,
+        "weight_diff": -5.027273172079007,
+        "portfolio_return": 0.22026465527430059,
+        "benchmark_return": 3.2,
+        "allocation_effect": 0.11316391910349846,
+        "selection_effect": -0.38736559481434096,
+        "interaction_effect": 0.14979943558435102,
+        "total_effect": -0.12440224012649151
+      },
+      "Energy": {
+        "portfolio_weight": 8.561712504660406,
+        "benchmark_weight": 4.0,
+        "weight_diff": 4.561712504660406,
+        "portfolio_return": 0.2823861630780157,
+        "benchmark_return": 7.8,
+        "allocation_effect": 0.10715462673447289,
+        "selection_effect": -0.30070455347687935,
+        "interaction_effect": -0.34293193045095105,
+        "total_effect": -0.5364818571933575
+      },
+      "Industrials": {
+        "portfolio_weight": 4.576780196899454,
+        "benchmark_weight": 8.0,
+        "weight_diff": -3.423219803100545,
+        "portfolio_return": 0.0,
+        "benchmark_return": 4.0,
+        "allocation_effect": 0.04967091934298893,
+        "selection_effect": -0.32,
+        "interaction_effect": 0.13692879212402181,
+        "total_effect": -0.13340028853298924
+      },
+      "Technology": {
+        "portfolio_weight": 24.83392848994326,
+        "benchmark_weight": 28.000000000000004,
+        "weight_diff": -3.1660715100567423,
+        "portfolio_return": 1.6238341900561573,
+        "benchmark_return": 8.5,
+        "allocation_effect": -0.09653352034163006,
+        "selection_effect": -1.9253264267842762,
+        "interaction_effect": 0.21770432669289444,
+        "total_effect": -1.8041556204330118
+      },
+      "Materials": {
+        "portfolio_weight": 0,
+        "benchmark_weight": 2.0,
+        "weight_diff": -2.0,
+        "portfolio_return": 0,
+        "benchmark_return": 3.5,
+        "allocation_effect": 0.03902000000000001,
+        "selection_effect": -0.07,
+        "interaction_effect": 0.07,
+        "total_effect": 0.03902000000000001
+      },
+      "Communication Services": {
+        "portfolio_weight": 5.714857633445372,
+        "benchmark_weight": 9.0,
+        "weight_diff": -3.2851423665546275,
+        "portfolio_return": 0.0,
+        "benchmark_return": 6.2,
+        "allocation_effect": -0.02460571632549415,
+        "selection_effect": -0.5579999999999999,
+        "interaction_effect": 0.2036788267263869,
+        "total_effect": -0.37892688959910714
+      }
+    }
+  },
+  "layer_attribution": {
+    "layer_1_macro": {
+      "layer": 1,
+      "layer_name": "Macro/Data",
+      "pnl": 0.0,
+      "cost_basis": 39522.6,
+      "return_contribution": 0.0,
+      "positions_influenced": 1
+    },
+    "layer_2_sector_desks": {
+      "layer": 2,
+      "layer_name": "Sector Desks",
+      "pnl": 5161.55,
+      "cost_basis": 464590.75,
+      "return_contribution": 0.76,
+      "positions_influenced": 11
+    },
+    "layer_3_superinvestors": {
+      "layer": 3,
+      "layer_name": "Superinvestors",
+      "pnl": 2936.43,
+      "cost_basis": 495317.64,
+      "return_contribution": 0.43,
+      "positions_influenced": 11
+    },
+    "layer_4_cio_decision": {
+      "layer": 4,
+      "layer_name": "CIO/Decision",
+      "pnl": -1454.04,
+      "cost_basis": 158450.04,
+      "return_contribution": -0.21,
+      "positions_influenced": 6
+    }
+  },
+  "bottleneck_analysis": {
+    "worst_layer": 4,
+    "worst_layer_name": "CIO/Decision",
+    "worst_contribution": -0.21,
+    "best_layer": 2,
+    "best_layer_name": "Sector Desks",
+    "best_contribution": 0.76,
+    "diagnosis": "Layer 4 (CIO/Decision) is net negative at -0.2% This layer is destroying alpha generated by other layers. The CIO/Decision layer is the bottleneck - sizing and timing are hurting returns."
+  },
+  "positions_analyzed": 16,
+  "trades_analyzed": 31
+}
