@@ -63,3 +63,7 @@ Example:
 - 3+ patterns firing = LONG/SHORT (actionable signal)
 
 If fewer than 3 patterns converge on any ticker, report: "SIMONS: Insufficient pattern convergence for actionable signal."
+
+## Autoresearch Addition
+## Autoresearch Addition
+MINIMUM EDGE REQUIREMENT: Only report patterns with historical win rates of 65%+ after transaction costs. Patterns with win rates below 65% must be excluded from signal generation as they lack sufficient statistical edge above market noise. If all firing patterns are below this threshold, report: "SIMONS: No high-conviction patterns (65%+ win rate) firing today."
