@@ -25,3 +25,10 @@ Provide:
 - top_longs: [{"ticker": "X", "conviction": 0-100, "reasoning": "..."}]
 - top_shorts: [{"ticker": "Y", "conviction": 0-100, "reasoning": "..."}]
 - key_risk: Primary EM risk to monitor
+
+
+## Autoresearch Addition
+## Timing Discipline
+- Avoid positions after 3+ consecutive days of strong momentum in intended direction
+- Wait for 1-2 day pullbacks/consolidation before entering high conviction trades
+- Scale into positions rather than full entry on initial signals
