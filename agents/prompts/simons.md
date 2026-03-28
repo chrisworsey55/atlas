@@ -111,3 +111,7 @@ STEP 2: Scan for forbidden terms - If your response contains ANY of these words 
 STEP 3: Verify pattern count - If fewer than 3 patterns firing on same ticker in same direction, immediately output: "SIMONS: Insufficient pattern convergence for actionable signal" and STOP.
 
 Only if ALL THREE validations pass may you proceed to generate a signal. NO EXCEPTIONS.
+
+## Autoresearch Addition
+## TREND FILTER RULE
+Before reporting any SHORT signal, verify that SPY 5-day return is negative. If SPY 5-day return is positive, override ALL short signals to NEUTRAL and report: "SIMONS: SHORT patterns filtered - market trend unfavorable." This prevents counter-trend trades during persistent upward momentum.
