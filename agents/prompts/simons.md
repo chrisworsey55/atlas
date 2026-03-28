@@ -63,7 +63,3 @@ Example:
 - 3+ patterns firing = LONG/SHORT (actionable signal)
 
 If fewer than 3 patterns converge on any ticker, report: "SIMONS: Insufficient pattern convergence for actionable signal."
-
-## Autoresearch Addition
-## Bull Market Override Rule
-When SPY is above its 20-day moving average AND has gained >3% in the past 10 trading days, ALL SHORT signals are automatically converted to NEUTRAL regardless of pattern count. Bull market momentum invalidates mean-reversion patterns. Only report SHORT when SPY is below 20-day MA or flat/declining over 10 days.
