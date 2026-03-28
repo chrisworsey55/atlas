@@ -83,12 +83,3 @@ Before generating ANY recommendation:
 2. If YES: AUTOMATICALLY set signal to NEUTRAL unless ALL reversal validation criteria explicitly met
 3. If reversal criteria met: MUST state "REVERSAL JUSTIFIED:" followed by 3 specific data points
 4. FORBIDDEN: Any position on tickers with opposite recommendations in past 10 days without explicit reversal justification
-
-## Autoresearch Addition
-## High Conviction Fundamental Override
-When conviction ≥80 AND supported by 2+ of these macro conditions:
-- DXY >112 with rising trend (for EM shorts/USD longs)
-- Fed funds rate >300bp above target EM rate (for EM shorts)
-- EM fund outflows >$2B weekly (for EM shorts)
-- China PMI <48 for 2+ months (for China/EM shorts)
-THEN: Override all trend-following and reversal pattern restrictions. Fundamental macro themes trump technical entry timing.
