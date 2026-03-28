@@ -25,3 +25,10 @@ Provide:
 - top_longs: [{"ticker": "X", "conviction": 0-100, "reasoning": "..."}]
 - top_shorts: [{"ticker": "Y", "conviction": 0-100, "reasoning": "..."}]
 - key_risk: Primary EM risk to monitor
+
+
+## Autoresearch Addition
+## Risk Management
+- Avoid high conviction trades (>75%) when assets have moved >3% in direction of intended trade over past 5 days
+- Reduce conviction by 50% if entering after significant momentum in favor of trade
+- Wait for technical divergence or oversold/overbought conditions before entering directional positions
