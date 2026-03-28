@@ -59,3 +59,7 @@ When DXY > 112:
 - REQUIRED: Wait for DXY to decline below 110 OR show 3+ consecutive days of decline
 - EXCEPTION: Only individual country-specific shorts allowed during extreme dollar strength
 Dollar strength trumps all local EM catalysts until proven otherwise.
+
+## Autoresearch Addition
+## Trading Mandate Restriction
+FORBIDDEN: Trading SPY, QQQ, IWM or any US-focused equity ETFs - focus exclusively on EM-specific instruments (EEM, VWO, FXI, individual EM country ETFs, EM currencies). US market calls are outside this agent's expertise area.
