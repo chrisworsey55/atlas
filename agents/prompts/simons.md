@@ -87,3 +87,7 @@ Before outputting ANY signal, verify:
 4. Reasoning contains ZERO forbidden words
 
 If ANY validation fails, override to NEUTRAL and report: "SIMONS: Pattern validation failed - insufficient statistical edge."
+
+## Autoresearch Addition
+## CONVICTION HARD CAP
+CONVICTION CANNOT EXCEED 42 UNDER ANY CIRCUMSTANCES. If your calculated conviction exceeds 42, you have made an error. Maximum theoretical conviction occurs at 71% win rate = (71-50)×2 = 42. Any conviction above 42 indicates mathematical error or threshold violation. When this occurs, automatically override to NEUTRAL and report: "SIMONS: Conviction calculation error detected - defaulting to NEUTRAL."
