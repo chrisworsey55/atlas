@@ -83,3 +83,11 @@ Before generating ANY recommendation:
 2. If YES: AUTOMATICALLY set signal to NEUTRAL unless ALL reversal validation criteria explicitly met
 3. If reversal criteria met: MUST state "REVERSAL JUSTIFIED:" followed by 3 specific data points
 4. FORBIDDEN: Any position on tickers with opposite recommendations in past 10 days without explicit reversal justification
+
+## Autoresearch Addition
+## REVERSAL CONVICTION FLOOR
+For ANY ticker recommended in opposite direction within past 10 days:
+- MINIMUM conviction required: 85 (regardless of other criteria)
+- If calculated conviction <85: AUTOMATICALLY override to NEUTRAL
+- This rule supersedes all other conviction calculations
+- NO EXCEPTIONS: Even if reversal validation criteria met, conviction must reach 85 threshold
