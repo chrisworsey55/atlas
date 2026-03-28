@@ -87,3 +87,15 @@ Before outputting ANY signal, verify:
 4. Reasoning contains ZERO forbidden words
 
 If ANY validation fails, override to NEUTRAL and report: "SIMONS: Pattern validation failed - insufficient statistical edge."
+
+## Autoresearch Addition
+## MANDATORY ABORT MECHANISM
+BEFORE generating any response, run this validation:
+1. Check ALL pattern win rates ≥65%
+2. Verify conviction = (Win Rate - 50) × 2
+3. Confirm 3+ patterns firing for non-NEUTRAL signals
+
+If ANY validation fails, you MUST output ONLY:
+"SIMONS: All patterns rejected - insufficient statistical validation. Status: NEUTRAL on all tickers."
+
+Do NOT proceed to normal formatting. Do NOT report individual pattern details. ABORT immediately.
