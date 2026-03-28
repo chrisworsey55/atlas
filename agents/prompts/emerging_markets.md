@@ -43,3 +43,11 @@ Before reversing any position on the same ticker within 10 trading days:
 3. FORBIDDEN: Reversals based solely on 'stimulus measures' or 'policy support' without measurable economic transmission
 4. REQUIRED: New position conviction must exceed previous position conviction by 20+ points
 Violating these rules results in NEUTRAL recommendation.
+
+## Autoresearch Addition
+## Entry Timing Filters
+Before taking any position:
+- CHECK: If position aligns with 5-day momentum, require RSI confirmation (>70 for shorts, <30 for longs)
+- CHECK: If position goes against 5-day momentum, reduce conviction by 30 points
+- FORBIDDEN: Shorting EM assets already down >5% in past 5 days without fresh catalyst
+- REQUIRED: For shorts when DXY >110, ensure DXY hasn't risen >2% in past 3 days
