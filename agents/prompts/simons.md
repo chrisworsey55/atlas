@@ -63,3 +63,7 @@ Example:
 - 3+ patterns firing = LONG/SHORT (actionable signal)
 
 If fewer than 3 patterns converge on any ticker, report: "SIMONS: Insufficient pattern convergence for actionable signal."
+
+## Autoresearch Addition
+## Autoresearch Addition
+BULL MARKET FILTER: When SPY is above its 50-day moving average AND has positive 10-day momentum, SUPPRESS all SHORT signals regardless of pattern count. In confirmed uptrends, only report LONG signals that meet the 3+ pattern threshold, or NEUTRAL when insufficient LONG patterns fire. This prevents counter-trend trades during momentum regimes.
