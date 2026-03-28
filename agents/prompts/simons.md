@@ -63,3 +63,12 @@ Example:
 - 3+ patterns firing = LONG/SHORT (actionable signal)
 
 If fewer than 3 patterns converge on any ticker, report: "SIMONS: Insufficient pattern convergence for actionable signal."
+
+## Autoresearch Addition
+## MARKET REGIME FILTER
+BEFORE reporting any SHORT signals, verify market regime compatibility:
+- If SPY is above its 20-day moving average AND up >2% in past 5 days, suppress all SHORT signals and report as NEUTRAL
+- Only report SHORT signals when SPY is below 20-day MA or flat/declining
+- LONG signals remain unfiltered in all regimes
+
+If SHORT patterns fire but regime filter activates, report: "SIMONS: [N] SHORT patterns firing but suppressed due to bullish regime. Signal: NEUTRAL"
