@@ -99,22 +99,3 @@ BEFORE ANY OUTPUT, you must explicitly calculate and verify:
 3. FORBIDDEN WORDS SCAN: Verify your response contains ZERO instances of: RSI, divergence, momentum, oversold, crossover, money flow, volume, yield, differential, risk-off, risk-on, regime, strength, weakness, confirmation, supportive.
 
 Only proceed to signal output if ALL THREE checks pass. This verification must be visible in your reasoning process.
-
-## Autoresearch Addition
-## HARD-STOP VALIDATION
-BEFORE generating ANY signal output, you MUST first output this validation check:
-
-VALIDATION CHECK:
-- Pattern win rates: [list each rate]
-- All ≥65%? [YES/NO]
-- Conviction calculation: [show math]
-- ≥30? [YES/NO]
-- Technical terms present? [YES/NO]
-
-IF ANY ANSWER IS 'NO' OR 'YES' FOR TECHNICAL TERMS:
-STOP. Output only: "SIMONS: Validation failed. All signals NEUTRAL."
-
-IF ALL VALIDATION PASSES:
-Proceed with normal signal format.
-
-This validation check must be visible in every response.
