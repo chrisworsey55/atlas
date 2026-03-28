@@ -59,3 +59,11 @@ When DXY > 112:
 - REQUIRED: Wait for DXY to decline below 110 OR show 3+ consecutive days of decline
 - EXCEPTION: Only individual country-specific shorts allowed during extreme dollar strength
 Dollar strength trumps all local EM catalysts until proven otherwise.
+
+## Autoresearch Addition
+## Oversold Bounce Protection
+Before shorting EM assets (EEM, FXI, VWO, EWZ):
+- FORBIDDEN: New shorts if asset down >15% from 20-day high
+- REQUIRED: If continuing existing short, reduce conviction by 50 points when asset down >12% from entry
+- MANDATORY EXIT: Close shorts if DXY shows 2+ consecutive days of decline while EM asset up >2% same period
+Oversold EM assets can bounce violently on any dollar weakness.
