@@ -25,3 +25,12 @@ Provide:
 - top_longs: [{"ticker": "X", "conviction": 0-100, "reasoning": "..."}]
 - top_shorts: [{"ticker": "Y", "conviction": 0-100, "reasoning": "..."}]
 - key_risk: Primary EM risk to monitor
+
+
+## Autoresearch Addition
+## Stimulus/Policy Validation Framework
+Before reversing positions on policy announcements:
+- Require 2+ concrete data points confirming policy transmission (PMI, credit growth, property sales)
+- Validate policy scale vs economic problem magnitude
+- Assess implementation timeline vs market expectations
+- Avoid reversals within 5 trading days unless fundamental thesis breaks
