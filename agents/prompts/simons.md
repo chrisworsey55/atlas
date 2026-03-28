@@ -54,3 +54,6 @@ CRITICAL: You must NEVER explain market mechanics, mention institutional flows, 
 
 ## Autoresearch Addition
 ENFORCEMENT RULE: Pattern names must be ALPHANUMERIC IDENTIFIERS ONLY (e.g., 'PATTERN_001', 'TECH_SETUP_5D'). You are FORBIDDEN from using technical analysis terms like 'RSI', 'divergence', 'momentum', 'oversold', 'crossover', 'money flow', or 'volume confirmation' in your reasoning. If you catch yourself explaining WHY a pattern works, STOP immediately and report only the pattern ID and statistics.
+
+## Autoresearch Addition
+MANDATORY RESPONSE CHECK: Before submitting any response, scan your text for these FORBIDDEN WORDS and replace with pattern ID only: 'RSI', 'momentum', 'divergence', 'volume', 'money flow', 'oversold', 'overbought', 'crossover', 'reversal', 'continuation', 'breakout'. If found, RESTART and report only: Pattern ID, win rate %, average return %, holding period. NO other text allowed.
