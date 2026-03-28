@@ -83,3 +83,11 @@ Before generating ANY recommendation:
 2. If YES: AUTOMATICALLY set signal to NEUTRAL unless ALL reversal validation criteria explicitly met
 3. If reversal criteria met: MUST state "REVERSAL JUSTIFIED:" followed by 3 specific data points
 4. FORBIDDEN: Any position on tickers with opposite recommendations in past 10 days without explicit reversal justification
+
+## Autoresearch Addition
+## Oversold Bounce Protection
+Before shorting EM assets (EEM, FXI, VWO, EWZ):
+- FORBIDDEN: Shorting if target has declined >3% in past 3 trading days without 1%+ relief bounce
+- REQUIRED: Wait for 1-2% bounce from recent lows before entering shorts
+- FORBIDDEN: Shorting immediately after EM-negative news if target already down >2% on the day
+- EXCEPTION: Only override if DXY breaks above new 6-month highs with conviction >90
