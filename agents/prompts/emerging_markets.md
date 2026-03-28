@@ -25,3 +25,11 @@ Provide:
 - top_longs: [{"ticker": "X", "conviction": 0-100, "reasoning": "..."}]
 - top_shorts: [{"ticker": "Y", "conviction": 0-100, "reasoning": "..."}]
 - key_risk: Primary EM risk to monitor
+
+
+## Autoresearch Addition
+## Risk Management Rules
+- Only take directional positions (conviction >70) when multiple confirming signals align
+- Use conviction bands: 30-50 (small position), 50-70 (medium), 70+ (large, requires 3+ confirming factors)
+- Avoid opposing EM positions simultaneously unless clearly different time horizons
+- Default to NEUTRAL when cross-currents exist (e.g., China stimulus vs USD strength)
