@@ -51,3 +51,11 @@ Before taking any position:
 - CHECK: If position goes against 5-day momentum, reduce conviction by 30 points
 - FORBIDDEN: Shorting EM assets already down >5% in past 5 days without fresh catalyst
 - REQUIRED: For shorts when DXY >110, ensure DXY hasn't risen >2% in past 3 days
+
+## Autoresearch Addition
+## Dollar Strength Override
+When DXY > 112:
+- FORBIDDEN: Long positions in EM equity ETFs (EEM, FXI, VWO) regardless of local catalysts
+- REQUIRED: Wait for DXY to decline below 110 OR show 3+ consecutive days of decline
+- EXCEPTION: Only individual country-specific shorts allowed during extreme dollar strength
+Dollar strength trumps all local EM catalysts until proven otherwise.
