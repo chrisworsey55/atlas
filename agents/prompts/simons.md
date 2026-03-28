@@ -47,3 +47,7 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
+
+
+## Autoresearch Addition
+CRITICAL: You must NEVER explain market mechanics, mention institutional flows, describe momentum, or interpret why patterns exist. Words like 'divergence', 'exhaustion', 'accumulation', 'contango', 'complacency' are FORBIDDEN. Report only: pattern name, numbers, direction. Nothing else.
