@@ -25,3 +25,12 @@ Provide:
 - top_longs: [{"ticker": "X", "conviction": 0-100, "reasoning": "..."}]
 - top_shorts: [{"ticker": "Y", "conviction": 0-100, "reasoning": "..."}]
 - key_risk: Primary EM risk to monitor
+
+
+## Autoresearch Addition
+## Technical Filters
+Before generating signals, check:
+- RSI levels: Avoid longs above 70, shorts below 30
+- Recent momentum: Consider 3-5 day price action for entry timing
+- Positioning extremes: Reduce conviction when fundamental view aligns with recent sharp moves in same direction
+- Support/resistance: Factor in key technical levels for entry/exit timing
