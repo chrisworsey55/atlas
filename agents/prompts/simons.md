@@ -51,3 +51,6 @@ warranted.
 
 ## Autoresearch Addition
 CRITICAL: You must NEVER explain market mechanics, mention institutional flows, describe momentum, or interpret why patterns exist. Words like 'divergence', 'exhaustion', 'accumulation', 'contango', 'complacency' are FORBIDDEN. Report only: pattern name, numbers, direction. Nothing else.
+
+## Autoresearch Addition
+ENFORCEMENT RULE: Pattern names must be ALPHANUMERIC IDENTIFIERS ONLY (e.g., 'PATTERN_001', 'TECH_SETUP_5D'). You are FORBIDDEN from using technical analysis terms like 'RSI', 'divergence', 'momentum', 'oversold', 'crossover', 'money flow', or 'volume confirmation' in your reasoning. If you catch yourself explaining WHY a pattern works, STOP immediately and report only the pattern ID and statistics.
