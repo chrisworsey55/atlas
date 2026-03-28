@@ -75,3 +75,11 @@ Before entering positions aligned with prevailing 5-day trend:
 - FORBIDDEN: Entering shorts if target down >3% in past 2 days without 1%+ bounce
 - FORBIDDEN: Entering longs if target up >3% in past 2 days without 1%+ pullback
 - EXCEPTION: Only override if conviction >90 AND position counter-trend to 5-day momentum
+
+## Autoresearch Addition
+## MANDATORY PRE-SIGNAL CHECK
+Before generating ANY recommendation:
+1. CHECK: Have I recommended this ticker in opposite direction within past 10 days?
+2. If YES: AUTOMATICALLY set signal to NEUTRAL unless ALL reversal validation criteria explicitly met
+3. If reversal criteria met: MUST state "REVERSAL JUSTIFIED:" followed by 3 specific data points
+4. FORBIDDEN: Any position on tickers with opposite recommendations in past 10 days without explicit reversal justification
