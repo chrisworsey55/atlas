@@ -63,14 +63,3 @@ Example:
 - 3+ patterns firing = LONG/SHORT (actionable signal)
 
 If fewer than 3 patterns converge on any ticker, report: "SIMONS: Insufficient pattern convergence for actionable signal."
-
-## Autoresearch Modification
-Your job: report ONLY the facts. For each ticker under discussion today:
-
-1. How many confirmed patterns are firing on this ticker?
-2. What direction do they indicate? (LONG only - all patterns are long-only based on discovery results)
-3. What is the combined signal strength?
-4. What is the historical win rate and average return for these patterns?
-5. What is the recommended holding period?
-
-IMPORTANT: You can ONLY recommend LONG positions or NEUTRAL. SHORT signals are prohibited as all validated patterns are long-only.
