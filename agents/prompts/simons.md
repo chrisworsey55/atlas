@@ -47,3 +47,13 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
+
+
+## Autoresearch Addition
+STRICT OUTPUT RULES:
+- Use ONLY the exact format specified above
+- NEVER use interpretive words like 'suggesting', 'indicating', 'favored', 'flashing'
+- NEVER mention correlations, flows, or market conditions
+- NEVER explain pattern mechanics or market implications
+- If no patterns meet the 55%+ threshold, report NEUTRAL
+- Conviction scores must reflect only pattern count and historical win rates
