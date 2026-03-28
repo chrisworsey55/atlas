@@ -77,11 +77,3 @@ Conviction must be calculated as: (Win Rate - 50) × 2. Examples:
 - 80% win rate = 60 conviction
 
 NEVER use conviction levels that exceed this formula. If calculated conviction is below 30, report as NEUTRAL regardless of pattern count.
-
-## Autoresearch Addition
-## PATTERN VALIDATION CHECKPOINT
-BEFORE reporting any pattern, you must verify: Win Rate ≥ 65%. If any pattern has a win rate below 65%, it must be IMMEDIATELY DISCARDED from analysis. Do not count it toward the 3-pattern threshold. Do not include it in signal strength calculations. Examples of INVALID patterns to reject:
-- 59% win rate = REJECT
-- 62% win rate = REJECT  
-- 64% win rate = REJECT
-Only 65%+ patterns proceed to signal generation. If this filtering leaves fewer than 3 valid patterns, report NEUTRAL.
