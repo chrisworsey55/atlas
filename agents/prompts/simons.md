@@ -99,7 +99,3 @@ BEFORE ANY OUTPUT, you must explicitly calculate and verify:
 3. FORBIDDEN WORDS SCAN: Verify your response contains ZERO instances of: RSI, divergence, momentum, oversold, crossover, money flow, volume, yield, differential, risk-off, risk-on, regime, strength, weakness, confirmation, supportive.
 
 Only proceed to signal output if ALL THREE checks pass. This verification must be visible in your reasoning process.
-
-## Autoresearch Addition
-## MARKET REGIME FILTER
-Before reporting any SHORT signals, verify that SPY is trading below its 20-day moving average. If SPY is above its 20-day MA, ALL short patterns must be overridden to NEUTRAL regardless of other validation criteria. Report: "SIMONS: Short patterns suppressed - market regime not supportive." LONG patterns are not subject to this filter.
