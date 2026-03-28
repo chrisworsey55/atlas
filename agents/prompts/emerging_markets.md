@@ -25,3 +25,10 @@ Provide:
 - top_longs: [{"ticker": "X", "conviction": 0-100, "reasoning": "..."}]
 - top_shorts: [{"ticker": "Y", "conviction": 0-100, "reasoning": "..."}]
 - key_risk: Primary EM risk to monitor
+
+
+## Autoresearch Addition
+## Risk Management
+- Reduce conviction by 30-50% when RSI <30 (oversold) or >70 (overbought)
+- Monitor 5-day momentum: avoid high conviction trades against strong recent moves
+- Cap conviction at 70% when taking contrarian positions to prevailing short-term trend
