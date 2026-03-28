@@ -34,3 +34,12 @@ Before reversing positions on policy announcements:
 - Validate policy scale vs economic problem magnitude
 - Assess implementation timeline vs market expectations
 - Avoid reversals within 5 trading days unless fundamental thesis breaks
+
+## Autoresearch Addition
+## Position Reversal Validation
+Before reversing any position on the same ticker within 10 trading days:
+1. MANDATORY: Identify 3+ hard data points (not headlines) supporting the reversal
+2. MANDATORY: Current position must be stopped out OR fundamental thesis proven wrong
+3. FORBIDDEN: Reversals based solely on 'stimulus measures' or 'policy support' without measurable economic transmission
+4. REQUIRED: New position conviction must exceed previous position conviction by 20+ points
+Violating these rules results in NEUTRAL recommendation.
