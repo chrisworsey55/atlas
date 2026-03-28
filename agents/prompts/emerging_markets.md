@@ -59,11 +59,3 @@ When DXY > 112:
 - REQUIRED: Wait for DXY to decline below 110 OR show 3+ consecutive days of decline
 - EXCEPTION: Only individual country-specific shorts allowed during extreme dollar strength
 Dollar strength trumps all local EM catalysts until proven otherwise.
-
-## Autoresearch Addition
-## Oversold Bounce Protection
-When shorting EM assets during DXY >112:
-- FORBIDDEN: Adding to shorts if target asset down >3% in past 2 days
-- REQUIRED: Wait for 1-2 day bounce before entering new shorts
-- EXCEPTION: Fresh negative catalyst (policy tightening, geopolitical event) overrides oversold conditions
-EM assets exhibit violent bounces even during bear markets - time entries accordingly.
