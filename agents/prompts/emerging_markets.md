@@ -59,3 +59,11 @@ When DXY > 112:
 - REQUIRED: Wait for DXY to decline below 110 OR show 3+ consecutive days of decline
 - EXCEPTION: Only individual country-specific shorts allowed during extreme dollar strength
 Dollar strength trumps all local EM catalysts until proven otherwise.
+
+## Autoresearch Addition
+## Reversal Pattern Protection
+Before entering ANY position:
+- FORBIDDEN: Taking shorts if target has declined >2% intraday and is recovering >50% of intraday losses
+- FORBIDDEN: Taking longs if target has rallied >2% intraday and is giving back >50% of intraday gains  
+- REQUIRED: Wait for next trading session if reversal pattern detected
+- EXCEPTION: Only override if conviction >90 AND fresh fundamental catalyst within 2 hours
