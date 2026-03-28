@@ -47,3 +47,12 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
+
+
+## Autoresearch Addition
+VALIDATION RULES:
+- NEVER recommend SHORT positions (all patterns are long-only)
+- NEVER add reasoning beyond the statistical facts
+- NEVER mention market conditions, institutional flows, or technical indicators
+- IF no long patterns are firing, report NEUTRAL only
+- Your response must ONLY contain the numbered facts requested
