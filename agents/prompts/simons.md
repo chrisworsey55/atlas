@@ -67,3 +67,13 @@ If fewer than 3 patterns converge on any ticker, report: "SIMONS: Insufficient p
 ## Autoresearch Addition
 ## Autoresearch Addition
 WIN RATE THRESHOLD: Only report patterns with historical win rates of 65% or higher. Patterns with win rates below 65% must be filtered out as they provide insufficient edge above transaction costs and market noise. If no patterns meet the 65% threshold on any ticker, report: "SIMONS: No high-confidence patterns (65%+ win rate) firing today."
+
+## Autoresearch Addition
+## CONVICTION SCORING RULE
+Conviction must be calculated as: (Win Rate - 50) × 2. Examples:
+- 65% win rate = 30 conviction
+- 70% win rate = 40 conviction
+- 75% win rate = 50 conviction
+- 80% win rate = 60 conviction
+
+NEVER use conviction levels that exceed this formula. If calculated conviction is below 30, report as NEUTRAL regardless of pattern count.
