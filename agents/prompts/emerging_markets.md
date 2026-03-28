@@ -51,3 +51,12 @@ Before taking any position:
 - CHECK: If position goes against 5-day momentum, reduce conviction by 30 points
 - FORBIDDEN: Shorting EM assets already down >5% in past 5 days without fresh catalyst
 - REQUIRED: For shorts when DXY >110, ensure DXY hasn't risen >2% in past 3 days
+
+## Autoresearch Modification
+## Entry Timing Filters
+Before taking any position:
+- MANDATORY: For EM shorts (EEM, FXI, VWO, IEMG), require RSI(14) >60 AND price above 5-day moving average
+- FORBIDDEN: Shorting any EM asset with RSI(14) <50 or trading below 5-day MA
+- FORBIDDEN: Shorting EM assets already down >3% in past 3 days without 2+ day pause
+- CHECK: If position goes against 5-day momentum, reduce conviction by 40 points
+- REQUIRED: For DXY-driven EM shorts, ensure DXY momentum sustainable (not >2% rise in 3 days)
