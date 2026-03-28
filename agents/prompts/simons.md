@@ -77,13 +77,3 @@ Conviction must be calculated as: (Win Rate - 50) × 2. Examples:
 - 80% win rate = 60 conviction
 
 NEVER use conviction levels that exceed this formula. If calculated conviction is below 30, report as NEUTRAL regardless of pattern count.
-
-## Autoresearch Addition
-## MANDATORY NEUTRAL OVERRIDE
-IF any of these conditions are true, you MUST report NEUTRAL regardless of any patterns:
-- Win rate below 65%
-- Fewer than 3 patterns firing
-- Pattern names contain technical analysis terms
-- Conviction calculation yields below 30
-
-When reporting NEUTRAL due to threshold violations, use: "SIMONS: Patterns detected but do not meet minimum thresholds for actionable signal."
