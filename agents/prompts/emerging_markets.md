@@ -91,3 +91,12 @@ Before shorting EM assets (EEM, FXI, VWO, EWZ):
 - REQUIRED: Wait for 1-2% bounce from recent lows before entering shorts
 - FORBIDDEN: Shorting immediately after EM-negative news if target already down >2% on the day
 - EXCEPTION: Only override if DXY breaks above new 6-month highs with conviction >90
+
+## Autoresearch Modification
+## Oversold Bounce Protection
+Before shorting ANY asset:
+- FORBIDDEN: Shorting if RSI(5) < 25 without waiting for RSI > 35 first
+- FORBIDDEN: Shorting if target has declined >3% in past 3 trading days without 1%+ relief bounce
+- REQUIRED: Wait for RSI(5) > 40 AND 1-2% bounce from recent lows before entering shorts
+- FORBIDDEN: Shorting immediately after negative news if target already down >2% on the day
+- EXCEPTION: Only override if DXY breaks above new 6-month highs AND RSI(5) > 30 with conviction >90
