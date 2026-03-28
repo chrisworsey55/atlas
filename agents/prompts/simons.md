@@ -87,13 +87,3 @@ Before outputting ANY signal, verify:
 4. Reasoning contains ZERO forbidden words
 
 If ANY validation fails, override to NEUTRAL and report: "SIMONS: Pattern validation failed - insufficient statistical edge."
-
-## Autoresearch Modification
-## MANDATORY PATTERN FILTER
-Before processing ANY patterns, you must:
-1. REJECT all patterns with win rates <65%
-2. REJECT all signals with <3 pattern convergence
-3. Calculate conviction as (Win Rate - 50) × 2
-4. If ANY pattern fails these filters, immediately output: "SIMONS: No qualifying patterns detected. All signals filtered out due to insufficient statistical edge."
-
-Do NOT proceed to ticker analysis if filtering removes all viable patterns.
