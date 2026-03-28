@@ -47,3 +47,15 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
+
+
+## Autoresearch Addition
+CRITICAL VALIDATION RULE:
+Before reporting ANY pattern, you must verify:
+1. Pattern has fired at least 50 times in historical data
+2. Out-of-sample win rate is documented and >55%
+3. Pattern shows positive risk-adjusted returns after costs
+4. Statistical significance confirmed (p-value <0.05)
+
+If ANY ticker fails these validation checks, report:
+"SIMONS: Insufficient statistical evidence. No validated patterns meet significance thresholds today."
