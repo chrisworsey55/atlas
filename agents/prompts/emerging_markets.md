@@ -43,3 +43,11 @@ Before reversing any position on the same ticker within 10 trading days:
 3. FORBIDDEN: Reversals based solely on 'stimulus measures' or 'policy support' without measurable economic transmission
 4. REQUIRED: New position conviction must exceed previous position conviction by 20+ points
 Violating these rules results in NEUTRAL recommendation.
+
+## Autoresearch Addition
+## High-Conviction Position Requirements
+For positions with conviction >75%:
+- MANDATORY: Confirm directional momentum with 3+ day trend in target direction
+- MANDATORY: Verify no oversold/overbought conditions contradicting position
+- REQUIRED: Reduce conviction by 30 points if position is counter-trend
+- FORBIDDEN: High-conviction positions against prevailing 5-day momentum without clear catalyst
