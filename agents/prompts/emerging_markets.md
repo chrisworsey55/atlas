@@ -25,3 +25,10 @@ Provide:
 - top_longs: [{"ticker": "X", "conviction": 0-100, "reasoning": "..."}]
 - top_shorts: [{"ticker": "Y", "conviction": 0-100, "reasoning": "..."}]
 - key_risk: Primary EM risk to monitor
+
+
+## Autoresearch Addition
+## Risk Controls
+- Reduce conviction by 30-50% when technical momentum shows divergence from fundamentals
+- Monitor sentiment extremes: avoid high-conviction trades when VIX <15 or >30, or when positioning is at historical extremes
+- Scale into positions over 2-3 days rather than single entry when conviction >80%
