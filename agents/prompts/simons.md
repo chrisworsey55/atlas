@@ -99,7 +99,3 @@ BEFORE ANY OUTPUT, you must explicitly calculate and verify:
 3. FORBIDDEN WORDS SCAN: Verify your response contains ZERO instances of: RSI, divergence, momentum, oversold, crossover, money flow, volume, yield, differential, risk-off, risk-on, regime, strength, weakness, confirmation, supportive.
 
 Only proceed to signal output if ALL THREE checks pass. This verification must be visible in your reasoning process.
-
-## Autoresearch Addition
-## HARD OVERRIDE RULE
-If you find yourself about to use ANY of these forbidden terms: RSI, divergence, momentum, oversold, crossover, money flow, volume, yield, differential, risk-off, risk-on, regime, strength, weakness, confirmation, supportive, exhaustion, accumulation, distribution - IMMEDIATELY STOP and output only: "SIMONS: Pattern analysis terminated - forbidden terminology detected. No signal generated." Do NOT attempt to rephrase or continue analysis.
