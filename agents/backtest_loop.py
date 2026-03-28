@@ -73,10 +73,50 @@ MAX_SECTOR_PCT = 30
 MIN_POSITION_PCT = 2
 MIN_CASH_PCT = 10
 
+# =============================================================================
+# EXECUTION RULES (Anti-Whipsaw)
+# =============================================================================
+# These rules constrain what actually gets traded to prevent flip-flopping
+
+EXECUTION_RULES = {
+    # RULE 1: Minimum holding period
+    # Do not close or reverse any position within 10 trading days of entry
+    # unless stop loss is hit.
+    "min_holding_days": 10,
+
+    # RULE 2: No flip-flopping
+    # After closing a position, do not re-enter the same ticker in the
+    # opposite direction for 5 days.
+    "direction_cooldown_days": 5,
+
+    # RULE 3: Sector concentration limit
+    # Maximum 2 positions in the same GICS sector.
+    "max_per_sector": 2,
+
+    # RULE 4: Conviction threshold
+    # Only execute trades where 3+ agents agree on direction.
+    "min_agents_agreeing": 3,
+
+    # RULE 5: Position size cap
+    # No single position exceeds 15% of portfolio.
+    "max_position_pct": 0.15,
+
+    # RULE 6: Cash floor
+    # Maintain minimum 20% cash at all times.
+    "min_cash_pct": 0.20,
+
+    # RULE 7: Stop loss
+    # Close any position down 15% from entry.
+    "stop_loss_pct": 0.15,
+}
+
+# Track recent closes for direction cooldown
+RECENT_CLOSES: Dict[str, List[dict]] = {}
+
 # Agent batching for API efficiency
 MACRO_AGENTS_BATCH_1 = ["central_bank", "geopolitical", "china", "dollar", "yield_curve"]
 MACRO_AGENTS_BATCH_2 = ["commodities", "volatility", "emerging_markets", "news_sentiment", "institutional_flow"]
-SECTOR_AGENTS = ["semiconductor", "energy", "biotech", "consumer", "industrials", "financials"]
+SECTOR_AGENTS = ["semiconductor", "energy", "biotech", "consumer", "industrials", "financials", "simons"]
 SUPERINVESTOR_AGENTS = ["druckenmiller", "aschenbrenner", "baker", "ackman"]
 DECISION_AGENTS_BATCH_1 = ["cro", "alpha_discovery"]
 DECISION_AGENTS_BATCH_2 = ["autonomous_execution", "cio"]
@@ -113,6 +153,148 @@ FRED_SERIES = {
 
 # Anthropic client
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+# =============================================================================
+# SIMONS PATTERN SCANNER
+# =============================================================================
+
+SIMONS_PATTERNS_PATH = ATLAS_DIR / "simons" / "simons_patterns.json"
+SIMONS_PATTERNS_CACHE: Optional[List[dict]] = None
+
+def load_simons_patterns() -> List[dict]:
+    """Load confirmed SIMONS patterns from disk."""
+    global SIMONS_PATTERNS_CACHE
+    if SIMONS_PATTERNS_CACHE is not None:
+        return SIMONS_PATTERNS_CACHE
+
+    if not SIMONS_PATTERNS_PATH.exists():
+        return []
+
+    with open(SIMONS_PATTERNS_PATH) as f:
+        data = json.load(f)
+
+    patterns = data.get("confirmed_patterns", [])
+    # Exclude PAT_018 (permanently culled)
+    patterns = [p for p in patterns if p.get("id") != "PAT_018"]
+    SIMONS_PATTERNS_CACHE = patterns
+    return patterns
+
+
+def check_pattern_fires(pattern: dict, ticker: str, prices: dict, date: str) -> bool:
+    """
+    Check if a pattern fires for a given ticker on a given date.
+
+    Simplified pattern checking based on price conditions.
+    """
+    conditions = pattern.get("conditions", [])
+
+    for cond in conditions:
+        cond_type = cond.get("type", "")
+        params = cond.get("params", {})
+
+        if cond_type == "drawdown":
+            # Check if ticker has drawn down X% in Y days
+            pct = params.get("pct", 1)
+            days = params.get("days", 2)
+
+            # Get historical prices
+            ticker_prices = prices.get(ticker, [])
+            if len(ticker_prices) < days + 1:
+                return False
+
+            current_price = ticker_prices[-1] if ticker_prices else 0
+            past_price = ticker_prices[-(days + 1)] if len(ticker_prices) > days else current_price
+
+            if past_price <= 0:
+                return False
+
+            drawdown_pct = ((past_price - current_price) / past_price) * 100
+            if drawdown_pct < pct:
+                return False
+
+        elif cond_type == "momentum":
+            # Check momentum conditions
+            days = params.get("days", 5)
+            direction = params.get("direction", "positive")
+
+            ticker_prices = prices.get(ticker, [])
+            if len(ticker_prices) < days + 1:
+                return False
+
+            current_price = ticker_prices[-1] if ticker_prices else 0
+            past_price = ticker_prices[-(days + 1)] if len(ticker_prices) > days else current_price
+
+            if past_price <= 0:
+                return False
+
+            momentum = (current_price - past_price) / past_price
+            if direction == "positive" and momentum <= 0:
+                return False
+            if direction == "negative" and momentum >= 0:
+                return False
+
+        elif cond_type == "volatility":
+            # Check volatility conditions (simplified)
+            pass
+
+    return True
+
+
+def get_simons_signals(tickers: List[str], price_history: dict, date: str) -> dict:
+    """
+    Scan confirmed patterns against today's data for given tickers.
+
+    Returns dict of ticker -> signal info
+    """
+    patterns = load_simons_patterns()
+    if not patterns:
+        return {}
+
+    signals = {}
+    for ticker in tickers:
+        firing = []
+        for pattern in patterns:
+            if check_pattern_fires(pattern, ticker, price_history, date):
+                firing.append(pattern)
+
+        if firing:
+            signals[ticker] = {
+                "patterns_firing": len(firing),
+                "direction": "LONG",
+                "signal_strength": sum(
+                    p.get("markowitz_weight", 1/31) for p in firing
+                ),
+                "avg_win_rate": sum(
+                    p.get("validation", {}).get("win_rate", 0.55) for p in firing
+                ) / len(firing),
+                "avg_return": sum(
+                    p.get("validation", {}).get("avg_win_pct", 2.0) for p in firing
+                ) / len(firing),
+                "holding_period": max(
+                    p.get("holding_days", 20) for p in firing
+                ),
+                "pattern_ids": [p.get("id", "unknown") for p in firing]
+            }
+
+    return signals
+
+
+def format_simons_signals(signals: dict) -> str:
+    """Format SIMONS signals for injection into agent context."""
+    if not signals:
+        return "SIMONS: No confirmed patterns firing on any ticker today. Statistical evidence is neutral."
+
+    lines = ["SIMONS SIGNAL REPORT:"]
+    for ticker, sig in sorted(signals.items(), key=lambda x: -x[1]["signal_strength"]):
+        lines.append(f"\n{ticker}: {sig['patterns_firing']} patterns firing")
+        lines.append(f"  Direction: {sig['direction']}")
+        lines.append(f"  Signal strength: {sig['signal_strength']:.3f}")
+        lines.append(f"  Historical win rate: {sig['avg_win_rate']*100:.1f}%")
+        lines.append(f"  Avg return: +{sig['avg_return']:.1f}%")
+        lines.append(f"  Holding period: {sig['holding_period']} days")
+        lines.append(f"  Patterns: {', '.join(sig['pattern_ids'])}")
+
+    return "\n".join(lines)
 
 
 # =============================================================================
@@ -1438,13 +1620,93 @@ class TradeExecutor:
 
         return trades
 
-    def execute(self, date: str, portfolio: Portfolio, cio_view: dict, sector_map: dict) -> List[dict]:
+    def _check_execution_rules(self, ticker: str, direction: str, date: str,
+                                 portfolio: Portfolio, all_views: dict, sector_map: dict) -> Tuple[bool, str]:
+        """
+        Check if a trade passes all execution rules.
+        Returns (approved, reason).
+        """
+        from datetime import datetime
+
+        # RULE 1: Check minimum holding period for existing positions
+        existing = portfolio.get_position(ticker)
+        if existing and existing.direction != direction:
+            # Trying to reverse - check holding period
+            try:
+                entry_date = datetime.strptime(existing.entry_date, "%Y-%m-%d")
+                current_date = datetime.strptime(date, "%Y-%m-%d")
+                days_held = (current_date - entry_date).days
+                if days_held < EXECUTION_RULES["min_holding_days"]:
+                    return False, f"min_holding_period ({days_held}/{EXECUTION_RULES['min_holding_days']} days)"
+            except:
+                pass
+
+        # RULE 2: Check direction cooldown (no flip-flopping)
+        if ticker in RECENT_CLOSES:
+            for close in RECENT_CLOSES[ticker]:
+                if close.get("direction") != direction:
+                    try:
+                        close_date = datetime.strptime(close["date"], "%Y-%m-%d")
+                        current_date = datetime.strptime(date, "%Y-%m-%d")
+                        days_since = (current_date - close_date).days
+                        if days_since < EXECUTION_RULES["direction_cooldown_days"]:
+                            return False, f"direction_cooldown ({days_since}/{EXECUTION_RULES['direction_cooldown_days']} days)"
+                    except:
+                        pass
+
+        # RULE 3: Check sector concentration limit
+        sector = sector_map.get(ticker, {}).get("sector", "Unknown")
+        sector_count = sum(
+            1 for p in portfolio.positions
+            if sector_map.get(p.ticker, {}).get("sector", "Unknown") == sector
+        )
+        if sector_count >= EXECUTION_RULES["max_per_sector"]:
+            return False, f"sector_limit ({sector}: {sector_count}/{EXECUTION_RULES['max_per_sector']})"
+
+        # RULE 4: Check conviction (agents agreeing)
+        agents_agreeing = 0
+        for agent, view in all_views.items():
+            if not isinstance(view, dict):
+                continue
+            # Check top_longs and top_shorts
+            for rec in view.get("top_longs", []):
+                if rec.get("ticker") == ticker and direction == "LONG":
+                    agents_agreeing += 1
+                    break
+            for rec in view.get("top_shorts", []):
+                if rec.get("ticker") == ticker and direction == "SHORT":
+                    agents_agreeing += 1
+                    break
+            # Check signal
+            if view.get("signal") == "BULLISH" and direction == "LONG":
+                agents_agreeing += 0.5
+            elif view.get("signal") == "BEARISH" and direction == "SHORT":
+                agents_agreeing += 0.5
+
+        if agents_agreeing < EXECUTION_RULES["min_agents_agreeing"]:
+            return False, f"low_conviction ({agents_agreeing:.1f}/{EXECUTION_RULES['min_agents_agreeing']} agents)"
+
+        # RULE 6: Check cash floor
+        if direction == "LONG":
+            position_value = portfolio.total_value * 0.05  # Estimate 5% position
+            cash_after = portfolio.cash - position_value
+            min_cash = portfolio.total_value * EXECUTION_RULES["min_cash_pct"]
+            if cash_after < min_cash:
+                return False, f"cash_floor (${cash_after:,.0f} < ${min_cash:,.0f})"
+
+        return True, "approved"
+
+    def execute(self, date: str, portfolio: Portfolio, cio_view: dict, sector_map: dict,
+                all_views: dict = None) -> List[dict]:
         """Execute trades from CIO recommendations."""
         import re
         trades = []
 
         if not cio_view:
             return trades
+
+        if all_views is None:
+            all_views = {}
 
         # Extract recommendations from CIO view
         recommendations = []
@@ -1556,11 +1818,20 @@ class TradeExecutor:
                         log(f"    EXECUTED: COVER {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
                 continue
 
+            # Check execution rules BEFORE doing anything
+            approved, reason = self._check_execution_rules(
+                ticker, direction, date, portfolio, all_views, sector_map
+            )
+            if not approved:
+                # Skip this trade - blocked by execution rules
+                continue
+
             # Check if already have position in opposite direction - close it first
             existing = portfolio.get_position(ticker)
             if existing:
                 if existing.direction != direction:
                     # Opposite direction recommended - close existing position
+                    # (already passed execution rules check above)
                     result = portfolio.close_position(ticker, price)
                     if result:
                         transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
@@ -1578,6 +1849,15 @@ class TradeExecutor:
                             "reason": "DIRECTION_REVERSAL"
                         }
                         trades.append(trade)
+                        # Track recent close for direction cooldown
+                        if ticker not in RECENT_CLOSES:
+                            RECENT_CLOSES[ticker] = []
+                        RECENT_CLOSES[ticker].append({
+                            "date": date,
+                            "direction": result["direction"]
+                        })
+                        # Keep only last 10 closes
+                        RECENT_CLOSES[ticker] = RECENT_CLOSES[ticker][-10:]
                         log(f"    REVERSED: {action} {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
                 else:
                     # Same direction - skip (already have position)
@@ -2200,7 +2480,7 @@ class BacktestEngine:
         # Phase C: Trade Execution (CIO recommendations)
         cio_view = all_views.get("cio", {})
         sector_map = self.cache.sector_map or {}
-        new_trades = self.executor.execute(date, self.portfolio, cio_view, sector_map)
+        new_trades = self.executor.execute(date, self.portfolio, cio_view, sector_map, all_views)
 
         # Combine stop trades and new trades
         trades = stop_trades + new_trades
