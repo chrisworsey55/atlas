@@ -100,3 +100,12 @@ Before shorting ANY asset:
 - REQUIRED: Wait for RSI(5) > 40 AND 1-2% bounce from recent lows before entering shorts
 - FORBIDDEN: Shorting immediately after negative news if target already down >2% on the day
 - EXCEPTION: Only override if DXY breaks above new 6-month highs AND RSI(5) > 30 with conviction >90
+
+## Autoresearch Modification
+## Autoresearch Modification
+## Momentum Entry Filter
+Before taking ANY position:
+- FORBIDDEN: Shorting if target's 5-day return < -2%
+- FORBIDDEN: Going long if target's 5-day return > +2%
+- REQUIRED: Only trade in direction opposite to recent 5-day momentum
+- NO EXCEPTIONS: This rule overrides all conviction levels and fundamental analysis
