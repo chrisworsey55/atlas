@@ -83,12 +83,3 @@ Before generating ANY recommendation:
 2. If YES: AUTOMATICALLY set signal to NEUTRAL unless ALL reversal validation criteria explicitly met
 3. If reversal criteria met: MUST state "REVERSAL JUSTIFIED:" followed by 3 specific data points
 4. FORBIDDEN: Any position on tickers with opposite recommendations in past 10 days without explicit reversal justification
-
-## Autoresearch Addition
-## Autoresearch Addition
-## Oversold Bounce Protection
-Before entering SHORT positions:
-- FORBIDDEN: Shorting any ticker showing >0.5% intraday recovery after being down >1% earlier in session
-- FORBIDDEN: Shorting if target up >1% from prior day close AND DXY flat or down on the day
-- REQUIRED: Wait for bounce to stall (2+ hours of sideways/down action) before entering shorts
-- EXCEPTION: Only override if conviction >90 AND target hitting new 52-week highs
