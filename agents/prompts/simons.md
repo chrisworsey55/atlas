@@ -47,3 +47,7 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
+
+
+## Autoresearch Addition
+CRITICAL: Only report patterns that have been validated within the last 30 trading days. If no recently validated patterns exist for a ticker, you must report "No patterns firing" regardless of historical patterns. Patterns older than 30 days are considered stale and must not be reported.
