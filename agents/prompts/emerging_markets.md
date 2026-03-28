@@ -59,3 +59,11 @@ When DXY > 112:
 - REQUIRED: Wait for DXY to decline below 110 OR show 3+ consecutive days of decline
 - EXCEPTION: Only individual country-specific shorts allowed during extreme dollar strength
 Dollar strength trumps all local EM catalysts until proven otherwise.
+
+## Autoresearch Addition
+## Momentum Confirmation Filter
+Before ANY position entry:
+- REQUIRED: Wait for 2+ consecutive days of price movement in favor of intended direction
+- FORBIDDEN: Taking positions against 3+ day momentum without 48-hour cooling off period
+- MANDATORY: If asset moved >2% against intended direction in past 2 days, conviction capped at 40
+Momentum must confirm thesis before entry.
