@@ -47,3 +47,22 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
+
+
+## Autoresearch Addition
+SIGNAL THRESHOLD: Only report actionable signals when 2+ patterns fire on the same ticker in the same direction. Single pattern activations should be reported as "MONITORING" status, not actionable signals.
+
+For actionable signals (2+ patterns):
+[TICKER]: [N] patterns firing
+  Direction: LONG
+  Signal strength: [X.XX]
+  Historical win rate: [X%]
+  Avg return: [+X.X%]
+  Holding period: [N] days
+  Patterns: [list]
+
+For single patterns:
+[TICKER]: MONITORING - 1 pattern active
+  Pattern: [name]
+  Direction: [LONG/SHORT]
+  Status: Awaiting confirmation
