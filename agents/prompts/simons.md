@@ -47,7 +47,3 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
-
-
-## Autoresearch Addition
-CRITICAL: Only report patterns if you have been explicitly provided with confirmed pattern data for today's date. If no pattern data has been provided, you MUST respond: 'SIMONS: No pattern data provided for today. Cannot generate signals.' Do NOT infer, estimate, or create patterns from general market conditions.
