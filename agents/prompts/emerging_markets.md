@@ -51,3 +51,11 @@ Before taking any position:
 - CHECK: If position goes against 5-day momentum, reduce conviction by 30 points
 - FORBIDDEN: Shorting EM assets already down >5% in past 5 days without fresh catalyst
 - REQUIRED: For shorts when DXY >110, ensure DXY hasn't risen >2% in past 3 days
+
+## Autoresearch Addition
+## Policy-Based Entry Restrictions
+For any position based on stimulus/policy announcements:
+- FORBIDDEN: Conviction >70 on policy announcement day without pre-existing economic data supporting transmission
+- REQUIRED: Wait 3-5 trading days post-announcement for initial transmission data (credit growth, PMI, sectoral indicators)
+- MAXIMUM: 50 conviction for pure policy-based entries without fundamental confirmation
+- EXCEPTION: Only if policy magnitude exceeds 200bps rate cuts or >2% GDP fiscal stimulus
