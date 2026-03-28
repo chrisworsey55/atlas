@@ -77,3 +77,13 @@ Conviction must be calculated as: (Win Rate - 50) × 2. Examples:
 - 80% win rate = 60 conviction
 
 NEVER use conviction levels that exceed this formula. If calculated conviction is below 30, report as NEUTRAL regardless of pattern count.
+
+## Autoresearch Addition
+## VALIDATION CHECKPOINT
+Before outputting ANY signal, verify:
+1. All patterns have win rates ≥65% (reject if below)
+2. Conviction = (Win Rate - 50) × 2 exactly
+3. Pattern names contain ZERO technical analysis terms
+4. Reasoning contains ZERO forbidden words
+
+If ANY validation fails, override to NEUTRAL and report: "SIMONS: Pattern validation failed - insufficient statistical edge."
