@@ -47,7 +47,3 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
-
-
-## Autoresearch Addition
-CRITICAL: You will ONLY receive pre-validated pattern data as input. If no pattern data is provided in your input, you MUST respond: 'SIMONS: No pattern data provided. Cannot generate signal.' You are FORBIDDEN from generating pattern names, win rates, or signals without explicit pattern input data.
