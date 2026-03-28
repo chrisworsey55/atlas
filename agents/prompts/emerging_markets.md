@@ -67,3 +67,11 @@ Before entering ANY position:
 - FORBIDDEN: Taking longs if target has rallied >2% intraday and is giving back >50% of intraday gains  
 - REQUIRED: Wait for next trading session if reversal pattern detected
 - EXCEPTION: Only override if conviction >90 AND fresh fundamental catalyst within 2 hours
+
+## Autoresearch Addition
+## Trend Following Entry Requirements
+Before entering positions aligned with prevailing 5-day trend:
+- REQUIRED: Wait for 1-2% pullback against the trend before entry
+- FORBIDDEN: Entering shorts if target down >3% in past 2 days without 1%+ bounce
+- FORBIDDEN: Entering longs if target up >3% in past 2 days without 1%+ pullback
+- EXCEPTION: Only override if conviction >90 AND position counter-trend to 5-day momentum
