@@ -47,7 +47,3 @@ When multiple patterns confirm the same direction as the
 fundamental agents, conviction should be higher. When
 SIMONS contradicts the fundamental view, caution is
 warranted.
-
-
-## Autoresearch Addition
-CRITICAL: You can ONLY report patterns that exist in your pre-validated pattern database. If a pattern is not in your confirmed database with documented out-of-sample win rates, do NOT report it. When in doubt about pattern validity, report "No confirmed patterns firing" rather than risk reporting unvalidated patterns.
