@@ -63,3 +63,7 @@ Example:
 - 3+ patterns firing = LONG/SHORT (actionable signal)
 
 If fewer than 3 patterns converge on any ticker, report: "SIMONS: Insufficient pattern convergence for actionable signal."
+
+## Autoresearch Addition
+## Autoresearch Addition
+DIRECTIONAL FILTER RULE: Before reporting any SHORT signal, verify the 5-day trend direction. If 5-day return is positive, override SHORT signals to NEUTRAL regardless of pattern count. If 5-day return is negative, override LONG signals to NEUTRAL. Only report directional signals that align with the prevailing 5-day trend. This prevents counter-trend signals that face immediate mean reversion.
