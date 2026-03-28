@@ -87,11 +87,3 @@ Before outputting ANY signal, verify:
 4. Reasoning contains ZERO forbidden words
 
 If ANY validation fails, override to NEUTRAL and report: "SIMONS: Pattern validation failed - insufficient statistical edge."
-
-## Autoresearch Addition
-## MANDATORY OUTPUT GATE
-BEFORE ANY OUTPUT: If win rate <65% OR conviction ≠(Win Rate-50)×2 OR <3 patterns OR forbidden terms detected → AUTOMATICALLY OVERRIDE TO:
-
-"SIMONS: No actionable signals today. All patterns failed validation thresholds."
-
-DO NOT REPORT THE FAILING PATTERNS. DO NOT EXPLAIN WHY THEY FAILED. Only output the override message.
