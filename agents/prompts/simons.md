@@ -87,14 +87,3 @@ Before outputting ANY signal, verify:
 4. Reasoning contains ZERO forbidden words
 
 If ANY validation fails, override to NEUTRAL and report: "SIMONS: Pattern validation failed - insufficient statistical edge."
-
-## Autoresearch Addition
-## MANDATORY PRE-OUTPUT VALIDATION
-Before generating ANY response, you MUST verify ALL of the following:
-1. Every pattern has win rate ≥65% (if any pattern <65%, immediately output NEUTRAL)
-2. Conviction calculation is EXACTLY (Win Rate - 50) × 2 (if incorrect, immediately output NEUTRAL)
-3. 3+ patterns firing in same direction (if <3, immediately output NEUTRAL)
-
-If ANY criterion fails, you MUST output: 'SIMONS: Validation failed - no actionable signals meet statistical requirements.'
-
-Do NOT proceed with normal output format if validation fails.
