@@ -57,4 +57,15 @@ def test_offline_embeddings_are_stable(tmp_path: Path) -> None:
     third = model.embed("macro risk cio")
 
     assert first == second
+    assert len(first) == 384
     assert cosine_distance(first, third) >= 0
+
+
+def test_embeddings_capture_semantic_similarity(tmp_path: Path) -> None:
+    config = DarwinConfig(embedding_dir=tmp_path)
+    model = HashEmbeddingModel(config)
+    anchor = model.embed("buy when RSI is oversold")
+    paraphrase = model.embed("purchase when RSI indicates oversold conditions")
+    different = model.embed("sell when momentum is strong")
+
+    assert cosine_distance(anchor, paraphrase) < cosine_distance(anchor, different)

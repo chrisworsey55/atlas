@@ -1,31 +1,65 @@
-"""Stable offline prompt embeddings.
+"""Stable local semantic prompt embeddings.
 
-This intentionally avoids API embeddings during evaluation. The vector is a
-deterministic signed hashing projection over normalized tokens. It is not a
-semantic embedding model, but it is stable, cached, and good enough for v2's
-initial diversity pressure without adding network dependence.
+The public interface intentionally matches the original hash implementation:
+``HashEmbeddingModel.embed`` returns ``list[float]`` and the cosine helpers
+operate on those lists. Internally this now uses sentence-transformers
+``all-MiniLM-L6-v2`` for semantic novelty pressure.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-import math
-import re
-from pathlib import Path
+import random
+import threading
+from typing import Any
 
 from darwin_v2.config import DarwinConfig
 
 
-TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+MODEL_DIMENSION = 384
+_MODEL_LOCK = threading.Lock()
+_MODEL: Any | None = None
+
+
+def _load_model() -> Any:
+    """Lazy-load the local sentence-transformers model once per process."""
+    global _MODEL
+    with _MODEL_LOCK:
+        if _MODEL is not None:
+            return _MODEL
+
+        random.seed(0)
+        try:
+            import numpy as np
+
+            np.random.seed(0)
+        except Exception:
+            pass
+        try:
+            import torch
+
+            torch.manual_seed(0)
+            torch.set_num_threads(1)
+        except Exception:
+            pass
+
+        from sentence_transformers import SentenceTransformer
+
+        try:
+            _MODEL = SentenceTransformer(MODEL_NAME, local_files_only=True)
+        except Exception:
+            _MODEL = SentenceTransformer(MODEL_NAME)
+        return _MODEL
 
 
 class HashEmbeddingModel:
-    """Deterministic offline embedding wrapper."""
+    """Compatibility wrapper around MiniLM semantic embeddings."""
 
     def __init__(self, config: DarwinConfig | None = None) -> None:
         self.config = config or DarwinConfig()
-        self.dim = self.config.embedding_dim
+        self.dim = MODEL_DIMENSION
         self.cache_dir = self.config.embedding_dir / "cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -35,18 +69,26 @@ class HashEmbeddingModel:
         if cache_file.exists():
             return json.loads(cache_file.read_text())["embedding"]
 
-        vec = [0.0] * self.dim
-        for token in TOKEN_RE.findall(text.lower()):
-            h = hashlib.blake2b(token.encode("utf-8"), digest_size=8).digest()
-            bucket = int.from_bytes(h[:4], "big") % self.dim
-            sign = 1.0 if h[4] % 2 == 0 else -1.0
-            vec[bucket] += sign
+        model = _load_model()
+        embedding = model.encode(
+            text,
+            normalize_embeddings=True,
+            convert_to_numpy=True,
+            show_progress_bar=False,
+        )
+        vec = [float(value) for value in embedding.tolist()]
 
-        norm = math.sqrt(sum(v * v for v in vec))
-        if norm > 0:
-            vec = [v / norm for v in vec]
-
-        cache_file.write_text(json.dumps({"sha256": digest, "embedding": vec}, indent=2))
+        cache_file.write_text(
+            json.dumps(
+                {
+                    "sha256": digest,
+                    "model": MODEL_NAME,
+                    "dimension": len(vec),
+                    "embedding": vec,
+                },
+                indent=2,
+            )
+        )
         return vec
 
 
