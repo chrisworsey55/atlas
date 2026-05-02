@@ -15,19 +15,16 @@ REPO_ROOT = PACKAGE_DIR.parent
 
 
 DEFAULT_ROLES: tuple[str, ...] = (
-    "news_flow",
-    "sector_desk_bond",
-    "sector_desk_currency",
-    "sector_desk_commodities",
-    "sector_desk_metals",
+    "macro",
     "sector_desk_semiconductor",
-    "sector_desk_biotech",
     "sector_desk_energy",
-    "sector_desk_consumer",
-    "sector_desk_industrials",
-    "sector_desk_microcap",
-    "superinvestor",
-    "risk_cio",
+    "emerging_markets",
+    "sector_desk_biotech",
+    "sector_desk_financials",
+    "cio",
+    "cro",
+    "quantitative",
+    "value",
 )
 
 
