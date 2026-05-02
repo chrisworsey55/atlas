@@ -116,7 +116,7 @@ class DarwinConfig:
     max_generation_days: int = 30
     novelty_lambda: float = 0.05
     mutation_rate_two_sections: float = 0.15
-    embedding_dim: int = 128
+    embedding_dim: int = 384
     lineage_dir: Path = PACKAGE_DIR / "lineage"
     lineage_db: Path = PACKAGE_DIR / "lineage" / "lineage.sqlite"
     prompt_dir: Path = PACKAGE_DIR / "lineage" / "prompts"
