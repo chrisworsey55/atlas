@@ -15,6 +15,16 @@
       "raw_fitness": 0.5,
       "effective_fitness": 0.5,
       "failed_outputs": 0
+    },
+    {
+      "generation": 0,
+      "n_forecasts": 197,
+      "brier": 0.40566695844375633,
+      "brier_per_regime": {},
+      "novelty": 0.00011132092485823807,
+      "raw_fitness": -0.40566695844375633,
+      "effective_fitness": -0.4056613923975134,
+      "failed_outputs": 0
     }
   ],
   "embedding": [
