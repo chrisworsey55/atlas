@@ -133,6 +133,7 @@ class PostMortemEngine:
     def _default_trade_sources(self) -> list[Path]:
         return [
             self.repo_root / "data" / "trade_journal" / "2026-03_trades.json",
+            self.repo_root / "data" / "state" / "decisions_v2.json",
             self.repo_root / "data" / "state" / "decisions.json",
         ]
 
@@ -280,4 +281,3 @@ def run_postmortems_from_default_sources(
 ) -> list[PostMortemResult]:
     engine = PostMortemEngine(repo_root=repo_root, llm_runner=llm_runner)
     return engine.run_from_default_sources(regime=regime, vix=vix)
-

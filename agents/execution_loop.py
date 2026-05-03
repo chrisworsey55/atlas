@@ -72,6 +72,10 @@ AGENT_VIEWS_FILE = STATE_DIR / "agent_views.json"
 RISK_ASSESSMENT_FILE = STATE_DIR / "risk_assessment.json"
 CIO_SYNTHESIS_FILE = STATE_DIR / "cio_synthesis.json"
 DECISIONS_FILE = STATE_DIR / "decisions.json"
+DECISIONS_V2_FILE = STATE_DIR / "decisions_v2.json"
+JANUS_DAILY_FILE = STATE_DIR / "janus_daily.json"
+DARWIN_V3_JUDGE_FILE = STATE_DIR / "judge_daily.json"
+DARWIN_V3_DECISIONS_FILE = STATE_DIR / "decisions_v3.json"
 AGENTS_STATUS_FILE = STATE_DIR / "agents.json"
 
 
@@ -683,6 +687,7 @@ class ATLASExecutionLoop:
             agent_views = self._load_state(AGENT_VIEWS_FILE) or {}
             risk_assessment = self._load_state(RISK_ASSESSMENT_FILE) or {}
             previous_synthesis = self._load_state(CIO_SYNTHESIS_FILE) or {}
+            janus_daily = self._load_state(JANUS_DAILY_FILE) or {}
             portfolio = self._load_portfolio()
 
             # Use Claude directly for CIO synthesis
@@ -717,6 +722,9 @@ Concerns: {json.dumps(risk_assessment.get('concerns', []))}
 
 ## PREVIOUS SYNTHESIS
 {previous_synthesis.get('summary', 'No previous synthesis')[:300]}
+
+## JANUS
+{json.dumps(janus_daily, indent=2)[:1500]}
 
 ## TASK
 Generate a CIO synthesis with:
@@ -886,9 +894,10 @@ Respond with valid JSON:
                     self._save_state(POSITIONS_FILE, positions_data)
 
             # Log to decisions.json
-            decisions = self._load_state(DECISIONS_FILE) or []
+            decisions = self._load_state(DECISIONS_V2_FILE) or self._load_state(DECISIONS_FILE) or []
             decisions.append(execution_result)
             decisions = decisions[-100:]  # Keep last 100
+            self._save_state(DECISIONS_V2_FILE, decisions)
             self._save_state(DECISIONS_FILE, decisions)
 
             self._update_agent_status("autonomous", "ACTIVE" if execution_result.get("executed") else "IDLE")
@@ -958,13 +967,16 @@ Respond with valid JSON:
             # Step 5: Adversarial review
             cycle_data["steps"]["adversarial"] = self.run_adversarial_review()
 
-            # Step 6: CIO synthesis
+            # Step 6: Darwin v3 integration pass-through
+            cycle_data["steps"]["darwin_v3"] = self.run_darwin_v3_pass_through()
+
+            # Step 7: CIO synthesis
             cycle_data["steps"]["cio"] = self.run_cio_synthesis()
 
-            # Step 7: Autonomous execution check
+            # Step 8: Autonomous execution check
             cycle_data["steps"]["autonomous"] = self.run_autonomous_execution()
 
-            # Step 8: Dashboard update
+            # Step 9: Dashboard update
             self.update_dashboard_state()
             cycle_data["steps"]["dashboard"] = {"status": "UPDATED"}
 
@@ -988,6 +1000,26 @@ Respond with valid JSON:
         logger.info("=" * 70)
 
         return cycle_data
+
+    def run_darwin_v3_pass_through(self) -> Dict:
+        """Run Darwin v3 as a non-blocking pass-through stack."""
+        logger.info("Step 6: Running Darwin v3 pass-through stack...")
+
+        try:
+            from darwin_v3.runtime import DarwinV3Runtime
+
+            runtime = DarwinV3Runtime(repo_root=Path(__file__).parent.parent)
+            result = runtime.run_once()
+            self._save_state(DARWIN_V3_DECISIONS_FILE, result)
+            logger.info(
+                "Darwin v3 complete: judge=%s janus=%s",
+                DARWIN_V3_JUDGE_FILE.exists(),
+                JANUS_DAILY_FILE.exists(),
+            )
+            return {"status": "SUCCESS", "result": result}
+        except Exception as e:
+            logger.error(f"Darwin v3 pass-through failed: {e}")
+            return {"status": "NOT_IMPLEMENTED", "error": str(e)}
 
     # =========================================================================
     # DAILY BRIEFING
