@@ -5,7 +5,20 @@ body {
 }
 
 body {
-  font-family: monospace;
+  background: #000;
+  color: #ffa500;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 0;
+  overflow: hidden;
+}
+
+#terminal {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: 28px 28px 1fr 54px;
+  height: 100vh;
+  width: 100vw;
 }
 
 .terminal-header,
@@ -14,15 +27,204 @@ body {
   display: flex;
 }
 
+.terminal-header {
+  align-items: center;
+  border-bottom: 1px solid #333;
+  gap: 16px;
+  padding: 0 8px;
+}
+
+.brand {
+  background: #ffa500;
+  color: #000;
+  font-weight: 700;
+  padding: 3px 8px;
+}
+
+.header-metrics {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 18px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.health-dot {
+  background: #00ff7f;
+  display: inline-block;
+  height: 9px;
+  width: 9px;
+}
+
+.health-dot.stale {
+  background: #ff3b3b;
+}
+
+.function-row {
+  border-bottom: 1px solid #333;
+}
+
+.function-row button {
+  background: #000;
+  border: 0;
+  border-right: 1px solid #333;
+  color: #ccc;
+  cursor: pointer;
+  flex: 1;
+  font: inherit;
+  padding: 0 8px;
+  text-align: left;
+}
+
+.function-row button:hover,
+#terminal[data-workspace="F1"] .function-row button[data-target="F1"],
+#terminal[data-workspace="F2"] .function-row button[data-target="F2"],
+#terminal[data-workspace="F3"] .function-row button[data-target="F3"],
+#terminal[data-workspace="F4"] .function-row button[data-target="F4"],
+#terminal[data-workspace="F5"] .function-row button[data-target="F5"],
+#terminal[data-workspace="F6"] .function-row button[data-target="F6"],
+#terminal[data-workspace="F7"] .function-row button[data-target="F7"],
+#terminal[data-workspace="F8"] .function-row button[data-target="F8"] {
+  color: #ffa500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .workspace {
   display: none;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-auto-rows: minmax(72px, 1fr);
-  gap: 4px;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .workspace.active {
   display: grid;
+}
+
+.panel {
+  border-bottom: 1px solid #333;
+  border-right: 1px solid #333;
+  box-sizing: border-box;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel h2 {
+  background: #ffa500;
+  color: #000;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0 6px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel-body {
+  box-sizing: border-box;
+  color: #ccc;
+  height: calc(100% - 20px);
+  overflow: hidden;
+  padding: 6px;
+}
+
+.terminal-footer {
+  border-top: 1px solid #333;
+  display: grid;
+  grid-template-rows: 22px 31px;
+}
+
+#status-line {
+  border-bottom: 1px solid #333;
+  color: #ccc;
+  overflow: hidden;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+#command-form {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  padding: 0 8px;
+}
+
+#command-form label {
+  color: #ffa500;
+}
+
+#command-input {
+  background: #000;
+  border: 0;
+  color: #ffa500;
+  flex: 1;
+  font: inherit;
+  height: 28px;
+  outline: 0;
+}
+
+.not-wired,
+.error-banner {
+  background: #270000;
+  color: #ff3b3b;
+  font-weight: 700;
+  padding: 4px 6px;
+}
+
+.positive {
+  color: #00ff7f;
+}
+
+.negative {
+  color: #ff3b3b;
+}
+
+.dim {
+  color: #ccc;
+}
+
+.data-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid #1f1f1f;
+  overflow: hidden;
+  padding: 2px 4px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table th {
+  color: #ffa500;
+  font-weight: 700;
+}
+
+.kv {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: max-content 1fr;
+}
+
+.kv span:nth-child(odd) {
+  color: #ffa500;
+}
+
+.kv span:nth-child(even) {
+  color: #ccc;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .span-2 { grid-column: span 2; }
@@ -39,3 +241,27 @@ body {
 .rows-5 { grid-row: span 5; }
 .rows-6 { grid-row: span 6; }
 
+@media (max-width: 900px) {
+  #terminal {
+    grid-template-rows: 52px 56px 1fr 54px;
+  }
+
+  .terminal-header,
+  .function-row {
+    flex-wrap: wrap;
+  }
+
+  .header-metrics {
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .workspace {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .span-8,
+  .span-12 {
+    grid-column: span 6;
+  }
+}
