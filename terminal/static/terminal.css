@@ -227,6 +227,15 @@ body {
   white-space: nowrap;
 }
 
+pre {
+  color: #ccc;
+  font: inherit;
+  margin: 0;
+  max-height: 100%;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+
 .span-2 { grid-column: span 2; }
 .span-3 { grid-column: span 3; }
 .span-4 { grid-column: span 4; }
