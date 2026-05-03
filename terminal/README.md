@@ -8,7 +8,7 @@ Bloomberg-style operator terminal for ATLAS. Production data is Azure state; loc
 - Phase 4 visual spec is installed.
 - Phase 5 command bar is installed.
 - Phase 6 source wiring is installed for F1, F2, F7, F3, F8, F4, and F6. F5 JANUS intentionally ships as `NOT_WIRED`.
-- Deploy config lands in the final phase commit.
+- Phase 7 deploy config is installed but not executed.
 
 ## Add a Panel
 
@@ -35,7 +35,33 @@ During local development the header shows snapshot age next to the health dot. O
 
 ## Deploy to Azure
 
-Deployment is documented in Phase 7 and should be run manually after review.
+Deployment files:
+
+- `terminal/deploy/atlas-terminal.service`
+- `terminal/deploy/nginx-terminal.conf`
+- `terminal/DEPLOY.md`
+
+Manual deploy commands:
+
+```bash
+cd /home/azureuser/atlas
+git fetch origin
+git checkout terminal/v1
+git pull --ff-only origin terminal/v1
+python3 -m pip install -r requirements.txt
+sudo cp terminal/deploy/atlas-terminal.service /etc/systemd/system/atlas-terminal.service
+sudo install -o root -g root -m 0644 terminal/deploy/nginx-terminal.conf /etc/nginx/snippets/atlas-terminal.conf
+sudo sed -i '/server_name meetvalis.com/a\\    include /etc/nginx/snippets/atlas-terminal.conf;' /etc/nginx/sites-available/meetvalis.com
+sudo systemctl daemon-reload
+sudo systemctl enable atlas-terminal.service
+sudo systemctl restart atlas-terminal.service
+sudo nginx -t
+sudo systemctl reload nginx
+curl -fsS http://127.0.0.1:8010/terminal/health
+curl -fsS https://meetvalis.com/terminal/health
+```
+
+If the nginx site already includes the snippet, skip the `sed` command.
 
 ## NOT_WIRED Panels
 

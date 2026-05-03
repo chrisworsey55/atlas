@@ -1,0 +1,23 @@
+[Unit]
+Description=ATLAS Terminal
+After=network.target postgresql.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=azureuser
+Group=azureuser
+WorkingDirectory=/home/azureuser/atlas
+Environment=ATLAS_TERMINAL_ENV=production
+Environment=ATLAS_STATE_ROOT=/home/azureuser/atlas
+Environment=ATLAS_KALSHI_ROOT=/home/azureuser/atlas-predict
+EnvironmentFile=-/home/azureuser/atlas/.env
+ExecStart=/usr/bin/python3 -m uvicorn terminal.app:app --host 127.0.0.1 --port 8010
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/atlas_terminal.log
+StandardError=append:/var/log/atlas_terminal.log
+
+[Install]
+WantedBy=multi-user.target
+
