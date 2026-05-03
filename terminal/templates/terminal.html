@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ATLAS TERMINAL</title>
+    <link rel="stylesheet" href="/terminal/static/terminal.css">
+  </head>
+  <body>
+    <main id="terminal" data-workspace="F1">
+      <header class="terminal-header">
+        <div class="brand">ATLAS TERMINAL</div>
+        <div class="header-metrics">
+          <span id="health-dot" class="health-dot stale"></span>
+          <span id="snapshot-age" {% if production %}hidden{% endif %}>SNAPSHOT: LOCAL DEV</span>
+          <span id="utc-clock">UTC --:--:--</span>
+          <span id="market-session">SESSION: UNKNOWN</span>
+          <span id="header-pnl">PNL: --</span>
+          <span id="header-cash">CASH: --</span>
+        </div>
+      </header>
+
+      <nav class="function-row" aria-label="Workspaces">
+        <button data-target="F1">F1 PORTFOLIO</button>
+        <button data-target="F2">F2 AGENTS</button>
+        <button data-target="F3">F3 SHANNON</button>
+        <button data-target="F4">F4 SIMONS</button>
+        <button data-target="F5">F5 JANUS</button>
+        <button data-target="F6 BACKTEST</button>
+        <button data-target="F7">F7 KALSHI</button>
+        <button data-target="F8">F8 INTEL</button>
+      </nav>
+
+      <section class="workspace active" id="F1" aria-label="Portfolio workspace">
+        <section class="panel span-3 rows-2" id="portfolio-summary"><h2>PORTFOLIO SUMMARY</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-5 rows-4" id="portfolio-positions"><h2>POSITIONS</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-2" id="portfolio-risk"><h2>RISK</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-2" id="portfolio-pnl"><h2>PNL HISTORY</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-8 rows-2" id="portfolio-decisions"><h2>RECENT DECISIONS</h2><div class="panel-body">NOT WIRED</div></section>
+      </section>
+
+      <section class="workspace" id="F2" aria-label="Agents workspace">
+        <section class="panel span-8 rows-6" id="agents-overview"><h2>AGENT SWARM</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-3" id="agents-execution"><h2>EXECUTION LOG</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-3" id="agents-prompts"><h2>PROMPT REWRITES</h2><div class="panel-body">NOT WIRED</div></section>
+      </section>
+
+      <section class="workspace" id="F3" aria-label="SHANNON workspace">
+        <section class="panel span-12 rows-1" id="shannon-status"><h2>SHANNON STATUS</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-5" id="shannon-queue"><h2>QUEUE</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-5 rows-5" id="shannon-items"><h2>LAST ITEMS</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-3 rows-5" id="shannon-scouts"><h2>SCOUTS / MEMOS</h2><div class="panel-body">NOT WIRED</div></section>
+      </section>
+
+      <section class="workspace" id="F4" aria-label="SIMONS workspace">
+        <section class="panel span-4 rows-3" id="simons-patterns"><h2>PATTERNS</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-3" id="simons-signals"><h2>SIGNALS</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-3" id="simons-backtest"><h2>BACKTEST STATS</h2><div class="panel-body">NOT WIRED</div></section>
+      </section>
+
+      <section class="workspace" id="F5" aria-label="JANUS workspace">
+        <section class="panel span-4 rows-3" id="janus-regime"><h2>REGIME</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-3" id="janus-weights"><h2>WEIGHT DISTRIBUTION</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-3" id="janus-reweighting"><h2>LAST REWEIGHTING</h2><div class="panel-body">NOT WIRED</div></section>
+      </section>
+
+      <section class="workspace" id="F6" aria-label="Backtest workspace">
+        <section class="panel span-3 rows-3" id="backtest-darwin"><h2>DARWIN GENERATIONS</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-3 rows-3" id="backtest-fitness"><h2>FITNESS SCORES</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-4 rows-3" id="backtest-equity"><h2>EQUITY CURVES</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-2 rows-3" id="backtest-ablations"><h2>ABLATIONS</h2><div class="panel-body">NOT WIRED</div></section>
+      </section>
+
+      <section class="workspace" id="F7" aria-label="Kalshi workspace">
+        <section class="panel span-4 rows-3" id="kalshi-summary"><h2>BOOK A / BOOK B</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-5 rows-3" id="kalshi-trades"><h2>RECENT PAPER TRADES</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-3 rows-3" id="kalshi-positions"><h2>POSITION SIZES</h2><div class="panel-body">NOT WIRED</div></section>
+      </section>
+
+      <section class="workspace" id="F8" aria-label="Intel workspace">
+        <section class="panel span-4 rows-3" id="intel-tracker"><h2>13F / CONGRESS</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-3 rows-3" id="intel-deadline"><h2>MAY 15 DEADLINE</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-3 rows-3" id="intel-entities"><h2>WATCHLIST</h2><div class="panel-body">NOT WIRED</div></section>
+        <section class="panel span-2 rows-3" id="intel-news"><h2>GEO NEWS</h2><div class="panel-body">NOT WIRED</div></section>
+      </section>
+
+      <footer class="terminal-footer">
+        <div id="status-line">READY</div>
+        <form id="command-form">
+          <label for="command-input">&gt;</label>
+          <input id="command-input" name="command" autocomplete="off" spellcheck="false">
+        </form>
+      </footer>
+    </main>
+    <script src="/terminal/static/terminal.js"></script>
+  </body>
+</html>
+
