@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+gene_pool.db
+postmortems/
+scores/
+judge/
+spawn/
+archives/
+breeding_log.json
