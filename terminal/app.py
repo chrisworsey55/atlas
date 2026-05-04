@@ -94,6 +94,12 @@ async def command_status():
     }
 
 
+@app.get("/terminal/api/commands/help")
+@app.get("/api/commands/help")
+async def commands_help():
+    return {"status": "OK", "as_of": datetime.now(timezone.utc).isoformat(), "commands": command_help()}
+
+
 @app.get("/terminal/api/commands/{command_id}")
 @app.get("/api/commands/{command_id}")
 async def command_get(command_id: str):
@@ -108,12 +114,6 @@ async def command_get(command_id: str):
         "output": run.output,
         "ui_action": run.ui_action,
     }
-
-
-@app.get("/terminal/api/commands/help")
-@app.get("/api/commands/help")
-async def commands_help():
-    return {"status": "OK", "as_of": datetime.now(timezone.utc).isoformat(), "commands": command_help()}
 
 
 @app.get("/terminal/health")

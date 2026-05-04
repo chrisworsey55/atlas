@@ -48,10 +48,25 @@ def response(status: str, source: Path | str | None, data: Any = None, **extra: 
         "status": status,
         "as_of": now_iso(),
         "source": str(source) if source else None,
-        "data": data if data is not None else {},
+        "data": json_safe(data if data is not None else {}),
     }
-    payload.update(extra)
+    payload.update(json_safe(extra))
     return payload
+
+
+def json_safe(value: Any) -> Any:
+    try:
+        json.dumps(value)
+        return value
+    except TypeError:
+        pass
+    if isinstance(value, dict):
+        return {str(key): json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(item) for item in value]
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
 
 
 def not_wired(reason: str, source: Path | str | None = None) -> dict[str, Any]:
@@ -471,4 +486,3 @@ def cron_status() -> list[dict[str, Any]]:
         present = command in crontab_text or name.split("_")[0] in crontab_text
         rows.append({"name": name, "schedule": schedule, "command": command, "status": "PRESENT_UNVERIFIED" if present else "MISSING", "source": "crontab -l"})
     return rows
-
