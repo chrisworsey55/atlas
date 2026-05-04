@@ -124,6 +124,102 @@ BIL 52.5% | BE 15% | TLT SHORT 10% | AVGO 5% | UNH 3.5% | CRM 3% | ADBE 3% | GOO
   - Use as third price validator and for previous day close, corporate actions, technical indicators
 - All market data functions in agents/market_data.py
 
+## Alpaca MCP Server (Trade Execution)
+
+Two Alpaca accounts configured via MCP for paper trading:
+
+### Accounts
+- **alpaca-atlas-a** — ATLAS-A account (uses ALPACA_A_KEY/ALPACA_A_SECRET from .env)
+- **alpaca-atlas-b** — ATLAS-B account (uses ALPACA_B_KEY/ALPACA_B_SECRET from .env)
+
+### Configuration
+- Wrapper scripts: `scripts/alpaca-mcp-a.sh`, `scripts/alpaca-mcp-b.sh`
+- API keys stored in `.env` as ALPACA_A_KEY, ALPACA_A_SECRET, ALPACA_B_KEY, ALPACA_B_SECRET
+- Paper trading mode controlled by ALPACA_PAPER=true in .env
+
+### MCP Tools Available
+When API keys are configured, these tools become available in Claude Code:
+- `get_account` — Get account info (buying power, equity, cash)
+- `get_positions` — List all open positions
+- `get_position` — Get specific position details
+- `place_order` — Submit market/limit orders
+- `cancel_order` — Cancel pending orders
+- `get_orders` — List order history
+- `get_watchlist` — Manage watchlists
+- `get_bars` — Historical price data
+- `get_quotes` — Real-time quotes
+
+### Setup Status
+1. API keys NOT yet filled in .env (waiting for account approval/funding)
+2. ALPACA_PAPER=true (paper trading mode, DO NOT change until confirmed)
+3. MCP servers registered in Claude Code user config
+
+### To Activate
+1. Fill in API keys in `~/Desktop/atlas/.env`:
+   ```
+   ALPACA_A_KEY=your_key_here
+   ALPACA_A_SECRET=your_secret_here
+   ALPACA_B_KEY=your_key_here
+   ALPACA_B_SECRET=your_secret_here
+   ```
+2. Restart Claude Code session
+3. Verify with `claude mcp list` — should show green checkmarks
+
+### Commands
+```bash
+# Check MCP server status
+claude mcp list
+
+# Test connection (after keys filled)
+# Just ask Claude: "Check my Alpaca account balance"
+```
+
+## Kalshi API (Prediction Markets)
+
+Kalshi credentials for prediction market trading:
+
+### Credentials
+- **API Key ID:** `93378d93-8aa4-407a-962f-3405a784c054`
+- **Private Key:** Stored in `.env` as `KALSHI_PRIVATE_KEY` (RSA PEM format)
+
+### Setup
+Add to `.env`:
+```
+KALSHI_API_KEY_ID=93378d93-8aa4-407a-962f-3405a784c054
+KALSHI_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEA39VvGnHdmntUtf6f7oKzDEfn2CiD38n1SZMmlQwhkXSnHvNF
+6s53OtPpFQh2IPLN0LnR7AlEszjbMa0JvJacN+H0Xbhjxgkpbjj7v+iRk7Zz7H0D
++2qWrcoa3WRhh3UUPwz8gAfK5RQ/m7dn7FvzkQghjGqcyQAuKLfZfxpk0n+2Kmab
+3J4efOetH7oX+mbRbjyZpBFcc4FK726Pn79FXYoVBwiX5TDJLr8ucWLexXnwHokF
+TvLsuJkaco4YupFdZXzbtiA9kazvoJ1nj6WEHpt0f+x1KhmuQ1qJi4Sce2mfH1w9
+74edFkWuci6yv3sMH+Bn09Q/fvyQu85Hpzt2UwIDAQABAoIBAFvIf94GqfmSMArO
+xdL+OiBDjgC3oFfQTyoj0nLUviEQhgTteZKOphpz0cRjq1jYZ2f7Amb45/hbzJoC
+nBb+ZUGPAG670QHgOOJvMGAhpCw/aSqkmtDqBK5vzPNSmaF7c1llYFa5m0uzMWAP
+ZWhozif+/w6+mtrbHZJpzSBO+N/NZRXpPqhtptX/8aJP2HPhtbOqkDEjOQGY0uMM
+NQzQ6NXOQrnV2XS7cmWjgL7n1TzLXnnjC2+IjKh9YTaUWCclD3jK5P4ZRlqLp2aG
+SgesiK9Eq+Akn5J/1U2nyXyxKyyb3wUanz9jUqsivwNzbhSi913e/a/YZ5TKHhu1
+thSzssECgYEA/D61lPv3wpt+8bmjucjdsrxQa92Hk+eu8JyNhacUePWIMsm1kZSK
+l8j9UV0Rm0nPvbePGa+qp+zFZ/NarGLs11FlQQVatOKf9Z7oH6/r+gqqqvXKxH+f
+sP8a0ookmTaUKuuHrT3/eCwcUR/Ryt9Ge/G8jYH/ERZDAnCraZ4qQEECgYEA4ypz
+fz47PqmXy2U8J8+/n21k2im169eW2R4W1jTL4F73VonGgcg+5mvg9nLCMb6F2PCp
+ZxICm3ICdrnFiYt1OvFSuumj1LuCwgn/sYdE+XRO4BSDP+7Hl0Z/Bih1jq5Prqep
+aJfc74L+nVvxJCzrLcNDX8ltbaauRyPMwg2kUZMCgYB4jxREd8UsCxu6NqrNEfb8
+BUs+squpAlO3hmuRlJCRW3DULVoNkXxIHXUNXTkcCkQy/bd0ZGRhTCXxj/snZ0Sh
+iLKnSALZb3Nadq+k7XUQleaKPV3DWugdNWBBfmsNm2tntBitsXMXoaWLFHU1zE8o
+0Bn5XEdniEdQtD8JBOJWwQKBgQC0FYkuDDWHPYbadUy0+tqcFmrnED3p0yUAxfuw
+oHYnTuGhNuOpKwfCPy898EfGi5UsH80LqplqhX0yhZ71pRqwOXMuPd3k3SmRjb+o
+CuZBI1UMCvbpje+oGvjD9vsKu2DrwnpoMkuxjBUwxhxqYzmlM7CLlPEtBgAO4XCH
+Pa1QBQKBgHN+mJCttU16by0JU6ZpaPhiQRO4fm3mA2GXliB4AgYxSxJCt+3StBnB
+poQ6g8xA8ElNzW+t0ShFxI9jyMopOPadsysTtqzYgODqp9MY7HXFOW+C8IDDgjOb
+qBkUzxi948iJnzcCvfx0ZgOJuqKheYFn649Un5x8/V28otjs5Y/5
+-----END RSA PRIVATE KEY-----"
+```
+
+### API Documentation
+- Base URL: `https://trading-api.kalshi.com/trade-api/v2`
+- Auth: RSA signature-based (sign timestamp + method + path with private key)
+- Docs: https://trading-api.kalshi.com/docs
+
 ### Price Validation Rules
 - NEVER use yfinance — it returns stale/incorrect prices
 - Every price must be cross-validated from multiple sources
@@ -135,6 +231,10 @@ BIL 52.5% | BE 15% | TLT SHORT 10% | AVGO 5% | UNH 3.5% | CRM 3% | ADBE 3% | GOO
 - Data quality flags: "verified" (FMP/Finnhub agree), "tiebreaker" (Polygon resolved conflict), "unverified" (all disagree), "single_source"
 - DON'T use Polygon for batch quotes (5/min rate limit) — only for tiebreaker conflicts
 - Log warnings when conflicts occur
+
+## Personal Shortcuts
+- **"open default Chrome"** — Open Chrome with Chris's personal profile (has passwords, saved tabs):
+  `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --profile-directory="Default" --new-window &`
 
 ## Rules
 1. ALWAYS read this file at the start of every session
@@ -219,3 +319,149 @@ Agents are weighted by Sharpe ratio (10-day rolling):
 6. Log result to autoresearch_results.tsv
 
 After 3 failed attempts on one agent, move to next worst.
+
+## Darwin v3
+
+Darwin v3 is the standalone prompt-evolution layer that sits alongside the live ATLAS loop and feeds JANUS with judge output instead of raw cohort accuracy.
+
+### Entry Point
+- `darwin_v3/runtime.py` — phase 9 runtime orchestrator
+
+### Runtime Placement
+- Runs inside `agents/execution_loop.py` as a non-blocking pass-through step
+- Continues to preserve the existing v2 loop and decision flow
+
+### Key Outputs
+- `data/state/judge_daily.json`
+- `data/state/janus_daily.json`
+- `data/state/decisions_v2.json`
+- `data/state/decisions_v3.json`
+
+### Gene Pool
+- `darwin_v3/gene_pool.db`
+- Seeded from real `autoresearch/` git history
+- PRISM/spawn seeding remains TODO unless commit `170aadb` is available
+
+### Supporting Modules
+- `darwin_v3/gene_pool.py`
+- `darwin_v3/postmortem_engine.py`
+- `darwin_v3/breeding.py`
+- `darwin_v3/config.py`
+- `darwin_v3/utils/`
+
+## SHANNON — Unstructured Intelligence Layer
+
+SHANNON is the reading-and-listening desk that sits upstream of SIMONS/JANUS, sourcing trade ideas from unstructured text and audio: SEC filings, earnings transcripts, news, and earnings call audio.
+
+### What SHANNON Does
+1. **Ingest** — Pulls data from SEC EDGAR (8-K, 10-Q, 10-K), FMP transcripts, Finnhub news
+2. **Filter** — Haiku-powered catalyst detection (cheap, fast first-pass)
+3. **Analyze** — Opus-powered thesis generation and adversarial contra analysis
+4. **Audio** — Transcription + acoustic analysis for word/voice mismatch detection
+5. **Output** — Markdown research memos + parquet queue for JANUS
+
+### Directory Structure
+```
+SHANNON/
+├── ingest/
+│   ├── filings.py          # SEC EDGAR ingestion
+│   ├── transcripts.py      # FMP earnings call transcripts
+│   ├── news.py             # Finnhub company news
+│   └── audio/              # Audio ingestion (earnings, podcasts, Fed)
+├── processing/
+│   ├── transcribe.py       # faster-whisper / OpenAI whisper
+│   ├── acoustic.py         # Pitch, pause, speech rate analysis
+│   └── diarize.py          # Speaker separation (pyannote)
+├── scouts/
+│   ├── catalyst.py         # Haiku catalyst filter
+│   ├── thesis.py           # Opus thesis generation
+│   ├── contra.py           # Opus red-team analysis
+│   └── vocal.py            # Opus word/voice mismatch detection
+├── memos/                  # Generated research memos
+├── queue/
+│   └── candidates.parquet  # Structured output for JANUS
+├── cache/                  # Raw data cache
+├── logs/                   # Logging + cost tracking
+├── shannon.py              # Main orchestrator
+├── janus_integration.py    # JANUS connector
+└── README.md               # Desk documentation
+```
+
+### SHANNON Commands
+```bash
+# Run single ticker analysis
+python3 -m SHANNON.shannon --ticker AAPL
+
+# Run test universe (5 tickers)
+python3 -m SHANNON.shannon --universe test --once
+
+# Run full S&P 100 universe
+python3 -m SHANNON.shannon --universe sp100 --once
+
+# Check SHANNON output for JANUS
+python3 -m SHANNON.janus_integration
+```
+
+### JANUS Integration
+SHANNON candidates with conviction >= 7 are automatically included in JANUS blending:
+- Weight: 0.15 (tunable in `SHANNON/janus_integration.py`)
+- File: `data/state/recommendations_shannon.json`
+- JANUS reads this alongside other cohort recommendations
+
+### Cost Controls
+- Daily cap: $50/day across all SHANNON LLM calls
+- Haiku (catalyst): ~$0.0003/call
+- Opus (thesis/contra/vocal): ~$0.03-0.05/call
+- Cost log: `SHANNON/logs/daily_cost_YYYYMMDD.txt`
+
+### Cron Schedule (for production)
+```
+# Pre-market (07:00 ET)
+0 7 * * 1-5 cd ~/atlas && python3 -m SHANNON.shannon --universe sp100 --once
+
+# Midday (12:30 ET)
+30 12 * * 1-5 cd ~/atlas && python3 -m SHANNON.shannon --universe sp100 --once
+
+# Post-close (17:00 ET)
+0 17 * * 1-5 cd ~/atlas && python3 -m SHANNON.shannon --universe sp100 --once
+```
+
+## API Keys Reference
+
+All API keys stored in `.env` at project root:
+
+### Market Data APIs
+```bash
+# Financial Modeling Prep (primary market data, transcripts)
+FMP_API_KEY=ZTvemA5AKSI3e7DnITVXs3RyLY46G2Wx
+
+# Finnhub (price validation, company news)
+FINNHUB_API_KEY=d6ml6rpr01qi0ajmm7t0d6ml6rpr01qi0ajmm7tg
+
+# Polygon/Massive (tiebreaker, historical data)
+POLYGON_API_KEY=Z50G_fKhrQmUWZ_9gCpN2XYeaNI99MYW
+```
+
+### AI/ML APIs
+```bash
+# Anthropic (Claude for all agents)
+ANTHROPIC_API_KEY=sk-ant-api03-...  # Already configured
+
+# OpenAI (whisper fallback for transcription)
+OPENAI_API_KEY=  # Optional, leave blank to use local faster-whisper
+
+# Hugging Face (pyannote diarization)
+HUGGINGFACE_TOKEN=  # Optional, for speaker diarization
+```
+
+### Rate Limits
+| API | Rate Limit | Notes |
+|-----|------------|-------|
+| FMP | 250/day (free) | Primary market data |
+| Finnhub | 60/min (free) | Real-time quotes |
+| Polygon | 5/min (free) | Tiebreaker only |
+| SEC EDGAR | 10/sec | User-Agent required |
+| Anthropic | Per model | See docs |
+
+### SEC EDGAR User-Agent
+Required for SEC requests: `Chris Adams chris@gic-fund.com`
