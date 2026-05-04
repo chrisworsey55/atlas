@@ -7,7 +7,7 @@ import hashlib
 import json
 import re
 import sqlite3
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Iterable
 
@@ -100,18 +100,20 @@ class GenePool:
         db_path: Path | None = None,
         repo_root: Path | None = None,
         prompts_dir: Path | None = None,
+        simulation_date: date | None = None,
         seed: bool = True,
         reset: bool = False,
     ) -> None:
         self.db_path = db_path or DEFAULT_DB_PATH
         self.repo_root = repo_root or REPO_ROOT
         self.prompts_dir = prompts_dir or DEFAULT_PROMPTS_DIR
+        self.simulation_date = simulation_date or datetime.now(tz=UTC).date()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         if reset and self.db_path.exists():
             self.db_path.unlink()
         self._init_schema()
         if seed:
-            self.seed_from_repo()
+            self.seed_from_repo(simulation_date=self.simulation_date)
 
     def connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
@@ -177,8 +179,10 @@ class GenePool:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_entries_created ON gene_pool_entries(created_at)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_tags_value ON gene_pool_tags(tag_value)")
 
-    def seed_from_repo(self) -> GenePoolSeedSummary:
+    def seed_from_repo(self, simulation_date: date | None = None) -> GenePoolSeedSummary:
         """Seed from git history and current live prompt files."""
+        if simulation_date is not None:
+            self.simulation_date = simulation_date
         events = parse_autoresearch_history(self.repo_root)
         day_events = [event for event in events if event.kind == "day" and event.agent_id]
         revert_events = [event for event in events if event.kind == "revert"]
@@ -234,7 +238,7 @@ class GenePool:
                 retired_at = None if status == "active" else entry.created_at
             final_entries.append(self._replace_entry(entry, status=status, retired_at=retired_at))
 
-        live_entries = self._seed_live_prompts(versions_by_agent)
+        live_entries = self._seed_live_prompts(versions_by_agent, simulation_date=self.simulation_date)
         active_agents = {entry.agent_id for entry in final_entries if entry.status == "active"}
         for live_entry in live_entries:
             active_agents.add(live_entry.agent_id)
@@ -258,36 +262,52 @@ class GenePool:
             rows = conn.execute("SELECT * FROM gene_pool_entries ORDER BY agent_id, version").fetchall()
         return [GenePoolEntry.from_row(row) for row in rows]
 
-    def find_best_for_regime(self, agent_id: str, regime: str, top_n: int = 3) -> list[GenePoolEntry]:
+    def find_best_for_regime(
+        self,
+        agent_id: str,
+        regime: str,
+        top_n: int = 3,
+        as_of: date | None = None,
+    ) -> list[GenePoolEntry]:
         canonical = normalize_agent_id(agent_id)
+        as_of_iso = self._as_of_iso(as_of)
         with self.connect() as conn:
             rows = conn.execute(
                 """
                 SELECT * FROM gene_pool_entries
                 WHERE agent_id = ?
                   AND (regime = ? OR regime = 'unknown')
+                  AND (? IS NULL OR created_at <= ?)
                 ORDER BY COALESCE(composite_score, -9999) DESC,
                          COALESCE(sharpe_20d, -9999) DESC,
                          COALESCE(sharpe_5d, -9999) DESC,
                          version DESC
                 LIMIT ?
                 """,
-                (canonical, regime, top_n),
+                (canonical, regime, as_of_iso, as_of_iso, top_n),
             ).fetchall()
         return [GenePoolEntry.from_row(row) for row in rows]
 
-    def find_donors(self, weakness_tags: list[str], regime: str, exclude_agent: str | None = None) -> list[GenePoolEntry]:
+    def find_donors(
+        self,
+        weakness_tags: list[str],
+        regime: str,
+        exclude_agent: str | None = None,
+        as_of: date | None = None,
+    ) -> list[GenePoolEntry]:
         canonical_exclude = normalize_agent_id(exclude_agent) if exclude_agent else None
         if not weakness_tags:
             return []
+        as_of_iso = self._as_of_iso(as_of)
         with self.connect() as conn:
             rows = conn.execute(
                 """
                 SELECT * FROM gene_pool_entries
                 WHERE regime IN (?, 'unknown')
+                  AND (? IS NULL OR created_at <= ?)
                 ORDER BY COALESCE(composite_score, -9999) DESC, version DESC
                 """,
-                (regime,),
+                (regime, as_of_iso, as_of_iso),
             ).fetchall()
         wanted = {tag.lower() for tag in weakness_tags}
         matched = []
@@ -300,8 +320,13 @@ class GenePool:
                 matched.append(entry)
         return matched
 
-    def find_analogues(self, regime: str, lookback_days: int = 30) -> list[GenePoolEntry]:
-        cutoff = (datetime.now(tz=UTC) - timedelta(days=lookback_days)).isoformat()
+    def find_analogues(
+        self,
+        regime: str,
+        lookback_days: int = 30,
+        as_of: date | None = None,
+    ) -> list[GenePoolEntry]:
+        cutoff = self._lookback_cutoff(lookback_days, as_of=as_of)
         with self.connect() as conn:
             rows = conn.execute(
                 """
@@ -315,28 +340,40 @@ class GenePool:
             ).fetchall()
         return [GenePoolEntry.from_row(row) for row in rows]
 
-    def get_extinct(self, regime: str | None = None) -> list[GenePoolEntry]:
+    def get_extinct(self, regime: str | None = None, as_of: date | None = None) -> list[GenePoolEntry]:
         sql = "SELECT * FROM gene_pool_entries WHERE status = 'extinct'"
         params: list[object] = []
         if regime is not None:
             sql += " AND regime = ?"
             params.append(regime)
+        as_of_iso = self._as_of_iso(as_of)
+        if as_of_iso is not None:
+            sql += " AND created_at <= ?"
+            params.append(as_of_iso)
         sql += " ORDER BY created_at DESC"
         with self.connect() as conn:
             rows = conn.execute(sql, params).fetchall()
         return [GenePoolEntry.from_row(row) for row in rows]
 
-    def search(self, query_tags: list[str], regime: str | None = None, min_score: float = 0.0) -> list[GenePoolEntry]:
+    def search(
+        self,
+        query_tags: list[str],
+        regime: str | None = None,
+        min_score: float = 0.0,
+        as_of: date | None = None,
+    ) -> list[GenePoolEntry]:
         if not query_tags:
             return []
+        as_of_iso = self._as_of_iso(as_of)
         with self.connect() as conn:
             rows = conn.execute(
                 """
                 SELECT * FROM gene_pool_entries
                 WHERE COALESCE(composite_score, 0) >= ?
+                  AND (? IS NULL OR created_at <= ?)
                 ORDER BY COALESCE(composite_score, -9999) DESC, created_at DESC
                 """,
-                (min_score,),
+                (min_score, as_of_iso, as_of_iso),
             ).fetchall()
         wanted = {tag.lower() for tag in query_tags}
         results = []
@@ -472,8 +509,9 @@ class GenePool:
         data.update(changes)
         return GenePoolEntry(**data)
 
-    def _seed_live_prompts(self, versions_by_agent: dict[str, int]) -> list[GenePoolEntry]:
+    def _seed_live_prompts(self, versions_by_agent: dict[str, int], simulation_date: date | None = None) -> list[GenePoolEntry]:
         live_entries: list[GenePoolEntry] = []
+        created_at = (simulation_date or self.simulation_date).isoformat()
         for prompt_file in sorted(self.prompts_dir.glob("*.md")):
             agent_id = normalize_agent_id(prompt_file.stem)
             prompt_text = prompt_file.read_text()
@@ -485,7 +523,7 @@ class GenePool:
                     prompt_path=str(prompt_file),
                     prompt_text=prompt_text,
                     git_commit="WORKTREE",
-                    created_at=datetime.now(tz=UTC).isoformat(),
+                    created_at=created_at,
                     source_kind="current_prompt",
                     source_ref=str(prompt_file),
                     status="active",
@@ -605,6 +643,13 @@ class GenePool:
             return None
         match = re.search(r"day:(\d+)", source_ref)
         return int(match.group(1)) if match else None
+
+    def _lookback_cutoff(self, lookback_days: int, as_of: date | None = None) -> str:
+        reference = as_of or self.simulation_date
+        return (datetime.combine(reference, datetime.min.time(), tzinfo=UTC) - timedelta(days=lookback_days)).isoformat()
+
+    def _as_of_iso(self, as_of: date | None = None) -> str | None:
+        return as_of.isoformat() if as_of is not None else None
 
 
 def seed_default_gene_pool(reset: bool = False) -> GenePoolSeedSummary:

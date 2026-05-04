@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 import os
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Callable, Iterable
 
@@ -66,33 +67,55 @@ class PostMortemEngine:
         output_dir: Path | None = None,
         cache_dir: Path | None = None,
         llm_runner: Callable[[str], dict] | None = None,
+        simulation_date: date | None = None,
     ) -> None:
         self.repo_root = repo_root or REPO_ROOT
         self.output_dir = output_dir or (self.repo_root / "darwin_v3" / "postmortems")
         self.cache_dir = cache_dir or (self.output_dir / "cache")
+        self.simulation_date = simulation_date or datetime.now(tz=UTC).date()
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self._llm_runner = llm_runner or self._default_llm_runner
 
-    def load_trades(self, trade_sources: Iterable[Path] | None = None) -> list[TradeRecord]:
+    def load_trades(
+        self,
+        trade_sources: Iterable[Path] | None = None,
+        simulation_date: date | None = None,
+    ) -> list[TradeRecord]:
         sources = list(trade_sources or self._default_trade_sources())
+        cutoff = simulation_date or self.simulation_date
         trades: list[TradeRecord] = []
         for source in sources:
             if source.suffix == ".json" and source.exists():
                 data = json.loads(source.read_text())
                 for item in data:
                     if isinstance(item, dict) and item.get("status"):
-                        trades.append(self._trade_from_dict(item))
+                        trade = self._trade_from_dict(item)
+                        if trade.date <= cutoff.isoformat():
+                            trades.append(trade)
         return trades
 
-    def find_triggers(self, trades: Iterable[TradeRecord]) -> list[tuple[str, TradeRecord]]:
+    def find_triggers(
+        self,
+        trades: Iterable[TradeRecord],
+        simulation_date: date | None = None,
+    ) -> list[tuple[str, TradeRecord]]:
         triggered: list[tuple[str, TradeRecord]] = []
+        cutoff = simulation_date or self.simulation_date
         for trade in trades:
+            if trade.date > cutoff.isoformat():
+                continue
             for trigger in self._trade_triggers(trade):
                 triggered.append((trigger, trade))
         return triggered
 
-    def generate_postmortem(self, trade: TradeRecord, regime: str = "unknown", vix: float | None = None) -> PostMortemResult:
+    def generate_postmortem(
+        self,
+        trade: TradeRecord,
+        regime: str = "unknown",
+        vix: float | None = None,
+        simulation_date: date | None = None,
+    ) -> PostMortemResult:
         trigger = self._primary_trigger(trade)
         prompt = self._build_prompt(trade, trigger, regime=regime, vix=vix)
         cache_key = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
@@ -109,11 +132,17 @@ class PostMortemEngine:
         out_path.write_text(json.dumps(result, indent=2, sort_keys=True))
         return PostMortemResult(path=out_path, payload=result, cached=cached)
 
-    def run_from_default_sources(self, regime: str = "unknown", vix: float | None = None) -> list[PostMortemResult]:
+    def run_from_default_sources(
+        self,
+        regime: str = "unknown",
+        vix: float | None = None,
+        simulation_date: date | None = None,
+    ) -> list[PostMortemResult]:
         results: list[PostMortemResult] = []
-        for trigger, trade in self.find_triggers(self.load_trades()):
+        cutoff = simulation_date or self.simulation_date
+        for trigger, trade in self.find_triggers(self.load_trades(simulation_date=cutoff), simulation_date=cutoff):
             if trade.is_closed_loss:
-                results.append(self.generate_postmortem(trade, regime=regime, vix=vix))
+                results.append(self.generate_postmortem(trade, regime=regime, vix=vix, simulation_date=cutoff))
         return results
 
     def _trade_from_dict(self, item: dict) -> TradeRecord:
@@ -278,6 +307,7 @@ def run_postmortems_from_default_sources(
     regime: str = "unknown",
     vix: float | None = None,
     llm_runner: Callable[[str], dict] | None = None,
+    simulation_date: date | None = None,
 ) -> list[PostMortemResult]:
-    engine = PostMortemEngine(repo_root=repo_root, llm_runner=llm_runner)
-    return engine.run_from_default_sources(regime=regime, vix=vix)
+    engine = PostMortemEngine(repo_root=repo_root, llm_runner=llm_runner, simulation_date=simulation_date)
+    return engine.run_from_default_sources(regime=regime, vix=vix, simulation_date=simulation_date)

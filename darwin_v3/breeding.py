@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, asdict
 import json
 from pathlib import Path
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, date, datetime, timedelta
 
 from .gene_pool import GenePool
 
@@ -28,10 +28,12 @@ class BreedingSelector:
         gene_pool: GenePool,
         postmortem_dir: Path,
         log_path: Path,
+        simulation_date: date | None = None,
     ) -> None:
         self.gene_pool = gene_pool
         self.postmortem_dir = postmortem_dir
         self.log_path = log_path
+        self.simulation_date = simulation_date or datetime.now(tz=UTC).date()
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
 
     def select_rewrite_strategy(
@@ -40,8 +42,10 @@ class BreedingSelector:
         current_version: int,
         current_regime: str = "unknown",
         current_score: float | None = None,
+        simulation_date: date | None = None,
     ) -> RewriteStrategy:
-        postmortems = self._load_recent_postmortems(agent_id, days=20)
+        ref_date = simulation_date or self.simulation_date
+        postmortems = self._load_recent_postmortems(agent_id, days=20, simulation_date=ref_date)
         if not postmortems:
             return self._log(
                 RewriteStrategy(
@@ -52,7 +56,7 @@ class BreedingSelector:
             )
 
         weakness_tags = sorted({tag for pm in postmortems for tag in pm.get("knowledge_gaps", [])})
-        donor_pool = self.gene_pool.find_donors(weakness_tags, current_regime, exclude_agent=agent_id)
+        donor_pool = self.gene_pool.find_donors(weakness_tags, current_regime, exclude_agent=agent_id, as_of=ref_date)
         if donor_pool:
             donor = donor_pool[0]
             return self._log(
@@ -65,7 +69,7 @@ class BreedingSelector:
                 )
             )
 
-        historical = self.gene_pool.find_best_for_regime(agent_id, current_regime, top_n=1)
+        historical = self.gene_pool.find_best_for_regime(agent_id, current_regime, top_n=1, as_of=ref_date)
         if historical and current_score is not None and historical[0].composite_score is not None:
             if historical[0].composite_score > current_score:
                 return self._log(
@@ -83,7 +87,7 @@ class BreedingSelector:
             if pm.get("spawn_candidate")
             and self._pm_days_ago(pm) <= 7
         ]
-        if len(spawn_candidates) >= 3 and not donor_pool and not self.gene_pool.get_extinct(current_regime):
+        if len(spawn_candidates) >= 3 and not donor_pool and not self.gene_pool.get_extinct(current_regime, as_of=ref_date):
             description = spawn_candidates[-1].get("spawn_description")
             return self._log(
                 RewriteStrategy(
@@ -102,10 +106,11 @@ class BreedingSelector:
             )
         )
 
-    def _load_recent_postmortems(self, agent_id: str, days: int) -> list[dict]:
+    def _load_recent_postmortems(self, agent_id: str, days: int, simulation_date: date | None = None) -> list[dict]:
         if not self.postmortem_dir.exists():
             return []
-        cutoff = datetime.now(tz=UTC) - timedelta(days=days)
+        ref = datetime.combine((simulation_date or self.simulation_date), datetime.min.time(), tzinfo=UTC)
+        cutoff = ref - timedelta(days=days)
         items: list[dict] = []
         for path in sorted(self.postmortem_dir.glob(f"{agent_id}_*.json")):
             try:
@@ -129,7 +134,7 @@ class BreedingSelector:
             parsed = datetime.fromisoformat(date_str)
             if parsed.tzinfo is None:
                 parsed = parsed.replace(tzinfo=UTC)
-            return max(0, (datetime.now(tz=UTC) - parsed).days)
+            return max(0, (datetime.combine(self.simulation_date, datetime.min.time(), tzinfo=UTC) - parsed).days)
         except ValueError:
             return 9999
 
@@ -145,4 +150,3 @@ class BreedingSelector:
         existing.append(entry)
         self.log_path.write_text(json.dumps(existing, indent=2, sort_keys=True))
         return strategy
-

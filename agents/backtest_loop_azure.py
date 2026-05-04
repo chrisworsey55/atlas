@@ -73,50 +73,10 @@ MAX_SECTOR_PCT = 30
 MIN_POSITION_PCT = 2
 MIN_CASH_PCT = 10
 
-# =============================================================================
-# EXECUTION RULES (Anti-Whipsaw)
-# =============================================================================
-# These rules constrain what actually gets traded to prevent flip-flopping
-
-EXECUTION_RULES = {
-    # RULE 1: Minimum holding period
-    # Do not close or reverse any position within 10 trading days of entry
-    # unless stop loss is hit.
-    "min_holding_days": 10,
-
-    # RULE 2: No flip-flopping
-    # After closing a position, do not re-enter the same ticker in the
-    # opposite direction for 5 days.
-    "direction_cooldown_days": 5,
-
-    # RULE 3: Sector concentration limit
-    # Maximum 2 positions in the same GICS sector.
-    "max_per_sector": 2,
-
-    # RULE 4: Conviction threshold
-    # Only execute trades where 3+ agents agree on direction.
-    "min_agents_agreeing": 3,
-
-    # RULE 5: Position size cap
-    # No single position exceeds 15% of portfolio.
-    "max_position_pct": 0.15,
-
-    # RULE 6: Cash floor
-    # Maintain minimum 20% cash at all times.
-    "min_cash_pct": 0.20,
-
-    # RULE 7: Stop loss
-    # Close any position down 15% from entry.
-    "stop_loss_pct": 0.15,
-}
-
-# Track recent closes for direction cooldown
-RECENT_CLOSES: Dict[str, List[dict]] = {}
-
 # Agent batching for API efficiency
 MACRO_AGENTS_BATCH_1 = ["central_bank", "geopolitical", "china", "dollar", "yield_curve"]
 MACRO_AGENTS_BATCH_2 = ["commodities", "volatility", "emerging_markets", "news_sentiment", "institutional_flow"]
-SECTOR_AGENTS = ["semiconductor", "energy", "biotech", "consumer", "industrials", "financials", "simons"]
+SECTOR_AGENTS = ["semiconductor", "energy", "biotech", "consumer", "industrials", "financials"]
 SUPERINVESTOR_AGENTS = ["druckenmiller", "aschenbrenner", "baker", "ackman"]
 DECISION_AGENTS_BATCH_1 = ["cro", "alpha_discovery"]
 DECISION_AGENTS_BATCH_2 = ["autonomous_execution", "cio"]
@@ -154,148 +114,6 @@ FRED_SERIES = {
 # Anthropic client
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-# =============================================================================
-# SIMONS PATTERN SCANNER
-# =============================================================================
-
-SIMONS_PATTERNS_PATH = ATLAS_DIR / "simons" / "simons_patterns.json"
-SIMONS_PATTERNS_CACHE: Optional[List[dict]] = None
-
-def load_simons_patterns() -> List[dict]:
-    """Load confirmed SIMONS patterns from disk."""
-    global SIMONS_PATTERNS_CACHE
-    if SIMONS_PATTERNS_CACHE is not None:
-        return SIMONS_PATTERNS_CACHE
-
-    if not SIMONS_PATTERNS_PATH.exists():
-        return []
-
-    with open(SIMONS_PATTERNS_PATH) as f:
-        data = json.load(f)
-
-    patterns = data.get("confirmed_patterns", [])
-    # Exclude PAT_018 (permanently culled)
-    patterns = [p for p in patterns if p.get("id") != "PAT_018"]
-    SIMONS_PATTERNS_CACHE = patterns
-    return patterns
-
-
-def check_pattern_fires(pattern: dict, ticker: str, prices: dict, date: str) -> bool:
-    """
-    Check if a pattern fires for a given ticker on a given date.
-
-    Simplified pattern checking based on price conditions.
-    """
-    conditions = pattern.get("conditions", [])
-
-    for cond in conditions:
-        cond_type = cond.get("type", "")
-        params = cond.get("params", {})
-
-        if cond_type == "drawdown":
-            # Check if ticker has drawn down X% in Y days
-            pct = params.get("pct", 1)
-            days = params.get("days", 2)
-
-            # Get historical prices
-            ticker_prices = prices.get(ticker, [])
-            if len(ticker_prices) < days + 1:
-                return False
-
-            current_price = ticker_prices[-1] if ticker_prices else 0
-            past_price = ticker_prices[-(days + 1)] if len(ticker_prices) > days else current_price
-
-            if past_price <= 0:
-                return False
-
-            drawdown_pct = ((past_price - current_price) / past_price) * 100
-            if drawdown_pct < pct:
-                return False
-
-        elif cond_type == "momentum":
-            # Check momentum conditions
-            days = params.get("days", 5)
-            direction = params.get("direction", "positive")
-
-            ticker_prices = prices.get(ticker, [])
-            if len(ticker_prices) < days + 1:
-                return False
-
-            current_price = ticker_prices[-1] if ticker_prices else 0
-            past_price = ticker_prices[-(days + 1)] if len(ticker_prices) > days else current_price
-
-            if past_price <= 0:
-                return False
-
-            momentum = (current_price - past_price) / past_price
-            if direction == "positive" and momentum <= 0:
-                return False
-            if direction == "negative" and momentum >= 0:
-                return False
-
-        elif cond_type == "volatility":
-            # Check volatility conditions (simplified)
-            pass
-
-    return True
-
-
-def get_simons_signals(tickers: List[str], price_history: dict, date: str) -> dict:
-    """
-    Scan confirmed patterns against today's data for given tickers.
-
-    Returns dict of ticker -> signal info
-    """
-    patterns = load_simons_patterns()
-    if not patterns:
-        return {}
-
-    signals = {}
-    for ticker in tickers:
-        firing = []
-        for pattern in patterns:
-            if check_pattern_fires(pattern, ticker, price_history, date):
-                firing.append(pattern)
-
-        if firing:
-            signals[ticker] = {
-                "patterns_firing": len(firing),
-                "direction": "LONG",
-                "signal_strength": sum(
-                    p.get("markowitz_weight", 1/31) for p in firing
-                ),
-                "avg_win_rate": sum(
-                    p.get("validation", {}).get("win_rate", 0.55) for p in firing
-                ) / len(firing),
-                "avg_return": sum(
-                    p.get("validation", {}).get("avg_win_pct", 2.0) for p in firing
-                ) / len(firing),
-                "holding_period": max(
-                    p.get("holding_days", 20) for p in firing
-                ),
-                "pattern_ids": [p.get("id", "unknown") for p in firing]
-            }
-
-    return signals
-
-
-def format_simons_signals(signals: dict) -> str:
-    """Format SIMONS signals for injection into agent context."""
-    if not signals:
-        return "SIMONS: No confirmed patterns firing on any ticker today. Statistical evidence is neutral."
-
-    lines = ["SIMONS SIGNAL REPORT:"]
-    for ticker, sig in sorted(signals.items(), key=lambda x: -x[1]["signal_strength"]):
-        lines.append(f"\n{ticker}: {sig['patterns_firing']} patterns firing")
-        lines.append(f"  Direction: {sig['direction']}")
-        lines.append(f"  Signal strength: {sig['signal_strength']:.3f}")
-        lines.append(f"  Historical win rate: {sig['avg_win_rate']*100:.1f}%")
-        lines.append(f"  Avg return: +{sig['avg_return']:.1f}%")
-        lines.append(f"  Holding period: {sig['holding_period']} days")
-        lines.append(f"  Patterns: {', '.join(sig['pattern_ids'])}")
-
-    return "\n".join(lines)
-
 
 # =============================================================================
 # DATA STRUCTURES
@@ -313,8 +131,6 @@ class Position:
     sector: str = ""
     agent_source: str = ""
     thesis: str = ""
-    stop_loss: float = 0.0  # Stop loss price (0 = not set)
-    target: float = 0.0  # Take profit price (0 = not set)
 
     @property
     def market_value(self) -> float:
@@ -338,19 +154,12 @@ class Position:
 class Portfolio:
     cash: float = STARTING_CAPITAL
     positions: List[Position] = field(default_factory=list)
-    short_proceeds: float = 0.0  # Track cash received from short sales
 
     @property
     def total_value(self) -> float:
-        """
-        Calculate total portfolio value correctly:
-        - Cash (including proceeds from short sales)
-        - Plus long position market values
-        - Minus short position obligations (what we owe to cover)
-        """
         long_value = sum(p.market_value for p in self.positions if p.direction == "LONG")
-        short_obligation = sum(p.market_value for p in self.positions if p.direction == "SHORT")
-        return self.cash + long_value - short_obligation
+        short_value = sum(p.market_value for p in self.positions if p.direction == "SHORT")
+        return self.cash + long_value - short_value
 
     @property
     def gross_exposure(self) -> float:
@@ -369,46 +178,6 @@ class Portfolio:
         long_value = sum(p.market_value for p in self.positions if p.direction == "LONG")
         short_value = sum(p.market_value for p in self.positions if p.direction == "SHORT")
         return (long_value - short_value) / total
-
-    def close_position(self, ticker: str, exit_price: float) -> Optional[dict]:
-        """
-        Close a position and return P&L details.
-        Returns dict with pnl, direction, shares or None if position not found.
-        """
-        for i, pos in enumerate(self.positions):
-            if pos.ticker == ticker:
-                # Calculate P&L
-                if pos.direction == "LONG":
-                    pnl = (exit_price - pos.entry_price) * pos.shares
-                    # Return cash from selling
-                    self.cash += pos.shares * exit_price
-                else:  # SHORT
-                    pnl = (pos.entry_price - exit_price) * pos.shares
-                    # Pay to cover the short (buy back shares)
-                    self.cash -= pos.shares * exit_price
-
-                result = {
-                    "ticker": ticker,
-                    "direction": pos.direction,
-                    "shares": pos.shares,
-                    "entry_price": pos.entry_price,
-                    "exit_price": exit_price,
-                    "pnl": pnl,
-                    "pnl_pct": (pnl / pos.cost_basis) * 100 if pos.cost_basis > 0 else 0
-                }
-
-                # Remove position
-                self.positions.pop(i)
-                return result
-
-        return None
-
-    def get_position(self, ticker: str) -> Optional[Position]:
-        """Get position by ticker, or None if not found."""
-        for pos in self.positions:
-            if pos.ticker == ticker:
-                return pos
-        return None
 
 
 @dataclass
@@ -1270,8 +1039,18 @@ class MarketSnapshot:
         sector_map = self._load_sector_map()
         return sector_map.get(ticker, {}).get("sector", "Unknown")
 
-    def build_snapshot(self, date: str, portfolio: Portfolio, agent_weights: dict) -> dict:
-        """Build complete market snapshot for a given date."""
+    def build_snapshot(self, date: str, portfolio: Portfolio, agent_weights: dict,
+                       meta: dict = None) -> dict:
+        """Build complete market snapshot for a given date.
+
+        Args:
+            date: Current trading date
+            portfolio: Current portfolio state
+            agent_weights: Agent performance weights
+            meta: Additional context (spy_return, drawdown, days_since_trade, peak_value)
+        """
+        meta = meta or {}
+
         snapshot = {
             "date": date,
             "prices": {},
@@ -1286,14 +1065,32 @@ class MarketSnapshot:
                 "gross_exposure": portfolio.gross_exposure,
                 "net_exposure": portfolio.net_exposure
             },
-            "agent_weights": agent_weights
+            "agent_weights": agent_weights,
+            "benchmark": {
+                "spy_return": meta.get("spy_return", 0)
+            },
+            "meta": {
+                "drawdown": meta.get("drawdown", 0),
+                "days_since_trade": meta.get("days_since_trade", 0),
+                "peak_value": meta.get("peak_value", 1000000)
+            }
         }
 
-        # Portfolio positions
+        # Portfolio positions with days held
         for pos in portfolio.positions:
             price = self.get_price(pos.ticker, date)
             if price:
                 pos.current_price = price
+
+            # Calculate days held
+            days_held = 0
+            if pos.entry_date:
+                try:
+                    entry = datetime.strptime(pos.entry_date, "%Y-%m-%d")
+                    current = datetime.strptime(date, "%Y-%m-%d")
+                    days_held = (current - entry).days
+                except:
+                    pass
 
             snapshot["portfolio"]["positions"].append({
                 "ticker": pos.ticker,
@@ -1303,7 +1100,9 @@ class MarketSnapshot:
                 "current_price": pos.current_price,
                 "pnl": pos.pnl,
                 "pnl_pct": pos.pnl_pct,
-                "sector": pos.sector
+                "sector": pos.sector,
+                "days_held": days_held,
+                "entry_date": pos.entry_date
             })
 
         # Key indices and prices
@@ -1382,15 +1181,53 @@ class AgentDebate:
         portfolio = snapshot["portfolio"]
         macro = snapshot["macro"]
 
-        # Portfolio summary
+        # CIO-specific context from meta
+        benchmark = snapshot.get("benchmark", {})
+        meta = snapshot.get("meta", {})
+
+        # Portfolio vs benchmark
+        portfolio_return = ((portfolio['total_value'] - 1000000) / 1000000) * 100
+        spy_return = benchmark.get("spy_return", 0)
+        alpha = portfolio_return - spy_return
+
+        # Cash as percentage
+        cash_pct = (portfolio['cash'] / portfolio['total_value']) * 100 if portfolio['total_value'] > 0 else 100
+
+        # Drawdown and days since trade
+        drawdown = meta.get("drawdown", 0)
+        days_since_trade = meta.get("days_since_trade", 0)
+        peak_value = meta.get("peak_value", 1000000)
+
+        # Position details with age and stop loss flags
         positions_text = []
         for pos in portfolio["positions"]:
+            days_held = pos.get("days_held", 0)
+            stop_hit = "*** STOP LOSS HIT ***" if pos['pnl_pct'] <= -15 else ""
+            age_warning = "[REVIEW - 60+ days]" if days_held >= 60 else ""
             positions_text.append(
                 f"  {pos['ticker']}: {pos['direction']} @ ${pos['entry_price']:.2f} -> "
-                f"${pos['current_price']:.2f} | P&L: ${pos['pnl']:.2f} ({pos['pnl_pct']:.2f}%)"
+                f"${pos['current_price']:.2f} | P&L: {pos['pnl_pct']:+.1f}% | Days: {days_held} {stop_hit}{age_warning}"
             )
 
         positions_str = "\n".join(positions_text) if positions_text else "  NO POSITIONS"
+
+        # Benchmark status
+        if alpha > 0:
+            benchmark_status = "BEATING BENCHMARK"
+        elif alpha < -10:
+            benchmark_status = "*** UNDERPERFORMING - ACTION REQUIRED ***"
+        else:
+            benchmark_status = "TRAILING BENCHMARK"
+
+        # Cash warning
+        cash_warning = ""
+        if cash_pct > 30:
+            cash_warning = f"\n*** WARNING: Cash at {cash_pct:.0f}% - Deploy or explain why not ***"
+
+        # Inactivity warning
+        trade_warning = ""
+        if days_since_trade > 20:
+            trade_warning = f"\n*** WARNING: {days_since_trade} days since last trade - Review positions ***"
 
         # Macro summary
         macro_str = f"""
@@ -1411,20 +1248,36 @@ Dollar Index: {macro.get('dollar_index', 'N/A')}
 === MARKET DATA — {date} ===
 (BACKTEST MODE: You can only see data up to this date)
 
-PORTFOLIO STATUS:
-Total Value: ${portfolio['total_value']:,.2f}
-Cash: ${portfolio['cash']:,.2f}
+=== BENCHMARK CHECK ===
+Portfolio Return: {portfolio_return:+.1f}%
+SPY Return (same period): {spy_return:+.1f}%
+Alpha: {alpha:+.1f}%
+Status: {benchmark_status}
+
+=== PORTFOLIO STATUS ===
+Total Value: ${portfolio['total_value']:,.0f} (Peak: ${peak_value:,.0f})
+Cash: ${portfolio['cash']:,.0f} ({cash_pct:.0f}% of portfolio)
+Drawdown from Peak: {drawdown:.1f}%
+Days Since Last Trade: {days_since_trade}
 Gross Exposure: {portfolio['gross_exposure']*100:.1f}%
 Net Exposure: {portfolio['net_exposure']*100:.1f}%
+{cash_warning}{trade_warning}
 
-CURRENT POSITIONS:
+=== CURRENT POSITIONS (Review each one!) ===
 {positions_str}
 
-KEY INDICES:
+=== KEY INDICES ===
 {prices_str}
 
-MACRO ENVIRONMENT:
+=== MACRO ENVIRONMENT ===
 {macro_str}
+
+ACTION REQUIRED:
+1. Review each position - would you enter today? If not, EXIT
+2. Any position down 15%+ from entry - EXIT IMMEDIATELY (stop loss)
+3. Any position held 60+ days - RECONFIRM thesis or EXIT
+4. Cash above 30% - DEPLOY into high-conviction ideas
+5. If trailing SPY by >10% - MAKE CHANGES
 
 Provide your analysis and specific trade recommendations in JSON format.
 """
@@ -1513,9 +1366,17 @@ Respond with JSON containing each agent's analysis.
 
         return views
 
-    def run_debate(self, date: str, portfolio: Portfolio, agent_weights: dict) -> dict:
-        """Run full agent debate for a given date."""
-        snapshot = self.snapshot.build_snapshot(date, portfolio, agent_weights)
+    def run_debate(self, date: str, portfolio: Portfolio, agent_weights: dict,
+                   meta: dict = None) -> dict:
+        """Run full agent debate for a given date.
+
+        Args:
+            date: Current trading date
+            portfolio: Current portfolio state
+            agent_weights: Agent performance weights
+            meta: Additional CIO context (spy_return, drawdown, days_since_trade, peak_value)
+        """
+        snapshot = self.snapshot.build_snapshot(date, portfolio, agent_weights, meta)
         all_views = {}
 
         # Layer 1: Macro Agents (Batch 1)
@@ -1558,329 +1419,165 @@ Respond with JSON containing each agent's analysis.
 class TradeExecutor:
     """Executes trades based on CIO decisions."""
 
-    # Default stop-loss percentage (15% from entry)
-    DEFAULT_STOP_LOSS_PCT = 15.0
-    # Default take-profit percentage (30% from entry)
-    DEFAULT_TAKE_PROFIT_PCT = 30.0
-
     def __init__(self, snapshot_builder: MarketSnapshot):
         self.snapshot = snapshot_builder
 
-    def check_stop_losses(self, date: str, portfolio: Portfolio) -> List[dict]:
-        """
-        Check all positions for stop-loss or take-profit triggers.
-        Returns list of trades executed.
-        """
-        trades = []
-        positions_to_close = []
-
-        for pos in portfolio.positions:
-            price = self.snapshot.get_price(pos.ticker, date)
-            if not price or price <= 0:
-                continue
-
-            pos.current_price = price
-            should_close = False
-            close_reason = ""
-
-            if pos.direction == "LONG":
-                # Check stop-loss (price dropped too much)
-                stop_price = pos.stop_loss if pos.stop_loss > 0 else pos.entry_price * (1 - self.DEFAULT_STOP_LOSS_PCT / 100)
-                if price <= stop_price:
-                    should_close = True
-                    close_reason = "STOP_LOSS"
-
-                # Check take-profit
-                target_price = pos.target if pos.target > 0 else pos.entry_price * (1 + self.DEFAULT_TAKE_PROFIT_PCT / 100)
-                if price >= target_price:
-                    should_close = True
-                    close_reason = "TAKE_PROFIT"
-
-            else:  # SHORT
-                # Check stop-loss (price rose too much - losing money on short)
-                stop_price = pos.stop_loss if pos.stop_loss > 0 else pos.entry_price * (1 + self.DEFAULT_STOP_LOSS_PCT / 100)
-                if price >= stop_price:
-                    should_close = True
-                    close_reason = "STOP_LOSS"
-
-                # Check take-profit (price dropped - making money on short)
-                target_price = pos.target if pos.target > 0 else pos.entry_price * (1 - self.DEFAULT_TAKE_PROFIT_PCT / 100)
-                if price <= target_price:
-                    should_close = True
-                    close_reason = "TAKE_PROFIT"
-
-            if should_close:
-                positions_to_close.append((pos.ticker, price, close_reason))
-
-        # Close positions outside the loop to avoid modifying list while iterating
-        for ticker, price, reason in positions_to_close:
-            result = portfolio.close_position(ticker, price)
-            if result:
-                transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
-                portfolio.cash -= transaction_cost
-
-                action = "SELL" if result["direction"] == "LONG" else "COVER"
-                trade = {
-                    "date": date,
-                    "ticker": ticker,
-                    "action": action,
-                    "shares": result["shares"],
-                    "price": price,
-                    "value": result["shares"] * price,
-                    "cost": transaction_cost,
-                    "pnl": result["pnl"],
-                    "reason": reason
-                }
-                trades.append(trade)
-                log(f"    {reason}: {action} {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
-
-        return trades
-
-    def _check_execution_rules(self, ticker: str, direction: str, date: str,
-                                 portfolio: Portfolio, all_views: dict, sector_map: dict) -> Tuple[bool, str]:
-        """
-        Check if a trade passes all execution rules.
-        Returns (approved, reason).
-        """
-        from datetime import datetime
-
-        # RULE 1: Check minimum holding period for existing positions
-        existing = portfolio.get_position(ticker)
-        if existing and existing.direction != direction:
-            # Trying to reverse - check holding period
-            try:
-                entry_date = datetime.strptime(existing.entry_date, "%Y-%m-%d")
-                current_date = datetime.strptime(date, "%Y-%m-%d")
-                days_held = (current_date - entry_date).days
-                if days_held < EXECUTION_RULES["min_holding_days"]:
-                    return False, f"min_holding_period ({days_held}/{EXECUTION_RULES['min_holding_days']} days)"
-            except:
-                pass
-
-        # RULE 2: Check direction cooldown (no flip-flopping)
-        if ticker in RECENT_CLOSES:
-            for close in RECENT_CLOSES[ticker]:
-                if close.get("direction") != direction:
-                    try:
-                        close_date = datetime.strptime(close["date"], "%Y-%m-%d")
-                        current_date = datetime.strptime(date, "%Y-%m-%d")
-                        days_since = (current_date - close_date).days
-                        if days_since < EXECUTION_RULES["direction_cooldown_days"]:
-                            return False, f"direction_cooldown ({days_since}/{EXECUTION_RULES['direction_cooldown_days']} days)"
-                    except:
-                        pass
-
-        # RULE 3: Check sector concentration limit
-        sector = sector_map.get(ticker, {}).get("sector", "Unknown")
-        sector_count = sum(
-            1 for p in portfolio.positions
-            if sector_map.get(p.ticker, {}).get("sector", "Unknown") == sector
-        )
-        if sector_count >= EXECUTION_RULES["max_per_sector"]:
-            return False, f"sector_limit ({sector}: {sector_count}/{EXECUTION_RULES['max_per_sector']})"
-
-        # RULE 4: Check conviction (agents agreeing)
-        agents_agreeing = 0
-        for agent, view in all_views.items():
-            if not isinstance(view, dict):
-                continue
-            # Check top_longs and top_shorts
-            for rec in view.get("top_longs", []):
-                if rec.get("ticker") == ticker and direction == "LONG":
-                    agents_agreeing += 1
-                    break
-            for rec in view.get("top_shorts", []):
-                if rec.get("ticker") == ticker and direction == "SHORT":
-                    agents_agreeing += 1
-                    break
-            # Check signal
-            if view.get("signal") == "BULLISH" and direction == "LONG":
-                agents_agreeing += 0.5
-            elif view.get("signal") == "BEARISH" and direction == "SHORT":
-                agents_agreeing += 0.5
-
-        if agents_agreeing < EXECUTION_RULES["min_agents_agreeing"]:
-            return False, f"low_conviction ({agents_agreeing:.1f}/{EXECUTION_RULES['min_agents_agreeing']} agents)"
-
-        # RULE 6: Check cash floor
-        if direction == "LONG":
-            position_value = portfolio.total_value * 0.05  # Estimate 5% position
-            cash_after = portfolio.cash - position_value
-            min_cash = portfolio.total_value * EXECUTION_RULES["min_cash_pct"]
-            if cash_after < min_cash:
-                return False, f"cash_floor (${cash_after:,.0f} < ${min_cash:,.0f})"
-
-        return True, "approved"
-
-    def execute(self, date: str, portfolio: Portfolio, cio_view: dict, sector_map: dict,
-                all_views: dict = None) -> List[dict]:
+    def execute(self, date: str, portfolio: Portfolio, cio_view: dict, sector_map: dict) -> List[dict]:
         """Execute trades from CIO recommendations."""
         import re
         trades = []
 
+        # PHASE 1: Automatic position management (stop losses, profit taking)
+        positions_to_close = []
+        for pos in portfolio.positions:
+            # Stop loss: exit any position down 15%+ from entry
+            if pos.pnl_pct <= -15:
+                positions_to_close.append((pos, "STOP_LOSS"))
+                log(f"    STOP LOSS TRIGGERED: {pos.ticker} at {pos.pnl_pct:.1f}%")
+
+            # Profit taking: trim winners up 30%+ (close 50% of position)
+            elif pos.pnl_pct >= 30:
+                # For now, just log - full position management would reduce shares
+                log(f"    PROFIT TARGET: {pos.ticker} at {pos.pnl_pct:.1f}% - should trim")
+
+        # Execute automatic closes
+        for pos, reason in positions_to_close:
+            price = pos.current_price
+            value = pos.shares * price
+            transaction_cost = value * (TRANSACTION_COST_BPS / 10000)
+
+            # Return cash for long positions
+            if pos.direction == "LONG":
+                portfolio.cash += (value - transaction_cost)
+            else:
+                portfolio.cash += (pos.cost_basis - value - transaction_cost)
+
+            portfolio.positions.remove(pos)
+
+            trade = {
+                "date": date,
+                "ticker": pos.ticker,
+                "action": "EXIT",
+                "reason": reason,
+                "shares": pos.shares,
+                "price": price,
+                "value": value,
+                "pnl": pos.pnl,
+                "pnl_pct": pos.pnl_pct
+            }
+            trades.append(trade)
+            log(f"    EXECUTED: EXIT {pos.ticker} @ ${price:.2f} (P&L: {pos.pnl_pct:+.1f}%) - {reason}")
+
         if not cio_view:
             return trades
 
-        if all_views is None:
-            all_views = {}
+        # PHASE 2: Parse CIO recommendations for exits and new positions
+        exits = []
+        new_positions = []
 
-        # Extract recommendations from CIO view
-        recommendations = []
-
-        # Try structured format
         if isinstance(cio_view, dict):
+            # Check for explicit exit instructions
+            for trade in cio_view.get("trades", []):
+                action = trade.get("action", "").upper()
+                ticker = trade.get("ticker")
+                if action in ["EXIT", "CLOSE", "COVER"] and ticker:
+                    exits.append(ticker)
+                elif action in ["BUY", "LONG"] and ticker:
+                    new_positions.append((ticker, "LONG", trade.get("conviction", 70)))
+                elif action in ["SELL", "SHORT"] and ticker:
+                    new_positions.append((ticker, "SHORT", trade.get("conviction", 70)))
+
+            # Check position_review for EXIT actions
+            for review in cio_view.get("position_review", []):
+                action = review.get("action", "").upper()
+                ticker = review.get("ticker")
+                if action == "EXIT" and ticker:
+                    exits.append(ticker)
+
+            # Standard parsing for recommendations
             for rec in cio_view.get("top_longs", []):
                 ticker = rec.get("ticker")
                 if ticker:
-                    recommendations.append((ticker, "LONG", rec.get("conviction", 50)))
+                    new_positions.append((ticker, "LONG", rec.get("conviction", 50)))
 
             for rec in cio_view.get("top_shorts", []):
                 ticker = rec.get("ticker")
                 if ticker:
-                    recommendations.append((ticker, "SHORT", rec.get("conviction", 50)))
+                    new_positions.append((ticker, "SHORT", rec.get("conviction", 50)))
 
-            # Also check for trades array
-            for trade in cio_view.get("trades", []):
-                action = trade.get("action", "").upper()
-                ticker = trade.get("ticker")
-                if action in ["BUY", "LONG"] and ticker:
-                    recommendations.append((ticker, "LONG", 70))
-                elif action in ["SELL", "SHORT"] and ticker:
-                    recommendations.append((ticker, "SHORT", 70))
-                elif action == "COVER" and ticker:
-                    recommendations.append((ticker, "COVER", 70))
-                elif action == "SELL" and ticker:
-                    recommendations.append((ticker, "SELL", 70))
-
-            # Check for recommendations array
             for rec in cio_view.get("recommendations", []):
                 ticker = rec.get("ticker") or rec.get("symbol")
                 action = (rec.get("action") or rec.get("direction") or "").upper()
                 conviction = rec.get("conviction", rec.get("confidence", 70))
                 if ticker and action in ["BUY", "LONG"]:
-                    recommendations.append((ticker, "LONG", conviction))
-                elif ticker and action in ["SELL"]:
-                    recommendations.append((ticker, "SELL", conviction))
-                elif ticker and action in ["SHORT"]:
-                    recommendations.append((ticker, "SHORT", conviction))
-                elif ticker and action in ["COVER"]:
-                    recommendations.append((ticker, "COVER", conviction))
+                    new_positions.append((ticker, "LONG", conviction))
+                elif ticker and action in ["SELL", "SHORT"]:
+                    new_positions.append((ticker, "SHORT", conviction))
+                elif ticker and action in ["EXIT", "CLOSE", "COVER"]:
+                    exits.append(ticker)
 
-            # Parse text-based raw output for BUY/SELL/COVER patterns
+            # Parse text-based patterns
             raw_text = cio_view.get("raw", "") or str(cio_view)
-            # Match patterns like "BUY AAPL" or "LONG NVDA" or "SHORT TLT" or "SELL AAPL" or "COVER TLT"
-            trade_patterns = re.findall(r'\b(BUY|LONG|SELL|SHORT|COVER)\s+([A-Z]{1,5})\b', raw_text.upper())
+            # Match EXIT patterns
+            exit_patterns = re.findall(r'\b(EXIT|CLOSE|COVER)\s+([A-Z]{1,5})\b', raw_text.upper())
+            for _, ticker in exit_patterns:
+                exits.append(ticker)
+            # Match BUY/SELL patterns
+            trade_patterns = re.findall(r'\b(BUY|LONG|SELL|SHORT)\s+([A-Z]{1,5})\b', raw_text.upper())
             for action, ticker in trade_patterns:
                 if action in ["BUY", "LONG"]:
-                    recommendations.append((ticker, "LONG", 60))
-                elif action == "SELL":
-                    recommendations.append((ticker, "SELL", 60))
-                elif action == "COVER":
-                    recommendations.append((ticker, "COVER", 60))
-                else:  # SHORT
-                    recommendations.append((ticker, "SHORT", 60))
+                    new_positions.append((ticker, "LONG", 60))
+                else:
+                    new_positions.append((ticker, "SHORT", 60))
+
+        # PHASE 3: Execute CIO-directed exits
+        for ticker in set(exits):
+            pos = next((p for p in portfolio.positions if p.ticker == ticker), None)
+            if pos:
+                price = pos.current_price
+                value = pos.shares * price
+                transaction_cost = value * (TRANSACTION_COST_BPS / 10000)
+
+                if pos.direction == "LONG":
+                    portfolio.cash += (value - transaction_cost)
+                else:
+                    portfolio.cash += (pos.cost_basis - value - transaction_cost)
+
+                portfolio.positions.remove(pos)
+
+                trade = {
+                    "date": date,
+                    "ticker": ticker,
+                    "action": "EXIT",
+                    "reason": "CIO_DECISION",
+                    "shares": pos.shares,
+                    "price": price,
+                    "value": value,
+                    "pnl": pos.pnl,
+                    "pnl_pct": pos.pnl_pct
+                }
+                trades.append(trade)
+                log(f"    EXECUTED: EXIT {ticker} @ ${price:.2f} (P&L: {pos.pnl_pct:+.1f}%) - CIO decision")
+
+        # Use new_positions instead of recommendations
+        recommendations = new_positions
 
         if not recommendations:
             return trades
 
         # Execute each recommendation
-        for ticker, direction, conviction in recommendations[:10]:  # Limit to top 10
+        for ticker, direction, conviction in recommendations[:5]:  # Limit to top 5
             price = self.snapshot.get_price(ticker, date)
             if not price or price <= 0:
                 continue
 
-            # Handle explicit SELL/COVER actions
-            if direction == "SELL":
-                existing = portfolio.get_position(ticker)
-                if existing and existing.direction == "LONG":
-                    result = portfolio.close_position(ticker, price)
-                    if result:
-                        transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
-                        portfolio.cash -= transaction_cost
-                        trade = {
-                            "date": date,
-                            "ticker": ticker,
-                            "action": "SELL",
-                            "shares": result["shares"],
-                            "price": price,
-                            "value": result["shares"] * price,
-                            "cost": transaction_cost,
-                            "pnl": result["pnl"],
-                            "reason": "CIO_RECOMMENDATION"
-                        }
-                        trades.append(trade)
-                        log(f"    EXECUTED: SELL {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
-                continue
-
-            if direction == "COVER":
-                existing = portfolio.get_position(ticker)
-                if existing and existing.direction == "SHORT":
-                    result = portfolio.close_position(ticker, price)
-                    if result:
-                        transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
-                        portfolio.cash -= transaction_cost
-                        trade = {
-                            "date": date,
-                            "ticker": ticker,
-                            "action": "COVER",
-                            "shares": result["shares"],
-                            "price": price,
-                            "value": result["shares"] * price,
-                            "cost": transaction_cost,
-                            "pnl": result["pnl"],
-                            "reason": "CIO_RECOMMENDATION"
-                        }
-                        trades.append(trade)
-                        log(f"    EXECUTED: COVER {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
-                continue
-
-            # Check execution rules BEFORE doing anything
-            approved, reason = self._check_execution_rules(
-                ticker, direction, date, portfolio, all_views, sector_map
-            )
-            if not approved:
-                # Skip this trade - blocked by execution rules
-                continue
-
-            # Check if already have position in opposite direction - close it first
-            existing = portfolio.get_position(ticker)
-            if existing:
-                if existing.direction != direction:
-                    # Opposite direction recommended - close existing position
-                    # (already passed execution rules check above)
-                    result = portfolio.close_position(ticker, price)
-                    if result:
-                        transaction_cost = abs(result["shares"] * price * (TRANSACTION_COST_BPS / 10000))
-                        portfolio.cash -= transaction_cost
-                        action = "SELL" if result["direction"] == "LONG" else "COVER"
-                        trade = {
-                            "date": date,
-                            "ticker": ticker,
-                            "action": action,
-                            "shares": result["shares"],
-                            "price": price,
-                            "value": result["shares"] * price,
-                            "cost": transaction_cost,
-                            "pnl": result["pnl"],
-                            "reason": "DIRECTION_REVERSAL"
-                        }
-                        trades.append(trade)
-                        # Track recent close for direction cooldown
-                        if ticker not in RECENT_CLOSES:
-                            RECENT_CLOSES[ticker] = []
-                        RECENT_CLOSES[ticker].append({
-                            "date": date,
-                            "direction": result["direction"]
-                        })
-                        # Keep only last 10 closes
-                        RECENT_CLOSES[ticker] = RECENT_CLOSES[ticker][-10:]
-                        log(f"    REVERSED: {action} {result['shares']} {ticker} @ ${price:.2f} (P&L: ${result['pnl']:+,.0f})")
-                else:
-                    # Same direction - skip (already have position)
-                    continue
-
             # Check position limits
             if len(portfolio.positions) >= MAX_POSITIONS:
+                continue
+
+            # Check if already have position
+            existing = [p for p in portfolio.positions if p.ticker == ticker]
+            if existing:
                 continue
 
             # Calculate position size based on conviction
@@ -1894,7 +1591,7 @@ class TradeExecutor:
             target_pct = min(target_pct, MAX_SINGLE_POSITION_PCT)
             target_value = portfolio.total_value * (target_pct / 100)
 
-            # Check cash availability for LONG positions
+            # Check cash availability
             if direction == "LONG":
                 if target_value > portfolio.cash * 0.9:  # Keep some buffer
                     target_value = portfolio.cash * 0.5
@@ -1915,22 +1612,11 @@ class TradeExecutor:
             if (sector_exposure + actual_value) / portfolio.total_value > MAX_SECTOR_PCT / 100:
                 continue
 
-            # Execute trade - FIXED: Proper cash handling for both LONG and SHORT
+            # Execute trade
             if direction == "LONG":
-                # LONG: Pay cash to buy shares
                 portfolio.cash -= (actual_value + transaction_cost)
             else:
-                # SHORT: Receive cash from selling borrowed shares (minus transaction cost)
-                # This is the critical fix - shorts credit cash!
-                portfolio.cash += (actual_value - transaction_cost)
-
-            # Calculate stop-loss and target prices
-            if direction == "LONG":
-                stop_loss = price * (1 - self.DEFAULT_STOP_LOSS_PCT / 100)
-                target = price * (1 + self.DEFAULT_TAKE_PROFIT_PCT / 100)
-            else:
-                stop_loss = price * (1 + self.DEFAULT_STOP_LOSS_PCT / 100)
-                target = price * (1 - self.DEFAULT_TAKE_PROFIT_PCT / 100)
+                portfolio.cash -= transaction_cost  # Short margin handled separately
 
             position = Position(
                 ticker=ticker,
@@ -1942,9 +1628,7 @@ class TradeExecutor:
                 current_price=price,
                 sector=sector,
                 agent_source="cio",
-                thesis=f"CIO recommendation (conviction: {conviction}%)",
-                stop_loss=stop_loss,
-                target=target
+                thesis=f"CIO recommendation (conviction: {conviction}%)"
             )
             portfolio.positions.append(position)
 
@@ -1957,9 +1641,7 @@ class TradeExecutor:
                 "value": actual_value,
                 "cost": transaction_cost,
                 "conviction": conviction,
-                "sector": sector,
-                "stop_loss": stop_loss,
-                "target": target
+                "sector": sector
             }
             trades.append(trade)
 
@@ -2481,27 +2163,22 @@ class BacktestEngine:
 
         prev_value = self.portfolio.total_value
 
-        # Phase A: Check stop-losses and take-profits FIRST
-        stop_trades = self.executor.check_stop_losses(date, self.portfolio)
-        if stop_trades:
-            self.trade_journal.extend(stop_trades)
+        # Build CIO context: benchmark, drawdown, days since trade
+        meta = self._build_cio_meta(date)
 
         # Phase B: Agent Debate
         log(f"  Running agent debate...")
-        all_views = self.debate.run_debate(date, self.portfolio, self.agent_weights)
+        all_views = self.debate.run_debate(date, self.portfolio, self.agent_weights, meta)
 
         # Extract and record recommendations
         self.scorer.extract_and_record(date, all_views)
 
-        # Phase C: Trade Execution (CIO recommendations)
+        # Phase C: Trade Execution
         cio_view = all_views.get("cio", {})
         sector_map = self.cache.sector_map or {}
-        new_trades = self.executor.execute(date, self.portfolio, cio_view, sector_map, all_views)
-
-        # Combine stop trades and new trades
-        trades = stop_trades + new_trades
+        trades = self.executor.execute(date, self.portfolio, cio_view, sector_map)
         day_result["trades"] = trades
-        self.trade_journal.extend(new_trades)
+        self.trade_journal.extend(trades)
 
         # Phase D: Update Scorecards
         self.scorer.update_returns(date)
@@ -2561,6 +2238,49 @@ class BacktestEngine:
 
         return ((current - peak) / peak) * 100 if peak > 0 else 0
 
+    def _build_cio_meta(self, date: str) -> dict:
+        """Build additional context for CIO: benchmark, drawdown, days since trade."""
+        # SPY return since backtest start
+        spy_start_price = self.snapshot.get_price("SPY", self.start_date)
+        spy_current_price = self.snapshot.get_price("SPY", date)
+        spy_return = 0
+        if spy_start_price and spy_current_price:
+            spy_return = ((spy_current_price - spy_start_price) / spy_start_price) * 100
+
+        # Peak portfolio value
+        peak_value = STARTING_CAPITAL
+        if self.equity_curve:
+            peak_value = max(e["portfolio_value"] for e in self.equity_curve)
+
+        # Drawdown from peak
+        drawdown = self._calculate_drawdown()
+
+        # Days since last trade
+        days_since_trade = 0
+        if self.trade_journal:
+            last_trade_date = max(t.get("date", self.start_date) for t in self.trade_journal)
+            try:
+                last = datetime.strptime(last_trade_date, "%Y-%m-%d")
+                current = datetime.strptime(date, "%Y-%m-%d")
+                days_since_trade = (current - last).days
+            except:
+                pass
+        else:
+            # No trades yet - count from start
+            try:
+                start = datetime.strptime(self.start_date, "%Y-%m-%d")
+                current = datetime.strptime(date, "%Y-%m-%d")
+                days_since_trade = (current - start).days
+            except:
+                pass
+
+        return {
+            "spy_return": spy_return,
+            "peak_value": peak_value,
+            "drawdown": drawdown,
+            "days_since_trade": days_since_trade
+        }
+
     def _calculate_rolling_sharpe(self, window: int = 20) -> float:
         """Calculate rolling Sharpe ratio."""
         if len(self.equity_curve) < window:
@@ -2581,7 +2301,6 @@ class BacktestEngine:
             "date": date,
             "portfolio": {
                 "cash": self.portfolio.cash,
-                "short_proceeds": self.portfolio.short_proceeds,
                 "positions": [asdict(p) if hasattr(p, '__dict__') else {
                     "ticker": p.ticker,
                     "direction": p.direction,
@@ -2592,9 +2311,7 @@ class BacktestEngine:
                     "current_price": p.current_price,
                     "sector": p.sector,
                     "agent_source": p.agent_source,
-                    "thesis": p.thesis,
-                    "stop_loss": getattr(p, 'stop_loss', 0.0),
-                    "target": getattr(p, 'target', 0.0)
+                    "thesis": p.thesis
                 } for p in self.portfolio.positions]
             },
             "agent_weights": self.agent_weights,
@@ -2621,7 +2338,6 @@ class BacktestEngine:
 
         # Restore state
         self.portfolio.cash = checkpoint["portfolio"]["cash"]
-        self.portfolio.short_proceeds = checkpoint["portfolio"].get("short_proceeds", 0.0)
         self.portfolio.positions = []
 
         for p in checkpoint["portfolio"]["positions"]:
@@ -2635,9 +2351,7 @@ class BacktestEngine:
                 current_price=p.get("current_price", p["entry_price"]),
                 sector=p.get("sector", ""),
                 agent_source=p.get("agent_source", ""),
-                thesis=p.get("thesis", ""),
-                stop_loss=p.get("stop_loss", 0.0),
-                target=p.get("target", 0.0)
+                thesis=p.get("thesis", "")
             )
             self.portfolio.positions.append(pos)
 
