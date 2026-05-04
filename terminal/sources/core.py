@@ -271,6 +271,11 @@ def kalshi_trades() -> dict[str, Any]:
 
 def kalshi_positions() -> dict[str, Any]:
     files = [settings.kalshi_root / "live" / "book_a_live.json", settings.kalshi_root / "live" / "book_b_live.json"]
+    if not any(path.exists() for path in files):
+        files = [
+            settings.kalshi_root / "paper_trades" / "live" / "book_a_live.json",
+            settings.kalshi_root / "paper_trades" / "live" / "book_b_live.json",
+        ]
     data = {path.stem: read_json(path, {}) for path in files if path.exists()}
     if not data:
         return not_wired("Kalshi live position files missing", files[0])
@@ -427,6 +432,39 @@ def janus_not_wired() -> dict[str, Any]:
     return not_wired(JANUS_REASON, source_path("data", "state", "janus_daily.json"))
 
 
+def janus_regime() -> dict[str, Any]:
+    path = source_path("data", "state", "janus_daily.json")
+    data = read_json(path, {})
+    if not data:
+        return janus_not_wired()
+    return response("OK", path, data, **stale_meta(path, 24 * 3600))
+
+
+def janus_weights() -> dict[str, Any]:
+    janus = janus_regime()
+    if janus["status"] != "OK":
+        return janus
+    weights_path = source_path("data", "state", "agent_weights.json")
+    weights = read_json(weights_path, {})
+    data = {
+        "janus": janus["data"],
+        "agent_weights": weights,
+    }
+    return response("OK", f"{janus['source']}, {weights_path}", data, **stale_meta(weights_path, 14 * 3600))
+
+
+def janus_reweighting() -> dict[str, Any]:
+    history_path = source_path("data", "state", "janus_history.json")
+    history = read_json(history_path, [])
+    if not history:
+        daily = janus_regime()
+        if daily["status"] != "OK":
+            return daily
+        return response("OK", daily["source"], {"latest": daily["data"]}, stale=daily.get("stale"))
+    latest = history[-1] if isinstance(history, list) else history
+    return response("OK", history_path, {"latest": latest, "count": len(history) if isinstance(history, list) else None}, **stale_meta(history_path, 24 * 3600))
+
+
 def snapshot_age() -> dict[str, Any] | None:
     if settings.production:
         return None
@@ -459,7 +497,11 @@ def health_sources() -> list[dict[str, Any]]:
     for name, path, threshold in checks:
         meta = stale_meta(path, threshold)
         rows.append({"name": name, "status": "OK" if path.exists() else "MISSING", "source": str(path), **meta})
-    rows.append({"name": "janus.daily", "status": "NOT_WIRED", "source": str(source_path("data", "state", "janus_daily.json")), "stale": True, "reason": JANUS_REASON})
+    janus_path = source_path("data", "state", "janus_daily.json")
+    if janus_path.exists():
+        rows.append({"name": "janus.daily", "status": "OK", "source": str(janus_path), **stale_meta(janus_path, 24 * 3600)})
+    else:
+        rows.append({"name": "janus.daily", "status": "NOT_WIRED", "source": str(janus_path), "stale": True, "reason": JANUS_REASON})
     return rows
 
 
@@ -480,9 +522,15 @@ def cron_status() -> list[dict[str, Any]]:
         ("kalshi_clear_flag", "5 23 * * *", "clear flag"),
         ("kalshi_contract_scan", "0 9 * * *", "contract scan"),
     ]
-    crontab_text = os.popen("crontab -l 2>/dev/null").read()
+    snapshot_crontab = settings.state_root / "crontab.txt"
+    if settings.production or not snapshot_crontab.exists():
+        crontab_text = os.popen("crontab -l 2>/dev/null").read()
+        crontab_source = "crontab -l"
+    else:
+        crontab_text = snapshot_crontab.read_text(encoding="utf-8")
+        crontab_source = str(snapshot_crontab)
     rows = []
     for name, schedule, command in expected:
         present = command in crontab_text or name.split("_")[0] in crontab_text
-        rows.append({"name": name, "schedule": schedule, "command": command, "status": "PRESENT_UNVERIFIED" if present else "MISSING", "source": "crontab -l"})
+        rows.append({"name": name, "schedule": schedule, "command": command, "status": "PRESENT_UNVERIFIED" if present else "MISSING", "source": crontab_source})
     return rows

@@ -163,9 +163,9 @@ ROUTES = {
     "backtest/fitness": sources.backtest_fitness,
     "backtest/equity": sources.backtest_equity,
     "backtest/ablations": sources.backtest_ablations,
-    "janus/regime": sources.janus_not_wired,
-    "janus/weights": sources.janus_not_wired,
-    "janus/reweighting": sources.janus_not_wired,
+    "janus/regime": sources.janus_regime,
+    "janus/weights": sources.janus_weights,
+    "janus/reweighting": sources.janus_reweighting,
 }
 
 

@@ -28,7 +28,9 @@ bash terminal/scripts/refresh_azure_snapshot.sh
 Run the terminal against the snapshot:
 
 ```bash
-ATLAS_STATE_ROOT=terminal/dev_state/azure_snapshot uvicorn terminal.app:app --host 127.0.0.1 --port 8010
+ATLAS_STATE_ROOT=terminal/dev_state/azure_snapshot \
+ATLAS_KALSHI_ROOT=terminal/dev_state/azure_snapshot/atlas-predict \
+uvicorn terminal.app:app --host 127.0.0.1 --port 8010
 ```
 
 During local development the header shows snapshot age next to the health dot. On Azure deployment the snapshot indicator is hidden because the service reads live production state.
