@@ -86,3 +86,10 @@ Before any trade, check financials sector momentum:
 - If XLF up >2% in last 3 days: NO SHORT positions above 50% conviction
 - If sector rotating out of financials (relative to SPY): Reduce all conviction by 20%
 - Wait for momentum confirmation or reversal signals before high-conviction trades
+
+## Autoresearch Addition
+## Position Management Rules
+- If position gains >1% in first day but sector momentum (XLF) turns negative next day: Reduce position size by 50%
+- If unrealized gains >1.5% and broader market (SPY) shows 2+ consecutive days of weakness: Take profits on 30% of position
+- For financials longs: Exit if 10-year yield drops >5bps intraday while position is profitable
+- For financials shorts: Exit if sector shows 3+ consecutive days of relative strength vs SPY
