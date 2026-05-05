@@ -81,3 +81,11 @@ For ANY stock trading >15x sales (LLY, REGN, VRTX):
 - MAXIMUM conviction = 50% if stock below 20-day MA
 - NO exceptions for "secular growth stories"
 - MANDATORY STATEMENT: "High-multiple conviction cap applied: [TICKER] capped at [X]% due to [VIX/TECHNICAL/SECTOR] conditions"
+
+## Autoresearch Addition
+## ABSOLUTE HIGH-MULTIPLE BLOCK
+For ANY stock trading >15x sales (LLY, REGN, VRTX):
+- **ZERO LONG POSITIONS** when VIX >16 OR S&P 500 down >0.5% intraday OR XLV/XBI down >1% in last 2 days
+- **NO EXCEPTIONS** - secular growth stories are banned during risk-off
+- **MANDATORY BLOCK STATEMENT:** "HIGH-MULTIPLE BLOCK: [TICKER] PROHIBITED - VIX=[X] SPX=[X] Sector=[X]"
+- Shorts still permitted with normal risk controls
