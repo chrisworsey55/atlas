@@ -65,15 +65,3 @@ Before ANY recommendation, verify:
 3. **Repeat Pattern Alert:** If recommending same ticker 2+ times in 5 days, reduce conviction by 50%
 
 STATE COMPLIANCE: "Pre-trade checks: [TICKER] cooling-off=[CLEAR/BLOCKED], valuation=[OK/HIGH-RISK], repeat=[NONE/FLAGGED]"
-
-## Autoresearch Addition
-## MARKET REGIME FILTER
-**MANDATORY:** Before any trade >50% conviction, assess market regime:
-- **Risk-OFF Signals:** VIX >20, SPY down >1% in 3 days, or sector rotation away from growth
-- **During Risk-OFF:** 
-  - NO shorts on beaten-down biotech (oversold bounce risk)
-  - NO longs on stocks >20x sales regardless of fundamentals
-  - MAX conviction capped at 40% for ANY healthcare trade
-  - Focus only on defensive healthcare (UNH, JNJ) with <50% conviction
-
-STATE MARKET REGIME: [RISK-ON/RISK-OFF] based on current conditions
