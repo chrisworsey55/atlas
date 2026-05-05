@@ -91,12 +91,19 @@ def run_status() -> dict:
 def _test_universe(universe_builder: GrahamUniverse) -> list:
     companies = universe_builder._seed_otc_companies()
     random.seed(1956)
-    sample = random.sample(companies, min(10, len(companies)))
-    sample = universe_builder.filter_active(sample)
-    sample = universe_builder.filter_shells(sample)
-    sample = universe_builder.filter_liquidity(sample)
-    universe_builder._write_cache(sample)
-    return sample
+    shuffled = random.sample(companies, len(companies))
+    selected = []
+    for offset in range(0, len(shuffled), 10):
+        batch = shuffled[offset : offset + 10]
+        batch = universe_builder.filter_active(batch)
+        batch = universe_builder.filter_shells(batch)
+        batch = universe_builder.filter_liquidity(batch)
+        selected.extend(batch)
+        if len(selected) >= 10:
+            break
+    selected = selected[:10]
+    universe_builder._write_cache(selected)
+    return selected
 
 
 def _write_run_status(status: dict) -> None:
@@ -124,4 +131,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

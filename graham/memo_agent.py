@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -34,9 +35,25 @@ class GrahamMemoAgent:
         return memo
 
     def batch_generate(self, results: list[NCAVResult]) -> list[str]:
-        # Cache-first. The LLM section generator is isolated so this can be replaced
-        # with Anthropic Message Batches without changing memo formatting.
-        return [self.generate_memo(result) for result in results]
+        cached: dict[str, str] = {}
+        uncached: list[NCAVResult] = []
+        for result in results:
+            key = self._cache_key(result)
+            memo = self.get_cached_memo(result.cik, result.filing_date or "unknown")
+            if memo:
+                cached[key] = memo
+                self._write_output(result, memo)
+            else:
+                uncached.append(result)
+        generated_sections = self._batch_sections(uncached) if uncached else {}
+        for result in uncached:
+            key = self._cache_key(result)
+            sections = generated_sections.get(key) or self._generate_sections(result)
+            memo = self._assemble_memo(result, sections)
+            self._cache_path(result.cik, result.filing_date or "unknown").write_text(memo)
+            self._write_output(result, memo)
+            cached[key] = memo
+        return [cached[self._cache_key(result)] for result in results if self._cache_key(result) in cached]
 
     def get_cached_memo(self, cik: str, filing_date: str) -> str | None:
         path = self._cache_path(cik, filing_date)
@@ -58,6 +75,45 @@ class GrahamMemoAgent:
             except Exception:
                 pass
         return self._fallback_sections(result)
+
+    def _batch_sections(self, results: list[NCAVResult], timeout_seconds: int = 900) -> dict[str, str]:
+        if not results or not self.client or not hasattr(getattr(self.client, "beta", None), "messages"):
+            return {}
+        try:
+            requests = [
+                {
+                    "custom_id": self._cache_key(result),
+                    "params": {
+                        "model": CLAUDE_MODEL,
+                        "max_tokens": 900,
+                        "temperature": 0.2,
+                        "messages": [{"role": "user", "content": self._prompt(result)}],
+                    },
+                }
+                for result in results
+            ]
+            batch = self.client.beta.messages.batches.create(requests=requests)
+            deadline = time.time() + timeout_seconds
+            while time.time() < deadline:
+                batch = self.client.beta.messages.batches.retrieve(batch.id)
+                if getattr(batch, "processing_status", None) == "ended":
+                    break
+                time.sleep(10)
+            if getattr(batch, "processing_status", None) != "ended":
+                return {}
+            sections: dict[str, str] = {}
+            for item in self.client.beta.messages.batches.results(batch.id):
+                custom_id = getattr(item, "custom_id", None)
+                result_obj = getattr(item, "result", None)
+                message = getattr(result_obj, "message", None)
+                if not custom_id or not message:
+                    continue
+                text = "".join(block.text for block in message.content if getattr(block, "type", "") == "text").strip()
+                if all(header in text for header in ["WHY IS IT CHEAP", "THE CATALYST", "THE RISKS"]):
+                    sections[custom_id] = text
+            return sections
+        except Exception:
+            return {}
 
     def _prompt(self, result: NCAVResult) -> str:
         return f"""You are analyzing {result.company_name} ({result.ticker}) for the
@@ -144,6 +200,10 @@ Source: {result.filing_url or 'Unknown'}
         return MEMO_CACHE_DIR / f"{cik}_{filing_date}.txt"
 
     @staticmethod
+    def _cache_key(result: NCAVResult) -> str:
+        return f"{result.cik}_{result.filing_date or 'unknown'}"
+
+    @staticmethod
     def _safe(value: str) -> str:
         return re.sub(r"[^A-Za-z0-9._-]+", "_", value)
 
@@ -191,4 +251,3 @@ Source: {result.filing_url or 'Unknown'}
         if result.data_quality_flag == "HTML_FALLBACK" and not result.is_stale:
             return "MEDIUM"
         return "LOW"
-
