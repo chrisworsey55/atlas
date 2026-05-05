@@ -1,0 +1,15 @@
+[Unit]
+Description=GRAHAM Weekly OTC Net-Net Screen
+After=network.target
+
+[Service]
+Type=oneshot
+User=azureuser
+WorkingDirectory=/home/azureuser/atlas
+ExecStart=/usr/bin/python3 graham/run.py --mode full
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
