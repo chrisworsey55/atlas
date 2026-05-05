@@ -56,3 +56,10 @@ RISKS TO MONITOR:
 - **Position Sizing:** Reduce conviction by 20% for each recent losing trade in same sector
 - **High Multiple Warning:** Stocks trading >20x sales require technical confirmation - avoid during risk-off periods
 - **Stop Loss Discipline:** Healthcare growth names can face momentum reversals despite strong fundamentals
+
+## Autoresearch Addition
+## Momentum Confirmation Required
+- **High Conviction Trades (>70%):** Must have 3+ day uptrend AND trading above 10-day MA
+- **Secular Growth Stories:** Strong fundamentals don't override technical breakdown - wait for momentum reset
+- **Conviction Reduction:** After any losing trade, reduce next conviction by 10 points minimum for same ticker
+- **Technical Override:** If stock breaks 5-day low, fundamental thesis is secondary to price action
