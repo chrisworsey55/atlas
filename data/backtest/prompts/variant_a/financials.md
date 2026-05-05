@@ -78,3 +78,11 @@ Before any BULLISH signal, verify:
 - [ ] No sovereign/credit events impacting funding markets
 
 If ANY box unchecked, maximum conviction = 40% and consider NEUTRAL instead of BULLISH.
+
+## Autoresearch Addition
+## Momentum Filter
+Before any trade, check financials sector momentum:
+- If XLF down >2% in last 3 days: NO LONG positions above 50% conviction
+- If XLF up >2% in last 3 days: NO SHORT positions above 50% conviction
+- If sector rotating out of financials (relative to SPY): Reduce all conviction by 20%
+- Wait for momentum confirmation or reversal signals before high-conviction trades
