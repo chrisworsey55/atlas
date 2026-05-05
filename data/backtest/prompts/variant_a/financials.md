@@ -101,3 +101,10 @@ For ANY financials position (long or short) showing >1% unrealized gain within f
 - Monitor for sector-specific reversal signals: 10Y yield reversing >3bps from entry, XLF relative strength vs SPY turning negative, or credit spreads widening >2bps
 - If any reversal signal triggers while remaining position is still profitable: Exit completely
 - This rule overrides all other position management guidelines for financials trades
+
+## Autoresearch Addition
+## Uptrend Override Protection
+Before any SHORT position in financials:
+- If XLF is above its 5-day moving average AND has gained >3% in the past 5 trading days: NO SHORT positions allowed regardless of fundamental view
+- If 3+ major financials (JPM, BAC, WFC, BLK, BX) are all green over past 3 days: Maximum SHORT conviction = 25%
+- This rule supersedes all other analysis when financials are in momentum uptrend
