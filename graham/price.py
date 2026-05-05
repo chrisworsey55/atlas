@@ -55,9 +55,9 @@ class PriceClient:
             if close.empty or volume.empty:
                 return PriceData(ticker=ticker, source="yfinance", data_quality="NO_PRICE", error="missing close/volume")
             dollars = (hist["Close"] * hist["Volume"]).dropna()
-            avg_dollars = float(dollars.tail(30).mean()) if not dollars.empty else 0.0
-            avg_shares = float(volume.tail(30).mean()) if not volume.empty else 0.0
-            price = float(close.iloc[-1])
+            avg_dollars = self._scalar(dollars.tail(30).mean()) if not dollars.empty else 0.0
+            avg_shares = self._scalar(volume.tail(30).mean()) if not volume.empty else 0.0
+            price = self._scalar(close.iloc[-1])
             market_cap = None
             try:
                 info = yf.Ticker(ticker).fast_info
@@ -119,3 +119,8 @@ class PriceClient:
         capacity = avg_dollars * 0.20
         return int(math.ceil(position_size / capacity)) if capacity > 0 else None
 
+    @staticmethod
+    def _scalar(value) -> float:
+        if hasattr(value, "iloc"):
+            value = value.iloc[0]
+        return float(value)
