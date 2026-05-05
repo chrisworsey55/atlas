@@ -23,9 +23,8 @@ class _DummyGenePool:
 
 
 class _DummyPostMortemEngine:
-    def __init__(self, repo_root: Path, *args, **kwargs) -> None:
+    def __init__(self, repo_root: Path) -> None:
         self.repo_root = repo_root
-        self.kwargs = kwargs
         self.output_dir = repo_root / "darwin_v3" / "postmortems"
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -48,11 +47,10 @@ class _DummyPostMortemEngine:
 
 
 class _DummyBreedingSelector:
-    def __init__(self, gene_pool, postmortem_dir, log_path, *args, **kwargs) -> None:
+    def __init__(self, gene_pool, postmortem_dir, log_path) -> None:
         self.gene_pool = gene_pool
         self.postmortem_dir = postmortem_dir
         self.log_path = log_path
-        self.kwargs = kwargs
 
     def select_rewrite_strategy(self, agent_id: str, current_version: int, current_regime: str = "unknown", current_score: float | None = None):
         return RewriteStrategy(

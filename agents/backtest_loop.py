@@ -517,26 +517,10 @@ class DataCache:
         return None
 
     def fetch_sp500_constituents(self) -> List[str]:
-        """Fetch the point-in-time universe list for the backtest."""
+        """Fetch S&P 500 constituent list. Prefers local file for reproducibility."""
         log("Fetching S&P 500 constituents...")
 
         cache_file = CACHE_DIR / "sp500_constituents.json"
-
-        universe_file = ATLAS_DIR / "data" / "backtest" / "universe_s30.json"
-        if universe_file.exists():
-            with open(universe_file, "r") as f:
-                data = json.load(f)
-            tickers = data if isinstance(data, list) else data.get("tickers", [])
-            self.sp500_tickers = [str(t).strip().upper() for t in tickers if str(t).strip()]
-            log(f"  Loaded {len(self.sp500_tickers)} tickers from point-in-time universe snapshot")
-            with open(cache_file, 'w') as f:
-                json.dump({
-                    "tickers": self.sp500_tickers,
-                    "fetched_date": datetime.now().isoformat(),
-                    "source": "backtest_universe_s30",
-                    "note": "Point-in-time universe snapshot; no current-membership API used"
-                }, f, indent=2)
-            return self.sp500_tickers
 
         # Check cache first
         if cache_file.exists():

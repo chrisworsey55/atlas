@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import statistics
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -32,9 +32,8 @@ class DarwinV3Runtime:
     daily state files, writes v3 artifacts, and returns a structured summary.
     """
 
-    def __init__(self, repo_root: Path | None = None, simulation_date: date | None = None) -> None:
+    def __init__(self, repo_root: Path | None = None) -> None:
         self.repo_root = repo_root or REPO_ROOT
-        self.simulation_date = simulation_date or datetime.now(tz=UTC).date()
         self.state_dir = self.repo_root / "data" / "state"
         self.v3_dir = self.repo_root / "darwin_v3"
         self.judge_file = self.state_dir / "judge_daily.json"
@@ -45,39 +44,36 @@ class DarwinV3Runtime:
         self.scored_outcomes_file = self.state_dir / "scored_outcomes.json"
         self.breeding_log_file = self.v3_dir / "breeding_log.json"
         self.postmortem_dir = self.v3_dir / "postmortems"
-        self.gene_pool = GenePool(seed=False, repo_root=self.repo_root, simulation_date=self.simulation_date)
-        self.postmortem_engine = PostMortemEngine(repo_root=self.repo_root, simulation_date=self.simulation_date)
+        self.gene_pool = GenePool(seed=False, repo_root=self.repo_root)
+        self.postmortem_engine = PostMortemEngine(repo_root=self.repo_root)
         self.breeding_selector = BreedingSelector(
             gene_pool=self.gene_pool,
             postmortem_dir=self.postmortem_dir,
             log_path=self.breeding_log_file,
-            simulation_date=self.simulation_date,
         )
         self.janus = Janus(cohorts=["18month", "10year"])
 
-    def run_once(self, simulation_date: date | None = None) -> dict[str, Any]:
+    def run_once(self) -> dict[str, Any]:
         """
         Run the Darwin v3 pass-through stack once.
 
         Returns:
             Structured summary of the v3 step outputs.
         """
-        effective_date = simulation_date or self.simulation_date
         started_at = datetime.now(tz=UTC).isoformat()
         summary: dict[str, Any] = {
             "started_at": started_at,
             "repo_root": str(self.repo_root),
             "steps": {},
-            "simulation_date": effective_date.isoformat(),
         }
 
         scorer_result = self._run_scorer()
         summary["steps"]["scorer"] = scorer_result
 
-        postmortem_result = self._run_postmortems(simulation_date=effective_date)
+        postmortem_result = self._run_postmortems()
         summary["steps"]["postmortem"] = postmortem_result
 
-        breeding_result = self._run_breeding(postmortem_result, simulation_date=effective_date)
+        breeding_result = self._run_breeding(postmortem_result)
         summary["steps"]["breeding"] = breeding_result
 
         agent_debate_result = self._load_state_snapshot(self.agent_views_file)
@@ -89,13 +85,7 @@ class DarwinV3Runtime:
             },
         }
 
-        judge_payload = self._build_judge_payload(
-            scorer_result,
-            postmortem_result,
-            breeding_result,
-            agent_debate_result,
-            simulation_date=effective_date,
-        )
+        judge_payload = self._build_judge_payload(scorer_result, postmortem_result, breeding_result, agent_debate_result)
         self._write_json(self.judge_file, judge_payload)
         summary["steps"]["judge"] = {
             "status": "ok",
@@ -151,9 +141,9 @@ class DarwinV3Runtime:
         except Exception as exc:
             return {"status": "error", "details": {"error": str(exc)}}
 
-    def _run_postmortems(self, simulation_date: date | None = None) -> dict[str, Any]:
+    def _run_postmortems(self) -> dict[str, Any]:
         try:
-            results = self.postmortem_engine.run_from_default_sources(simulation_date=simulation_date)
+            results = self.postmortem_engine.run_from_default_sources()
             return {
                 "status": "ok",
                 "details": {
@@ -165,7 +155,7 @@ class DarwinV3Runtime:
         except Exception as exc:
             return {"status": "error", "details": {"error": str(exc)}}
 
-    def _run_breeding(self, postmortem_result: dict[str, Any], simulation_date: date | None = None) -> dict[str, Any]:
+    def _run_breeding(self, postmortem_result: dict[str, Any]) -> dict[str, Any]:
         try:
             postmortem_paths = postmortem_result.get("details", {}).get("paths", [])
             strategies: list[dict[str, Any]] = []
@@ -181,7 +171,6 @@ class DarwinV3Runtime:
                     current_version=int(payload.get("agent_version") or 0),
                     current_regime=str(payload.get("regime") or "unknown"),
                     current_score=None,
-                    simulation_date=simulation_date,
                 )
                 strategies.append(asdict(strategy))
 
@@ -201,7 +190,6 @@ class DarwinV3Runtime:
         postmortem_result: dict[str, Any],
         breeding_result: dict[str, Any],
         agent_debate_result: dict[str, Any] | None,
-        simulation_date: date | None = None,
     ) -> dict[str, Any]:
         outcomes = self._load_scored_outcomes()
         cohorts: dict[str, dict[str, Any]] = {}
@@ -234,9 +222,8 @@ class DarwinV3Runtime:
             }
 
         regime = self._derive_regime(cohorts)
-        effective_date = simulation_date or self.simulation_date
         return {
-            "date": effective_date.isoformat(),
+            "date": datetime.now(tz=UTC).date().isoformat(),
             "generated_at": datetime.now(tz=UTC).isoformat(),
             "input_source": "scored_outcomes.json",
             "cohorts": cohorts,
