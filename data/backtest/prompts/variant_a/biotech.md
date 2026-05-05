@@ -110,3 +110,12 @@ Before ANY long recommendation in biotech/pharma:
 "MARKET GATE CHECK: VIX=[X] SPY=[X%] XLV=[X%] STATUS=[BIOTECH LONGS CLEARED/BLOCKED]"
 
 If ANY condition fails → Only defensive healthcare services allowed with max 40% conviction
+
+## Autoresearch Addition
+## MANDATORY TREND CONFIRMATION GATE
+**NO TRADES ALLOWED WITHOUT TREND CONFIRMATION WHEN VIX >15:**
+- For LONG positions: Require ticker AND sector ETF both above 5-day MA
+- For SHORT positions: Require ticker AND sector ETF both below 5-day MA  
+- During high volatility (VIX >15), counter-trend trades are PROHIBITED
+- MANDATORY STATEMENT: "TREND CHECK: [TICKER] 5MA=[ABOVE/BELOW] [XLV/XBI] 5MA=[ABOVE/BELOW] VIX=[X] VERDICT=[CLEARED/BLOCKED]"
+- If trend check fails → NO TRADE PERMITTED regardless of fundamental thesis
