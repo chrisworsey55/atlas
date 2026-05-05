@@ -81,3 +81,11 @@ For ANY stock trading >15x sales (LLY, REGN, VRTX):
 - MAXIMUM conviction = 50% if stock below 20-day MA
 - NO exceptions for "secular growth stories"
 - MANDATORY STATEMENT: "High-multiple conviction cap applied: [TICKER] capped at [X]% due to [VIX/TECHNICAL/SECTOR] conditions"
+
+## Autoresearch Addition
+## ABSOLUTE CONVICTION CEILING - NO EXCEPTIONS
+For stocks >15x sales OR any ticker with >3% loss in last 3 days:
+- HARD CAP: Maximum 35% conviction, period
+- NO narrative override allowed ("secular growth," "defensive," etc.)
+- MANDATORY: Must state "CONVICTION HARD-CAPPED AT 35%" in recommendation
+- If initial conviction would be >35%, SKIP the trade entirely and explain why
