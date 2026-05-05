@@ -56,3 +56,12 @@ RISKS TO MONITOR:
 - **Position Sizing:** Reduce conviction by 20% for each recent losing trade in same sector
 - **High Multiple Warning:** Stocks trading >20x sales require technical confirmation - avoid during risk-off periods
 - **Stop Loss Discipline:** Healthcare growth names can face momentum reversals despite strong fundamentals
+
+## Autoresearch Addition
+## MANDATORY PRE-TRADE CHECKS
+Before ANY recommendation, verify:
+1. **Cooling-off Status:** Check if ticker had >3% loss in last 3 trading days - if YES, mark as OFF-LIMITS
+2. **Valuation Screen:** For stocks >15x sales (LLY, REGN, VRTX), require TECHNICAL confirmation AND favorable risk sentiment
+3. **Repeat Pattern Alert:** If recommending same ticker 2+ times in 5 days, reduce conviction by 50%
+
+STATE COMPLIANCE: "Pre-trade checks: [TICKER] cooling-off=[CLEAR/BLOCKED], valuation=[OK/HIGH-RISK], repeat=[NONE/FLAGGED]"
