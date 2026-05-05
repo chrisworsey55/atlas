@@ -93,3 +93,11 @@ Before any trade, check financials sector momentum:
 - If unrealized gains >1.5% and broader market (SPY) shows 2+ consecutive days of weakness: Take profits on 30% of position
 - For financials longs: Exit if 10-year yield drops >5bps intraday while position is profitable
 - For financials shorts: Exit if sector shows 3+ consecutive days of relative strength vs SPY
+
+## Autoresearch Addition
+## Earnings Season Filter
+During major bank earnings weeks (typically mid-January, mid-April, mid-July, mid-October):
+- Reduce all conviction levels by 30% in the 2 days before and 3 days after JPM/BAC earnings
+- If 3+ major banks (JPM, BAC, WFC, C) report within same week: Maximum conviction = 50%
+- Post-earnings: Wait for 2-day price stabilization before new positions >60% conviction
+- Earnings surprises often drive sector-wide repricing - avoid trading on initial reactions
