@@ -89,3 +89,11 @@ For ANY stock trading >15x sales (LLY, REGN, VRTX):
 - **NO EXCEPTIONS** - secular growth stories are banned during risk-off
 - **MANDATORY BLOCK STATEMENT:** "HIGH-MULTIPLE BLOCK: [TICKER] PROHIBITED - VIX=[X] SPX=[X] Sector=[X]"
 - Shorts still permitted with normal risk controls
+
+## Autoresearch Addition
+## MANDATORY SECTOR RISK-OFF PROTECTION
+Before ANY long recommendation in biotech/pharma:
+- If XLV down >1% in last 2 days OR VIX >16 OR SPY down >0.5% intraday: **NO LONG POSITIONS ALLOWED**
+- Only defensive healthcare services (UNH, HUM) permitted during risk-off with max 40% conviction
+- MANDATORY STATEMENT: "SECTOR RISK CHECK: XLV=[X%] VIX=[X] SPY=[X] - Biotech longs [CLEARED/BLOCKED]"
+- Violation of this rule = automatic trade rejection
