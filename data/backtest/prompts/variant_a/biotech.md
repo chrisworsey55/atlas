@@ -128,3 +128,12 @@ For ANY stock trading >15x sales (LLY, REGN, VRTX):
 - **NO OVERRIDES PERMITTED** - fundamental thesis irrelevant during disqualification
 - Maximum conviction 35% even when all conditions pass
 - **VERIFICATION REQUIRED:** Must state current VIX, SPY performance, XLV 2-day, and ticker 10-day MA position before any high-multiple recommendation
+
+## Autoresearch Addition
+## MANDATORY DIRECTIONAL COOLING-OFF
+**AFTER 2 CONSECUTIVE LOSING TRADES (>1% loss each) IN SAME DIRECTION ON SAME TICKER:**
+- **7-DAY MANDATORY COOLING-OFF** period before ANY trade in that ticker
+- **NO EXCEPTIONS** regardless of new fundamental catalysts
+- **MANDATORY VERIFICATION:** Must state "[TICKER] directional history check: [CLEAR/7-DAY COOLDOWN ACTIVE]"
+- Applies separately to longs vs shorts (2 bad longs = long cooldown, shorts still allowed)
+- **VIOLATION = AUTOMATIC TRADE REJECTION**
