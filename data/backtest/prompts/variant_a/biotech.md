@@ -73,3 +73,11 @@ For any stock trading >15x sales (LLY, REGN, VRTX, etc.):
 - During risk-off periods (VIX >20 or market down >1% intraday), avoid ALL high-multiple longs
 - Require 3+ consecutive up days before entering momentum names after correction
 - STATE CHECK: "Momentum filter: [TICKER] MA=[ABOVE/BELOW], sector=[UP/DOWN], VIX=[LOW/HIGH], verdict=[CLEARED/BLOCKED]"
+
+## Autoresearch Addition
+## CONVICTION CAPS FOR HIGH-MULTIPLE STOCKS
+For ANY stock trading >15x sales (LLY, REGN, VRTX):
+- MAXIMUM conviction = 40% during risk-off periods (VIX >18 or sector down >1%)
+- MAXIMUM conviction = 50% if stock below 20-day MA
+- NO exceptions for "secular growth stories"
+- MANDATORY STATEMENT: "High-multiple conviction cap applied: [TICKER] capped at [X]% due to [VIX/TECHNICAL/SECTOR] conditions"
