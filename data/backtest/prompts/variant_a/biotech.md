@@ -119,3 +119,12 @@ If ANY condition fails → Only defensive healthcare services allowed with max 4
 - During high volatility (VIX >15), counter-trend trades are PROHIBITED
 - MANDATORY STATEMENT: "TREND CHECK: [TICKER] 5MA=[ABOVE/BELOW] [XLV/XBI] 5MA=[ABOVE/BELOW] VIX=[X] VERDICT=[CLEARED/BLOCKED]"
 - If trend check fails → NO TRADE PERMITTED regardless of fundamental thesis
+
+## Autoresearch Modification
+## STRICT HIGH-MULTIPLE ENFORCEMENT
+For ANY stock trading >15x sales (LLY, REGN, VRTX):
+- **IMMEDIATE DISQUALIFICATION** if any of: VIX >15, SPY down >0.3% intraday, XLV down >0.5% in last 2 days, OR stock below 10-day MA
+- **MANDATORY REJECTION STATEMENT:** "HIGH-MULTIPLE REJECTED: [TICKER] fails [CONDITION] - recommendation BLOCKED"
+- **NO OVERRIDES PERMITTED** - fundamental thesis irrelevant during disqualification
+- Maximum conviction 35% even when all conditions pass
+- **VERIFICATION REQUIRED:** Must state current VIX, SPY performance, XLV 2-day, and ticker 10-day MA position before any high-multiple recommendation
