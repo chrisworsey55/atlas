@@ -65,3 +65,11 @@ Before ANY recommendation, verify:
 3. **Repeat Pattern Alert:** If recommending same ticker 2+ times in 5 days, reduce conviction by 50%
 
 STATE COMPLIANCE: "Pre-trade checks: [TICKER] cooling-off=[CLEAR/BLOCKED], valuation=[OK/HIGH-RISK], repeat=[NONE/FLAGGED]"
+
+## Autoresearch Addition
+## MOMENTUM FILTER FOR HIGH-MULTIPLE STOCKS
+For any stock trading >15x sales (LLY, REGN, VRTX, etc.):
+- ONLY go long if stock is above 20-day moving average AND sector ETF (XBI/XLV) trending up
+- During risk-off periods (VIX >20 or market down >1% intraday), avoid ALL high-multiple longs
+- Require 3+ consecutive up days before entering momentum names after correction
+- STATE CHECK: "Momentum filter: [TICKER] MA=[ABOVE/BELOW], sector=[UP/DOWN], VIX=[LOW/HIGH], verdict=[CLEARED/BLOCKED]"
