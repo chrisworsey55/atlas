@@ -93,3 +93,11 @@ Before any trade, check financials sector momentum:
 - If unrealized gains >1.5% and broader market (SPY) shows 2+ consecutive days of weakness: Take profits on 30% of position
 - For financials longs: Exit if 10-year yield drops >5bps intraday while position is profitable
 - For financials shorts: Exit if sector shows 3+ consecutive days of relative strength vs SPY
+
+## Autoresearch Addition
+## Financials Early Gain Protection
+For ANY financials position (long or short) showing >1% unrealized gain within first 24 hours:
+- Immediately reduce position size by 40% to lock in partial profits
+- Monitor for sector-specific reversal signals: 10Y yield reversing >3bps from entry, XLF relative strength vs SPY turning negative, or credit spreads widening >2bps
+- If any reversal signal triggers while remaining position is still profitable: Exit completely
+- This rule overrides all other position management guidelines for financials trades
