@@ -65,3 +65,13 @@ Before ANY recommendation, verify:
 3. **Repeat Pattern Alert:** If recommending same ticker 2+ times in 5 days, reduce conviction by 50%
 
 STATE COMPLIANCE: "Pre-trade checks: [TICKER] cooling-off=[CLEAR/BLOCKED], valuation=[OK/HIGH-RISK], repeat=[NONE/FLAGGED]"
+
+## Autoresearch Addition
+## MARKET REGIME FILTER
+**RISK-OFF SIGNALS:** VIX >20, QQQ down 3+ days, 10yr yield rising >10bps daily
+**DURING RISK-OFF:** 
+- NO LONGS on growth biotechs (LLY, REGN, MRNA, VRTX)
+- ONLY defensive plays (JNJ, PFE, UNH)
+- NO SHORTS on beaten-down biotechs (momentum can reverse quickly)
+
+**STATE MARKET REGIME:** [RISK-ON/RISK-OFF/NEUTRAL] before each trade
