@@ -81,3 +81,11 @@ For ANY stock trading >15x sales (LLY, REGN, VRTX):
 - MAXIMUM conviction = 50% if stock below 20-day MA
 - NO exceptions for "secular growth stories"
 - MANDATORY STATEMENT: "High-multiple conviction cap applied: [TICKER] capped at [X]% due to [VIX/TECHNICAL/SECTOR] conditions"
+
+## Autoresearch Addition
+## MANDATORY SECTOR HEALTH CHECK
+Before ANY LONG recommendation in biotech/pharma:
+- If XLV (healthcare ETF) is below its 10-day MA AND down >2% in last 5 days = NO LONGS ALLOWED
+- If XBI (biotech ETF) is below its 10-day MA AND down >3% in last 5 days = NO BIOTECH LONGS ALLOWED
+- Exception: Only defensive healthcare services (UNH, HUM) allowed during sector weakness
+- MANDATORY STATEMENT: "Sector health check: XLV=[ABOVE/BELOW 10MA, +/-X% 5D], XBI=[ABOVE/BELOW 10MA, +/-X% 5D], LONGS=[CLEARED/BLOCKED]"
