@@ -19,7 +19,7 @@ from graham.screener import GrahamScreener
 from graham.universe import GrahamUniverse
 
 
-def run_full(test: bool = False) -> dict:
+def run_full(test: bool = False, verbose: bool = False) -> dict:
     ensure_dirs()
     universe_builder = GrahamUniverse()
     if test:
@@ -29,7 +29,7 @@ def run_full(test: bool = False) -> dict:
     ciks = [company.cik for company in companies]
     ncav_results = NCAVCalculator(edgar=universe_builder.edgar, price_client=universe_builder.price_client).batch_calculate(ciks)
     screener = GrahamScreener()
-    ranked = screener.rank(screener.screen(ncav_results))
+    ranked = screener.rank(screener.screen(ncav_results, verbose=verbose))
     memos = GrahamMemoAgent().batch_generate(screener.top_n(ranked, 50))
     outputs = GrahamOutputGenerator().generate(ranked, universe_count=len(companies))
     status = {
@@ -46,13 +46,13 @@ def run_full(test: bool = False) -> dict:
     return status
 
 
-def run_refresh() -> dict:
+def run_refresh(verbose: bool = False) -> dict:
     ensure_dirs()
     universe_builder = GrahamUniverse()
     companies = universe_builder.get_cached() or universe_builder.build()
     ncav_results = NCAVCalculator(edgar=universe_builder.edgar, price_client=universe_builder.price_client).batch_calculate([c.cik for c in companies])
     screener = GrahamScreener()
-    ranked = screener.rank(screener.screen(ncav_results))
+    ranked = screener.rank(screener.screen(ncav_results, verbose=verbose))
     memos = GrahamMemoAgent().batch_generate(screener.top_n(ranked, 50))
     outputs = GrahamOutputGenerator().generate(ranked, universe_count=len(companies))
     status = {
@@ -114,15 +114,16 @@ def _write_run_status(status: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="GRAHAM OTC net-net screener")
     parser.add_argument("--mode", choices=["full", "refresh", "memos", "status", "test"], default="status")
+    parser.add_argument("--verbose", action="store_true", help="Print screener pass/fail reasons")
     args = parser.parse_args()
     if args.mode == "full":
-        payload = run_full(test=False)
+        payload = run_full(test=False, verbose=args.verbose)
     elif args.mode == "refresh":
-        payload = run_refresh()
+        payload = run_refresh(verbose=args.verbose)
     elif args.mode == "memos":
         payload = run_memos()
     elif args.mode == "test":
-        payload = run_full(test=True)
+        payload = run_full(test=True, verbose=args.verbose)
     else:
         payload = run_status()
     print(json.dumps(payload, indent=2, sort_keys=True))
