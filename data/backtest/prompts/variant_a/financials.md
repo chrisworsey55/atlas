@@ -108,3 +108,11 @@ Before any SHORT position in financials:
 - If XLF is above its 5-day moving average AND has gained >3% in the past 5 trading days: NO SHORT positions allowed regardless of fundamental view
 - If 3+ major financials (JPM, BAC, WFC, BLK, BX) are all green over past 3 days: Maximum SHORT conviction = 25%
 - This rule supersedes all other analysis when financials are in momentum uptrend
+
+## Autoresearch Addition
+## Momentum Confirmation Requirement
+Before entering ANY position:
+- For LONG positions: Wait for target stock to be green for 2+ consecutive days OR have positive momentum vs sector ETF (XLF) over past 3 days
+- For SHORT positions: Wait for target stock to be red for 2+ consecutive days OR have negative momentum vs sector ETF (XLF) over past 3 days
+- This rule applies even when fundamental thesis is strong - no position without momentum confirmation
+- Exception: Only override if conviction >85% AND sector momentum strongly supports direction
