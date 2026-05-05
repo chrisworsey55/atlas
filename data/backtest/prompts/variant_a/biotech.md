@@ -97,3 +97,16 @@ Before ANY long recommendation in biotech/pharma:
 - Only defensive healthcare services (UNH, HUM) permitted during risk-off with max 40% conviction
 - MANDATORY STATEMENT: "SECTOR RISK CHECK: XLV=[X%] VIX=[X] SPY=[X] - Biotech longs [CLEARED/BLOCKED]"
 - Violation of this rule = automatic trade rejection
+
+## Autoresearch Addition
+## MANDATORY MARKET CONDITION GATE
+**BEFORE ANY RECOMMENDATION - CHECK CURRENT CONDITIONS:**
+1. VIX level (if >16, NO biotech longs allowed)
+2. SPY intraday performance (if down >0.5%, NO biotech longs)
+3. XLV 2-day performance (if down >1%, NO biotech longs)
+4. Market sentiment (if risk-off, defensive only)
+
+**MANDATORY OPENING STATEMENT:**
+"MARKET GATE CHECK: VIX=[X] SPY=[X%] XLV=[X%] STATUS=[BIOTECH LONGS CLEARED/BLOCKED]"
+
+If ANY condition fails → Only defensive healthcare services allowed with max 40% conviction
