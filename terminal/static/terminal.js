@@ -46,6 +46,7 @@ const panels = {
   "intel-deadline": "/terminal/api/intel/deadline",
   "intel-entities": "/terminal/api/intel/entities",
   "intel-news": "/terminal/api/intel/news",
+  "graham-screen": "/terminal/api/graham",
 };
 
 function switchWorkspace(target) {
@@ -152,6 +153,24 @@ function renderPanel(id, payload) {
     ]);
   } else if (id === "kalshi-summary") {
     panel.innerHTML = stale + `<pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
+  } else if (id === "graham-screen") {
+    if (payload.status === "NOT_RUN") {
+      panel.innerHTML = `<div class="not-wired">NOT_RUN -- ${escapeHtml(payload.reason || "No GRAHAM output exists")}</div>`;
+      return;
+    }
+    const rows = data.top_10 || [];
+    const meta = data.meta || {};
+    panel.innerHTML = stale
+      + `<div>Last run: ${escapeHtml(meta.date)} | Scanned: ${escapeHtml(meta.universe_count)} | Passing: ${escapeHtml(meta.passing_count)}</div>`
+      + table(rows, [
+        { label: "RANK", value: "rank" },
+        { label: "TICKER", value: "ticker" },
+        { label: "PRICE", value: (r) => r.current_price },
+        { label: "NCAV/SH", value: (r) => r.ncav_per_share },
+        { label: "DISC%", value: (r) => r.ncav_discount_pct },
+        { label: "QUALITY", value: "ncav_quality" },
+      ])
+      + `<div>Full report: ${escapeHtml(meta.portfolio_path || "")}</div>`;
   } else if (Array.isArray(data)) {
     panel.innerHTML = stale + `<pre>${escapeHtml(JSON.stringify(data.slice(-20), null, 2))}</pre>`;
   } else {
@@ -177,7 +196,7 @@ async function refreshHeader() {
     const snapshot = document.getElementById("snapshot-age");
     if (snapshot && payload.snapshot) snapshot.textContent = payload.snapshot.label;
     const portfolio = payload.portfolio?.data || {};
-    document.getElementById("header-pnl").innerHTML = `PNL: <span class="${clsForNumber(portfolio.pnl)}">${escapeHtml(portfolio.pnl)}</span>`;
+    document.getElementById("header-pnl").innerHTML = `${payload.health?.trade_ready ? "TRADE READY" : "TRADE BLOCKED"} | PNL: <span class="${clsForNumber(portfolio.pnl)}">${escapeHtml(portfolio.pnl)}</span>`;
     document.getElementById("header-cash").textContent = `CASH: ${fmt(portfolio.cash_pct)}%`;
     const hour = new Date().getUTCHours();
     document.getElementById("market-session").textContent = hour >= 13 && hour < 20 ? "SESSION: US OPEN" : "SESSION: CLOSED";

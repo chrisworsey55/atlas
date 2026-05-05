@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import sqlite3
 from datetime import datetime, timezone
@@ -11,6 +12,8 @@ from terminal.settings import settings
 
 
 JANUS_REASON = "production janus_daily.json missing - local file stale 2026-04-24"
+SHANNON_REASON = "production SHANNON queue missing on Azure - deploy/run SHANNON ingestion before using F3 for trades"
+SIMONS_REASON = "production SIMONS files missing on Azure - deploy/run SIMONS pattern engine before using F4 for trades"
 
 
 def now_iso() -> str:
@@ -55,10 +58,14 @@ def response(status: str, source: Path | str | None, data: Any = None, **extra: 
 
 
 def json_safe(value: Any) -> Any:
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
     try:
-        json.dumps(value)
+        json.dumps(value, allow_nan=False)
         return value
     except TypeError:
+        pass
+    except ValueError:
         pass
     if isinstance(value, dict):
         return {str(key): json_safe(item) for key, item in value.items()}
@@ -284,17 +291,28 @@ def kalshi_positions() -> dict[str, Any]:
 
 def shannon_status() -> dict[str, Any]:
     queue = source_path("SHANNON", "queue", "candidates.parquet")
+    log = source_path("SHANNON", "logs", "shannon.log")
     recs = source_path("data", "state", "recommendations_shannon.json")
+    if not queue.exists():
+        if log.exists():
+            meta = stale_meta(log, 24 * 3600)
+            message = "SHANNON ran recently but produced no candidates parquet" if not meta["stale"] else SHANNON_REASON
+            return response("OK" if not meta["stale"] else "NOT_WIRED", log, {"message": message, "row_count": 0}, **meta)
+        return not_wired(SHANNON_REASON, queue)
     meta = stale_meta(queue, 24 * 3600)
     meta["recommendations_mtime"] = mtime_iso(recs)
     meta["cron_found"] = False
-    return response("OK" if queue.exists() else "NOT_WIRED", queue, {"message": "SHANNON queue is stale; no production cron found"}, **meta)
+    message = "SHANNON queue is current" if not meta["stale"] else "SHANNON queue is stale; no production cron found"
+    return response("OK", queue, {"message": message}, **meta)
 
 
 def shannon_queue() -> dict[str, Any]:
     path = source_path("SHANNON", "queue", "candidates.parquet")
     if not path.exists():
-        return not_wired("SHANNON candidates.parquet missing", path)
+        log = source_path("SHANNON", "logs", "shannon.log")
+        if log.exists() and not stale_meta(log, 24 * 3600)["stale"]:
+            return response("OK", log, {"row_count": 0, "newest_as_of": None, "rows": []}, **stale_meta(log, 24 * 3600))
+        return not_wired(SHANNON_REASON, path)
     try:
         import pandas as pd
 
@@ -310,11 +328,15 @@ def shannon_queue() -> dict[str, Any]:
 def shannon_items() -> dict[str, Any]:
     memos = source_path("SHANNON", "memos")
     rows = [{"file": file.name, "mtime": mtime_iso(file)} for file in sorted(memos.glob("*.md"))[-20:]] if memos.exists() else []
-    return response("OK", memos, rows, stale=not bool(rows))
+    if not rows:
+        return not_wired(SHANNON_REASON, memos)
+    return response("OK", memos, rows, stale=False)
 
 
 def shannon_scouts() -> dict[str, Any]:
     base = source_path("SHANNON")
+    if not base.exists():
+        return not_wired(SHANNON_REASON, base)
     data = {
         "memos": len(list((base / "memos").glob("*.md"))) if (base / "memos").exists() else 0,
         "filings_cache": len(list((base / "cache" / "filings").glob("*"))) if (base / "cache" / "filings").exists() else 0,
@@ -360,19 +382,52 @@ def intel_news() -> dict[str, Any]:
     return response("OK", path, data, **stale_meta(path, 24 * 3600))
 
 
+def graham_screen() -> dict[str, Any]:
+    graham_output = source_path("graham", "output")
+    files = sorted(graham_output.glob("screener_*.json")) if graham_output.exists() else []
+    if not files:
+        return response("NOT_RUN", graham_output, {}, reason="No GRAHAM screener output exists")
+    path = files[-1]
+    payload = read_json(path, {})
+    rows = payload.get("top_50") or payload.get("results") or []
+    status = read_json(graham_output / "latest_status.json", {})
+    date = payload.get("date") or status.get("last_run") or path.stem.replace("screener_", "")
+    portfolio_path = status.get("portfolio_path") or f"graham/output/portfolio_candidates_{date}.md"
+    return response(
+        "OK",
+        path,
+        {
+            "meta": {
+                "date": date,
+                "universe_count": status.get("universe_count"),
+                "passing_count": payload.get("passing_count", len(rows)),
+                "portfolio_path": portfolio_path,
+            },
+            "top_10": rows[:10],
+        },
+        **stale_meta(path, 8 * 86400),
+    )
+
+
 def simons_patterns() -> dict[str, Any]:
     path = source_path("simons", "simons_patterns.json")
     data = read_json(path, {})
     if not data:
-        return not_wired("simons_patterns.json missing or unreadable", path)
+        return not_wired(SIMONS_REASON, path)
     patterns = data.get("patterns") or data.get("confirmed_patterns") or []
     total = data.get("metadata", {}).get("total_confirmed") or data.get("total_confirmed") or len(patterns)
-    return response("OK", path, {"pattern_count": total, "raw": data}, **stale_meta(path, 7 * 86400))
+    return response("OK", path, {"pattern_count": total, "raw": data}, **stale_meta(path, 365 * 86400))
 
 
 def simons_signals() -> dict[str, Any]:
+    live_state = source_path("simons", "live_state.json")
+    data = read_json(live_state, {})
+    if data:
+        return response("OK", live_state, data, **stale_meta(live_state, 36 * 3600))
     path = source_path("data", "simons")
     files = list(path.glob("*.json")) if path.exists() else []
+    if not files:
+        return not_wired("production SIMONS live_state.json missing on Azure", live_state)
     return response("OK", path, {"signal_file_count": len(files), "files": [file.name for file in files[-20:]]}, stale=False)
 
 
@@ -380,19 +435,22 @@ def simons_backtest() -> dict[str, Any]:
     path = source_path("simons", "simons_backtest_results.json")
     data = read_json(path, {})
     if not data:
-        return not_wired("simons_backtest_results.json missing or unreadable", path)
+        return not_wired(SIMONS_REASON, path)
     return response("OK", path, data, **stale_meta(path, 30 * 86400))
 
 
 def backtest_darwin() -> dict[str, Any]:
-    db = source_path("darwin_v2", "lineage", "lineage.sqlite")
-    data = {"sqlite_exists": db.exists(), "prompt_count": 0, "scorecards": []}
-    prompt_dir = source_path("darwin_v2", "lineage", "prompts")
-    score_dir = source_path("darwin_v2", "lineage", "scorecards")
-    if prompt_dir.exists():
-        data["prompt_count"] = len(list(prompt_dir.glob("*.json")))
-    if score_dir.exists():
-        data["scorecards"] = [file.name for file in sorted(score_dir.glob("*.json"))[-20:]]
+    db = source_path("darwin_v3", "gene_pool.db")
+    phase9 = source_path("darwin_v3", "phase9_daily.json")
+    breeding = source_path("darwin_v3", "breeding_log.json")
+    data = {
+        "gene_pool_db_exists": db.exists(),
+        "phase9_daily": read_json(phase9, {}),
+        "breeding_log": read_json(breeding, {}),
+        "postmortem_count": len(list(source_path("darwin_v3", "postmortems").glob("*.json")))
+        if source_path("darwin_v3", "postmortems").exists()
+        else 0,
+    }
     if db.exists():
         try:
             conn = sqlite3.connect(db)
@@ -400,16 +458,22 @@ def backtest_darwin() -> dict[str, Any]:
             conn.close()
         except Exception as exc:
             data["sqlite_error"] = str(exc)
-    return response("OK" if db.exists() or data["scorecards"] else "NOT_WIRED", db, data, **stale_meta(db, 7 * 86400))
+    if not db.exists() and not phase9.exists():
+        return not_wired("Darwin v3 production gene pool/phase9 state missing", db)
+    return response("OK", db if db.exists() else phase9, data, **stale_meta(phase9 if phase9.exists() else db, 36 * 3600))
 
 
 def backtest_fitness() -> dict[str, Any]:
-    path = source_path("darwin_v2", "lineage", "scorecards")
-    rows = []
-    if path.exists():
-        for file in sorted(path.glob("*.json"))[-10:]:
-            rows.append({"file": file.name, "mtime": mtime_iso(file), "data": read_json(file, {})})
-    return response("OK" if rows else "NOT_WIRED", path, rows, stale=not bool(rows))
+    paths = [
+        source_path("darwin_v3", "phase9_daily.json"),
+        source_path("data", "backtest", "results", "final_agent_weights.json"),
+        source_path("darwin_v3", "breeding_log.json"),
+    ]
+    rows = [{"file": path.name, "mtime": mtime_iso(path), "data": read_json(path, {})} for path in paths if path.exists()]
+    if not rows:
+        return not_wired("Darwin/backtest fitness state missing", paths[0])
+    newest_age = min((file_age_seconds(path) for path in paths if path.exists()), default=None)
+    return response("OK", ", ".join(str(path) for path in paths if path.exists()), rows, stale=newest_age is None or newest_age > 36 * 3600, staleness_seconds=newest_age, threshold_seconds=36 * 3600)
 
 
 def backtest_equity() -> dict[str, Any]:
@@ -423,9 +487,21 @@ def backtest_equity() -> dict[str, Any]:
 def backtest_ablations() -> dict[str, Any]:
     path = source_path("data", "backtest", "results")
     files = list(path.glob("*ablation*.json")) if path.exists() else []
+    if path.exists() and not files:
+        return response(
+            "OK",
+            path,
+            {"ablation_count": 0, "message": "no ablation result files found", "files": []},
+            **stale_meta(path, 90 * 86400),
+        )
     if not files:
         return not_wired("ablation outputs not found", path)
-    return response("OK", path, [read_json(file, {}) for file in files], stale=False)
+    return response(
+        "OK",
+        path,
+        {"ablation_count": len(files), "files": [read_json(file, {}) for file in files]},
+        stale=False,
+    )
 
 
 def janus_not_wired() -> dict[str, Any]:
@@ -483,25 +559,27 @@ def snapshot_age() -> dict[str, Any] | None:
 
 def health_sources() -> list[dict[str, Any]]:
     checks = [
-        ("portfolio.positions", source_path("data", "state", "positions.json"), 14 * 3600),
-        ("portfolio.decisions", source_path("data", "state", "decisions.json"), 14 * 3600),
-        ("agents.views", source_path("data", "state", "agent_views.json"), 2 * 3600),
-        ("agents.weights", source_path("data", "state", "agent_weights.json"), 14 * 3600),
-        ("shannon.queue", source_path("SHANNON", "queue", "candidates.parquet"), 24 * 3600),
-        ("simons.patterns", source_path("simons", "simons_patterns.json"), 7 * 86400),
-        ("kalshi.summary", settings.kalshi_root / "paper_trades" / "combined_summary.json", 26 * 3600),
-        ("tracker.state", source_path("state", "tracker_state.json"), 2 * 3600),
-        ("backtest.summary", source_path("data", "backtest", "results", "summary.json"), 30 * 86400),
+        ("portfolio.positions", source_path("data", "state", "positions.json"), 18 * 3600, True),
+        ("portfolio.decisions", source_path("data", "state", "decisions.json"), 18 * 3600, True),
+        ("agents.views", source_path("data", "state", "agent_views.json"), 18 * 3600, True),
+        ("agents.weights", source_path("data", "state", "agent_weights.json"), 36 * 3600, True),
+        ("shannon.run", source_path("SHANNON", "logs", "shannon.log"), 24 * 3600, True),
+        ("simons.patterns", source_path("simons", "simons_patterns.json"), 365 * 86400, True),
+        ("simons.live_state", source_path("simons", "live_state.json"), 36 * 3600, True),
+        ("kalshi.summary", settings.kalshi_root / "paper_trades" / "combined_summary.json", 26 * 3600, True),
+        ("tracker.state", source_path("state", "tracker_state.json"), 18 * 3600, True),
+        ("backtest.summary", source_path("data", "backtest", "results", "summary.json"), 90 * 86400, False),
+        ("darwin_v3.phase9", source_path("darwin_v3", "phase9_daily.json"), 36 * 3600, True),
     ]
     rows = []
-    for name, path, threshold in checks:
+    for name, path, threshold, critical in checks:
         meta = stale_meta(path, threshold)
-        rows.append({"name": name, "status": "OK" if path.exists() else "MISSING", "source": str(path), **meta})
+        rows.append({"name": name, "status": "OK" if path.exists() else "MISSING", "source": str(path), "critical": critical, **meta})
     janus_path = source_path("data", "state", "janus_daily.json")
     if janus_path.exists():
-        rows.append({"name": "janus.daily", "status": "OK", "source": str(janus_path), **stale_meta(janus_path, 24 * 3600)})
+        rows.append({"name": "janus.daily", "status": "OK", "source": str(janus_path), "critical": True, **stale_meta(janus_path, 24 * 3600)})
     else:
-        rows.append({"name": "janus.daily", "status": "NOT_WIRED", "source": str(janus_path), "stale": True, "reason": JANUS_REASON})
+        rows.append({"name": "janus.daily", "status": "NOT_WIRED", "source": str(janus_path), "critical": True, "stale": True, "reason": JANUS_REASON})
     return rows
 
 

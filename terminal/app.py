@@ -123,14 +123,27 @@ async def health():
     return JSONResponse(await source_call(build_health))
 
 
+@app.get("/terminal/api/graham")
+@app.get("/api/graham")
+async def graham():
+    return JSONResponse(await source_call(sources.graham_screen))
+
+
 def build_health():
     source_rows = sources.health_sources()
     cron_rows = sources.cron_status()
-    red_dot = any(row.get("stale") or row.get("status") in {"MISSING", "NOT_WIRED"} for row in source_rows)
+    blockers = [
+        row
+        for row in source_rows
+        if row.get("critical") and (row.get("stale") or row.get("status") in {"MISSING", "NOT_WIRED"})
+    ]
+    red_dot = bool(blockers)
     return {
-        "status": "DEGRADED" if red_dot else "OK",
+        "status": "BLOCKED" if blockers else "OK",
         "as_of": datetime.now(timezone.utc).isoformat(),
         "red_dot": red_dot,
+        "trade_ready": not blockers,
+        "blockers": blockers,
         "sources": source_rows,
         "cron": cron_rows,
     }
@@ -156,6 +169,7 @@ ROUTES = {
     "intel/deadline": sources.intel_deadline,
     "intel/entities": sources.intel_entities,
     "intel/news": sources.intel_news,
+    "graham/screen": sources.graham_screen,
     "simons/patterns": sources.simons_patterns,
     "simons/signals": sources.simons_signals,
     "simons/backtest": sources.simons_backtest,

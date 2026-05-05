@@ -6,6 +6,10 @@ ATLAS is an AI-native hedge fund with 20+ autonomous agents that source, analyse
 ## Quick Commands (Skills)
 
 ### Trading Operations
+- `/graham` — Run or inspect GRAHAM OTC net-net screen
+  `python3 graham/run.py --mode status`
+  `python3 graham/run.py --mode test`
+  `python3 graham/run.py --mode full`
 - `/screen` — Run full universe fundamental screen (4000+ tickers)
   `python3 -m agents.fundamental_batch --universe data/state/us_universe.json --resume`
 - `/screen-sp500` — Run S&P 500 only screen
@@ -103,6 +107,7 @@ atlas/
 │   ├── open/              # Active position journals
 │   └── closed/            # Closed position journals
 ├── data/evidence/         # LP-facing documentation
+├── graham/                # OTC net-net screener and diligence engine
 ├── templates/             # Flask/Jinja2 HTML templates
 └── config/settings.py     # Environment and path config
 ```
