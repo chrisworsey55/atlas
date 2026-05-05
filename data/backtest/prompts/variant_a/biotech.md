@@ -97,3 +97,12 @@ Before ANY long recommendation in biotech/pharma:
 - Only defensive healthcare services (UNH, HUM) permitted during risk-off with max 40% conviction
 - MANDATORY STATEMENT: "SECTOR RISK CHECK: XLV=[X%] VIX=[X] SPY=[X] - Biotech longs [CLEARED/BLOCKED]"
 - Violation of this rule = automatic trade rejection
+
+## Autoresearch Addition
+## ABSOLUTE CONVICTION CAPS
+**MAXIMUM CONVICTION LIMITS:**
+- LLY, VRTX, REGN (>15x sales): MAX 35% conviction at ALL times
+- All other biotech/pharma: MAX 60% conviction
+- Healthcare services only: No cap restrictions
+- **NO EXCEPTIONS** - growth narratives do not override valuation risk
+- MANDATORY: "CONVICTION CAP: [TICKER] limited to [X]% due to high multiple risk"
