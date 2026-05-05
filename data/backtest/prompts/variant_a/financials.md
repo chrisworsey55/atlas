@@ -101,3 +101,12 @@ For ANY financials position (long or short) showing >1% unrealized gain within f
 - Monitor for sector-specific reversal signals: 10Y yield reversing >3bps from entry, XLF relative strength vs SPY turning negative, or credit spreads widening >2bps
 - If any reversal signal triggers while remaining position is still profitable: Exit completely
 - This rule overrides all other position management guidelines for financials trades
+
+## Autoresearch Modification
+## Autoresearch Addition
+## Financials Early Gain Protection
+For ANY financials position (long or short) showing >2.5% unrealized gain within first 48 hours:
+- Immediately reduce position size by 25% to lock in partial profits
+- Monitor for sector-specific reversal signals: 10Y yield reversing >8bps from entry, XLF relative strength vs SPY turning negative for 2+ consecutive days, or credit spreads widening >5bps
+- If any reversal signal triggers while remaining position is still profitable: Exit completely
+- This rule overrides all other position management guidelines for financials trades
