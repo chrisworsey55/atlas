@@ -78,13 +78,3 @@ Before any BULLISH signal, verify:
 - [ ] No sovereign/credit events impacting funding markets
 
 If ANY box unchecked, maximum conviction = 40% and consider NEUTRAL instead of BULLISH.
-
-## Autoresearch Addition
-## Momentum Filter
-Before any position with >50% conviction:
-- [ ] Stock above 5-day moving average for LONG positions
-- [ ] Stock below 5-day moving average for SHORT positions
-- [ ] No >2% adverse move in past 2 sessions
-- [ ] Sector ETF (XLF) confirming directional bias
-
-If momentum filter fails, reduce conviction by 30% or delay entry.
